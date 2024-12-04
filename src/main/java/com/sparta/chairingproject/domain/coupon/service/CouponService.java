@@ -5,7 +5,6 @@ import com.sparta.chairingproject.domain.coupon.dto.CouponResponse;
 import com.sparta.chairingproject.domain.coupon.entity.Coupon;
 import com.sparta.chairingproject.domain.coupon.repository.CouponRepository;
 import com.sparta.chairingproject.domain.member.entity.Member;
-import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,10 +14,6 @@ public class CouponService {
     private final CouponRepository couponRepository;
 
     public CouponResponse createCoupon(CouponRequest request, Member member) {
-        if(!MemberRole.ADMIN.equals(member.getMemberRole())) {
-            throw new IllegalStateException("쿠폰 생성 권한이 없습니다."); // TODO: 글로벌 예외처리
-        }
-
         Coupon coupon = Coupon.builder()
                 .name(request.name())
                 .quantity(request.quantity())
@@ -32,7 +27,7 @@ public class CouponService {
                 .name(coupon.getName())
                 .quantity(coupon.getQuantity())
                 .discountPrice(coupon.getDiscountPrice())
-                .createAt(String.valueOf(coupon.getCreatedAt()))
+                .createAt(coupon.getCreatedAt())
                 .build();
     }
 }
