@@ -54,7 +54,7 @@ public class JwtUtil {
 			Jwts.builder()
 				.setSubject(String.valueOf(userId))
 				.claim("email", email)
-				.claim("userRole", memberRole)
+				.claim("memberRole", memberRole)
 				.setExpiration(new Date(date.getTime() + TOKEN_TIME))
 				.setIssuedAt(date) // 발급일
 				.signWith(key, signatureAlgorithm) // 암호화 알고리즘
