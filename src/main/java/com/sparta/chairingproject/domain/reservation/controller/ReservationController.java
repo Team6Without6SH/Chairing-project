@@ -23,7 +23,7 @@ public class ReservationController {
                                                                  @RequestBody CreateReservationRequest requestDto,
                                                                  @AuthenticationPrincipal UserDetailsImpl authUser) {
         return new ResponseEntity<>(
-                reservationService.createReservation(storeId, requestDto, authUser),
+                ResponseBodyDto.success("예약 완료", reservationService.createReservation(requestDto)),
                 HttpStatus.OK);
     }
 }
