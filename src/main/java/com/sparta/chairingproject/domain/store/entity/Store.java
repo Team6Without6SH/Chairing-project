@@ -52,4 +52,11 @@ public class Store extends Timestamped {
 
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Reservation> reservations = new ArrayList<>();
+
+	public Store(String name, String image, String description, Member member) {
+		this.name = name;
+		this.image = image;
+		this.description = description;
+		this.owner = member;
+	}
 }
