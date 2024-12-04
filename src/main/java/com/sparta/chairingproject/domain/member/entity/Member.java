@@ -52,4 +52,8 @@ public class Member extends Timestamped {
 		this.password = password;
 		this.memberRole = memberRole;
 	}
+
+	public void updatePassword(String updatePassword) {
+		this.password = updatePassword;
+	}
 }
