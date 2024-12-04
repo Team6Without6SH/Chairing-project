@@ -1,5 +1,7 @@
 package com.sparta.chairingproject.domain.reservation.controller;
 
+import com.sparta.chairingproject.domain.reservation.dto.ReservationResponseDto;
+import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequestDto;
 import com.sparta.chairingproject.domain.reservation.service.ReservationService;
 import com.sparta.chairingproject.util.ResponseBodyDto;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<ResponseBodyDto<ReservationResponseDto>> createCoupon(@RequestBody ReservationCreateponRequestDto requestDto) {
+    public ResponseEntity<ResponseBodyDto<ReservationResponseDto>> createCoupon(@RequestBody CreateReservationRequestDto requestDto) {
         return new ResponseEntity<>(
                 ResponseBodyDto.success("예약 완료", reservationService.createReservation(requestDto)),
                 HttpStatus.OK);
