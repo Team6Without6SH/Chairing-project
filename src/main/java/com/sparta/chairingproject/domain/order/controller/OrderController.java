@@ -16,10 +16,11 @@ import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.service.OrderService;
 import com.sparta.chairingproject.util.ResponseBodyDto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/store")
+@RequestMapping("/stores")
 @RequiredArgsConstructor
 public class OrderController {
 	private final OrderService orderService;
@@ -28,7 +29,7 @@ public class OrderController {
 	public ResponseEntity<ResponseBodyDto<OrderResponse>> createOrder(
 		@PathVariable Long storeId,
 		@AuthenticationPrincipal UserDetailsImpl authMember,
-		@RequestBody OrderRequest orderRequest
+		@Valid @RequestBody OrderRequest orderRequest
 	) {
 		return new ResponseEntity<>(
 			ResponseBodyDto.success("주문 완료", orderService.createOrder(storeId, authMember, orderRequest)),
