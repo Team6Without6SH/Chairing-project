@@ -25,6 +25,7 @@ public class CouponController {
         return ResponseEntity.ok(ResponseBodyDto.success("쿠폰 생성 성공", response));
     }
 
+    @Secured("ROLE_USER")
     @PostMapping("/{couponId}")
     public ResponseEntity<ResponseBodyDto<String>> issueCoupon(@PathVariable Long couponId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         ResponseBodyDto<String> response = couponService.issueCoupon(couponId, userDetails.getMember());

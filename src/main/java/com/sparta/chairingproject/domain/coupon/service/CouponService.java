@@ -49,10 +49,8 @@ public class CouponService {
             throw new IllegalStateException("이미 해당 쿠폰을 발급받았습니다.");
         }
 
-        if (coupon.getQuantity() <= 0) {
-            throw new IllegalStateException("쿠폰 수량이 부족합니다.");
-        }
-        coupon.updateQuantity(coupon.getQuantity() - 1);
+        coupon.validateQuantity();
+        coupon.decreaseQuantity();
 
         Issuance issuance = Issuance.builder()
                 .member(member)

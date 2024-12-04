@@ -33,7 +33,13 @@ public class Coupon extends Timestamped {
     @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Issuance> issuances = new ArrayList<>();
 
-    public void updateQuantity(int quantity) {
-        this.quantity = quantity;
+    public void validateQuantity() {
+        if (this.quantity <= 0) {
+            throw new IllegalStateException("쿠폰 수량이 부족합니다.");
+        }
+    }
+
+    public void decreaseQuantity() {
+        this.quantity -= 1;
     }
 }
