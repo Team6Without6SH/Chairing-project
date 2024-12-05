@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
+import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.service.OrderService;
 
 import jakarta.validation.Valid;
@@ -45,6 +47,17 @@ public class OrderController {
 		@AuthenticationPrincipal UserDetailsImpl authMember,
 		@RequestBody OrderCancelRequest memberId
 	) {
-		return ResponseEntity.ok(orderService.requestOrderCancellation(storeId, orderId, authMember.getMember(), memberId));
+		return ResponseEntity.ok(
+			orderService.requestOrderCancellation(storeId, orderId, authMember.getMember(), memberId));
+	}
+
+	@Secured("ROLE_USER")
+	@PostMapping("/{storeId}/orders/waiting")
+	public ResponseEntity<OrderWaitingResponse> createWaiting(
+		@PathVariable Long storeId,
+		@AuthenticationPrincipal UserDetailsImpl authMember,
+		@RequestBody RequestDto request
+	) {
+		return ResponseEntity.ok(orderService.createWaiting(storeId, authMember.getMember(), request));
 	}
 }
