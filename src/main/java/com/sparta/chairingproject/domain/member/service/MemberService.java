@@ -78,7 +78,7 @@ public class MemberService {
     public Page<MemberReservationResponse> getReservationsByMember(UserDetailsImpl authMember,
         RequestDto request, int page, int size) {
         Member member = memberRepository.findById(authMember.getMember().getId())
-            .orElseThrow(() -> new GlobalException(NOT_FOUND_MEMBER));
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
