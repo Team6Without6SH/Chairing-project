@@ -12,6 +12,8 @@ import com.sparta.chairingproject.domain.review.entity.Review;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -58,5 +60,21 @@ public class Store extends Timestamped {
 		this.image = image;
 		this.description = description;
 		this.owner = member;
+	}
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private StoreStatus status = StoreStatus.PENDING;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
+
+	public void updateStoreStatus(StoreStatus status) {
+		this.status = status;
+	}
+
+	public void updateRequestStatus(StoreRequestStatus storeRequestStatus) {
+		this.requestStatus = storeRequestStatus;
 	}
 }
