@@ -11,6 +11,6 @@ import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-	List<Store> findAllByStatus(StoreStatus status);
+	List<Store> findAllByRequestStatusAndStatus(StoreRequestStatus requestStatus, StoreStatus status);
 	boolean existsByOwner(Member owner);
 }

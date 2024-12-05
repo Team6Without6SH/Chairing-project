@@ -3,8 +3,7 @@ package com.sparta.chairingproject.domain.store.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-
-import com.sparta.chairingproject.config.JwtUtil;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
@@ -25,21 +24,20 @@ public class StoreService {
 
 	private final StoreRepository storeRepository;
 	private final MemberRepository memberRepository;
-	private final JwtUtil jwtUtil;
 
 	public void registerStore(StoreRequest request, UserDetailsImpl authMember) {
 		// 사장님 정보 확인
 		Member owner = memberRepository.findById(authMember.getMember().getId())
-			.orElseThrow(() -> new GlobalException(ExceptionCode.NOT_FOUND_USER));
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
 		// 이미 등록된 가게 여부 확인
 		if (storeRepository.existsByOwner(owner)) {
-			throw new GlobalException(ExceptionCode.CANNOT_EXCEED_STORE_LIMIT);
+			throw new GlobalException(CANNOT_EXCEED_STORE_LIMIT);
 		}
 
 		// 영업 시간 검증
 		if ((request.getOpenTime() == null) != (request.getCloseTime() == null)) {
-			throw new GlobalException(ExceptionCode.STORE_CLOSED);
+			throw new GlobalException(STORE_CLOSED);
 		}
 
 		// Store 엔터티 생성 및 저장
@@ -53,13 +51,16 @@ public class StoreService {
 		storeRepository.save(store); // 저장
 
 	}
-	public List<StoreResponse> getAllApprovedStores() {
-		// StoreStatus.APPROVED 상태만 조회
-		List<Store> stores = storeRepository.findAllByStatus(StoreStatus.OPEN);
+
+	public List<StoreResponse> getAllOpenedStores() {
+		// Approved 상태 및 Open 상태의 가게만 조회
+		List<Store> stores = storeRepository.findAllByRequestStatusAndStatus(
+			StoreRequestStatus.APPROVED, StoreStatus.OPEN
+		);
 
 		//조회된 가게가 없는 경우
 		if (stores.isEmpty()) {
-			throw new GlobalException(ExceptionCode.NOT_FOUND_STORE);
+			throw new GlobalException(NOT_FOUND_STORE);
 		}
 
 		// Store 데이터를 StoreResponse DTO로 변환하여 반환

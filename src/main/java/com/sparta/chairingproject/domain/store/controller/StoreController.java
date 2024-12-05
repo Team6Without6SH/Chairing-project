@@ -10,10 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
-
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.domain.store.service.StoreService;
-import com.sparta.chairingproject.util.ResponseBodyDto;
+
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,9 +30,11 @@ public class StoreController {
 	) {
 		storeService.registerStore(storeRequest, authMember);
 		return ResponseEntity.ok().build();
-	@GetMapping
-	public ResponseEntity<List<StoreResponse>> getAllApprovedStores() {
-		List<StoreResponse> stores = storeService.getAllApprovedStores();
+	}
+
+	@GetMapping("/owners/stores")
+	public ResponseEntity<List<StoreResponse>> getAllOpenedStores() {
+		List<StoreResponse> stores = storeService.getAllOpenedStores();
 		return ResponseEntity.ok(stores);
 	}
 }
