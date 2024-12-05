@@ -2,9 +2,12 @@ package com.sparta.chairingproject.domain.member.controller;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
+import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
 import com.sparta.chairingproject.domain.member.service.MemberService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,8 +31,15 @@ public class MemberController {
 
     @PatchMapping
     public void updatePassword(
-        @RequestBody MemberPasswordRequest request,
+        @Valid @RequestBody MemberPasswordRequest request,
         @AuthenticationPrincipal UserDetailsImpl authMember) {
         memberService.updatePassword(authMember, request);
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<Page<MemberOrderResponse>> getOrdersByMember(
+        @AuthenticationPrincipal UserDetailsImpl authMember
+    ) {
+        return memberService.getOrdersByMember(authMember, request);
     }
 }
