@@ -51,7 +51,7 @@ public enum ExceptionCode {
 	ONLY_ORDER_ALLOWED(HttpStatus.FORBIDDEN, "주문한 사람만 수정 가능합니다"),
 	CANCEL_ONLY_PENDING(HttpStatus.FORBIDDEN, "대기 상태일때만 취소 가능합니다"),
 	ORDER_NOT_DELIVERED(HttpStatus.FORBIDDEN, "주문이 배달 완료 상태가 아닙니다"),
-	STORE_CLOSED_BY_OWER(HttpStatus.GONE, "해당 가게는 개인사정으로 문을 닫았습니다"),
+	STORE_CLOSED_BY_OWNER(HttpStatus.GONE, "해당 가게는 개인사정으로 문을 닫았습니다"),
 	NOT_ORDER_THIS_STORE(HttpStatus.BAD_REQUEST, "선택한 메뉴는 주문할 수 없습니다."),
 	NOT_REJECTED_ACCEPT(HttpStatus.BAD_REQUEST, "완료된 주문은 취소할 수 없습니다."),
 	PAYED_NOT_EQUAL_BILL(HttpStatus.BAD_REQUEST, "총 가격과 결제 가격이 일치하지 않습니다."),
