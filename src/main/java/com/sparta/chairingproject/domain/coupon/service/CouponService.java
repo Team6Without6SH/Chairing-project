@@ -37,7 +37,7 @@ public class CouponService {
     }
 
     // TODO: 글로벌 예외처리
-    public ResponseBodyDto<String> issueCoupon(Long couponId, Member member) {
+    public void issueCoupon(Long couponId, Member member) {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 쿠폰을 찾을 수 없습니다. ID: " + couponId));
 
@@ -57,7 +57,5 @@ public class CouponService {
                 .coupon(coupon)
                 .build();
         issuanceRepository.save(issuance);
-
-        return ResponseBodyDto.success("쿠폰이 성공적으로 발급되었습니다.");
     }
 }
