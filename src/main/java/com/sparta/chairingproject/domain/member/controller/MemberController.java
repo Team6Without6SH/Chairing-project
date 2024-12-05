@@ -41,7 +41,7 @@ public class MemberController {
     @GetMapping("/orders")
     public ResponseEntity<Page<MemberOrderResponse>> getOrdersByMember(
         @AuthenticationPrincipal UserDetailsImpl authMember,
-        RequestDto request,
+        @RequestBody RequestDto request,
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "5") int size
     ) {
