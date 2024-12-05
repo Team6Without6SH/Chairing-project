@@ -6,12 +6,15 @@ import java.util.List;
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
 import com.sparta.chairingproject.domain.review.entity.Review;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,6 +43,9 @@ public class Store extends Timestamped {
 	@Column(nullable = true)
 	private String description;
 
+	@Column(nullable = false)
+	private int tableCount;
+
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member owner;
@@ -53,10 +59,29 @@ public class Store extends Timestamped {
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Reservation> reservations = new ArrayList<>();
 
+	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Order> orders = new ArrayList<>();
+
 	public Store(String name, String image, String description, Member member) {
 		this.name = name;
 		this.image = image;
 		this.description = description;
 		this.owner = member;
+	}
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private StoreStatus status = StoreStatus.PENDING;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
+
+	public void updateStoreStatus(StoreStatus status) {
+		this.status = status;
+	}
+
+	public void updateRequestStatus(StoreRequestStatus storeRequestStatus) {
+		this.requestStatus = storeRequestStatus;
 	}
 }

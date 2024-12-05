@@ -21,4 +21,9 @@ public class StoreResponse {
 	private List<String> images;      // 이미지 리스트
 	private String ownerName;         // 사장님 이름
 
+	public StoreResponse(String name, String image, String description) {
+		this.name = name;
+		this.images = List.of(image); // 단일 이미지를 리스트로 변환
+		this.description = description;
+	}
 }

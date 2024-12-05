@@ -1,8 +1,7 @@
 package com.sparta.chairingproject.config.exception.enums;
 
-import org.springframework.http.HttpStatus;
-
 import lombok.Getter;
+import org.springframework.http.HttpStatus;
 
 @Getter
 public enum ExceptionCode {
@@ -43,6 +42,7 @@ public enum ExceptionCode {
 	NOT_FOUND_CATEGORY(HttpStatus.NOT_FOUND, "해당 카테고리가 없습니다"),
 	NOT_FOUND_OPTION(HttpStatus.NOT_FOUND, "해당 옵션이 없습니다"),
 	OPTION_NOT_BELONG_TO_MENU(HttpStatus.NOT_FOUND, "해당 옵션은 선택한 메뉴에 포함되어 있지 않습니다"),
+
 
 	//----------주문----------
 	STORE_CLOSED(HttpStatus.GONE, "영업 시간이 아닙니다"),
