@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class CouponController {
     private final CouponService couponService;
 
-    @Secured("ROLE_ADMIN") // ADMIN 권한만 접근 가능
+    @Secured("ROLE_ADMIN")
     @PostMapping
     public ResponseEntity<CouponResponse> createCoupon(@Valid @RequestBody CouponRequest request) {
         CouponResponse response = couponService.createCoupon(request);
@@ -32,8 +32,8 @@ public class CouponController {
 
     @Secured("ROLE_USER")
     @PostMapping("/{couponId}")
-    public ResponseEntity<Void> issueCoupon(@PathVariable Long couponId, @AuthenticationPrincipal UserDetailsImpl authMember) {
-        couponService.issueCoupon(couponId, authMember.getMember());
+    public ResponseEntity<Void> issueCoupon(@PathVariable Long couponId, @RequestBody RequestDto request, @AuthenticationPrincipal UserDetailsImpl authMember) {
+        couponService.issueCoupon(couponId, request, authMember.getMember());
         return ResponseEntity.ok().build();
     }
 

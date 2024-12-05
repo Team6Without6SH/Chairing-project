@@ -44,7 +44,7 @@ public class CouponService {
                 .build();
     }
 
-    public void issueCoupon(Long couponId, Member member) {
+    public void issueCoupon(Long couponId, RequestDto request, Member member) {
         Coupon coupon = couponRepository.findById(couponId)
                 .orElseThrow(() -> new GlobalException(COUPON_NOT_FOUND));
 

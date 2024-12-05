@@ -71,6 +71,7 @@ class CouponServiceTest {
     void issueCoupon_success() {
         // Given
         Long couponId = 1L;
+        RequestDto request = new RequestDto(1L);
         Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
         Coupon coupon = Coupon.builder()
                 .id(couponId)
@@ -83,7 +84,7 @@ class CouponServiceTest {
         when(issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId)).thenReturn(Optional.empty());
 
         // When
-        couponService.issueCoupon(couponId, member);
+        couponService.issueCoupon(couponId, request, member);
 
         // Then
         verify(couponRepository, times(1)).findById(couponId);
@@ -97,13 +98,14 @@ class CouponServiceTest {
     void issueCoupon_fail_couponNotFound() {
         // Given
         Long couponId = 1L;
+        RequestDto request = new RequestDto(1L);
         Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
 
         when(couponRepository.findById(couponId)).thenReturn(Optional.empty());
 
         // When & Then
         GlobalException exception = assertThrows(GlobalException.class,
-                () -> couponService.issueCoupon(couponId, member));
+                () -> couponService.issueCoupon(couponId, request ,member));
         assertEquals(ExceptionCode.COUPON_NOT_FOUND.getMessage(), exception.getMessage());
         verify(couponRepository, times(1)).findById(couponId);
     }
@@ -113,6 +115,7 @@ class CouponServiceTest {
     void issueCoupon_fail_alreadyIssued() {
         // Given
         Long couponId = 1L;
+        RequestDto request = new RequestDto(1L);
         Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
         Coupon coupon = Coupon.builder()
                 .id(couponId)
@@ -126,7 +129,7 @@ class CouponServiceTest {
 
         // When & Then
         GlobalException exception = assertThrows(GlobalException.class,
-                () -> couponService.issueCoupon(couponId, member));
+                () -> couponService.issueCoupon(couponId, request, member));
         assertEquals(ExceptionCode.COUPON_ALREADY_ISSUED.getMessage(), exception.getMessage());
         verify(couponRepository, times(1)).findById(couponId);
         verify(issuanceRepository, times(1)).findByMemberIdAndCouponId(member.getId(), couponId);

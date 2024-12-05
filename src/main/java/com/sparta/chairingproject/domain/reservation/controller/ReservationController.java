@@ -1,5 +1,8 @@
 package com.sparta.chairingproject.domain.reservation.controller;
 
+import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
+import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
 import com.sparta.chairingproject.domain.reservation.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

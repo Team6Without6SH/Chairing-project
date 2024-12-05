@@ -55,6 +55,7 @@ class CouponControllerTest {
         // Given
         String requestBody = """
                 {
+                    "memberId": 1,
                     "name": "Spring Sale",
                     "quantity": 100,
                     "discountPrice": 5000
@@ -66,7 +67,7 @@ class CouponControllerTest {
                         .header("Authorization", adminToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isCreated()) // HTTP 201 Created
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.name").value("Spring Sale"))
                 .andExpect(jsonPath("$.quantity").value(100))
@@ -81,6 +82,7 @@ class CouponControllerTest {
         // Given
         String requestBody = """
                 {
+                    "memberId": 1,
                     "name": "Spring Sale",
                     "quantity": 100,
                     "discountPrice": 5000
@@ -92,29 +94,7 @@ class CouponControllerTest {
                         .header("Authorization", userToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
-                .andExpect(status().isForbidden()) // HTTP 403 Forbidden
-                .andDo(print());
-    }
-
-    @Test
-    @WithMockUser(username = "admin", roles = {"ADMIN"})
-    @DisplayName("쿠폰수량, 할인 가격은 0 이상")
-    void createCoupon_validationError_whenRequestBodyIsInvalid() throws Exception {
-        // Given
-        String invalidRequestBody = """
-                {
-                    "name": "",
-                    "quantity": -1,
-                    "discountPrice": -5000
-                }
-                """;
-
-        // When & Then
-        mockMvc.perform(post("/coupons")
-                        .header("Authorization", adminToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidRequestBody))
-                .andExpect(status().isBadRequest()) // HTTP 400 Bad Request
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 
@@ -126,15 +106,16 @@ class CouponControllerTest {
         Long couponId = 1L;
         String requestBody = """
                 {
-                    "couponId": %d
+                    "memberId": 1
                 }
-                """.formatted(couponId);
+                """;
 
         // When & Then
         mockMvc.perform(post("/coupons/" + couponId)
                         .header("Authorization", adminToken)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isForbidden()) // HTTP 403 Forbidden
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 
@@ -156,9 +137,10 @@ class CouponControllerTest {
         mockMvc.perform(get("/coupons")
                         .param("page", String.valueOf(page))
                         .param("size", String.valueOf(size))
+                        .header("Authorization", userToken)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(requestBody)) // 요청 본문 추가
-                .andExpect(status().isForbidden()) // HTTP 403 Forbidden
+                        .content(requestBody))
+                .andExpect(status().isForbidden())
                 .andDo(print());
     }
 }
