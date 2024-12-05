@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
@@ -69,6 +68,34 @@ public class StoreService {
 				store.getName(),
 				store.getImage(),
 				store.getDescription()
+			))
+			.toList();
+	}
+
+	public List<StoreResponse> getAdminStores(StoreStatus status) {
+		// 상태와 승인된 요청 상태를 기준으로 가게 조회
+		List<Store> stores = storeRepository.findByStatusAndRequestStatus(
+			status, StoreRequestStatus.APPROVED
+		);
+
+		// 조회된 가게가 없는 경우 예외 처리
+		if (stores.isEmpty()) {
+			throw new GlobalException(NOT_FOUND_STORE);
+		}
+
+		// Store 엔티티를 StoreResponse로 변환
+		return stores.stream()
+			.map(store -> new StoreResponse(
+				store.getId(),
+				store.getName(),
+				store.getAddress() != null ? store.getAddress() : "기본 주소 없음", // 기본값 설정
+				store.getPhone() != null ? store.getPhone() : "전화번호 없음",       // 기본값 설정
+				store.getOpenTime() != null ? store.getOpenTime() : "09:00",     // 기본값 설정
+				store.getCloseTime() != null ? store.getCloseTime() : "18:00",   // 기본값 설정
+				null, // 카테고리 정보는 필요 없음
+				store.getDescription(),
+				List.of(store.getImage() != null ? store.getImage() : "default.jpg"), // 기본 이미지 설정
+				store.getOwner().getName()
 			))
 			.toList();
 	}

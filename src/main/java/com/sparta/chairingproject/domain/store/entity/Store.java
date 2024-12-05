@@ -41,6 +41,17 @@ public class Store extends Timestamped {
 
     @Column(nullable = true)
     private String description;
+	@Column(nullable = true)
+	private String address;
+
+	@Column(nullable = true)
+	private String phone;
+
+	@Column(nullable = true)
+	private String openTime;
+
+	@Column(nullable = true)
+	private String closeTime;
 
     @Column(nullable = false)
     private int tableCount;
@@ -58,14 +69,27 @@ public class Store extends Timestamped {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> reservations = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Order> orders = new ArrayList<>();
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private StoreStatus status = StoreStatus.PENDING;
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
+	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Order> orders = new ArrayList<>();
+
+	public Store(String name, String image, String description, Member owner) {
+		this.name = name;
+		this.image = image;
+		this.description = description;
+		this.owner = owner;
+		this.address = address;
+		this.phone = phone;
+		this.openTime = openTime;
+		this.closeTime = closeTime;
+	}
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private StoreStatus status = StoreStatus.PENDING;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
 
     public Store(String name, String image, String description, Member member) {
         this.name = name;
@@ -86,6 +110,25 @@ public class Store extends Timestamped {
         this.status = status;
     }
 
+	public void updateRequestStatus(StoreRequestStatus storeRequestStatus) {
+		this.requestStatus = storeRequestStatus;
+	}
+
+	public String getAddress() {
+		return this.openTime != null ? this.openTime : "09:00";
+	}
+
+	public String getPhone() {
+		return this.closeTime != null ? this.closeTime : "18:00";
+	}
+
+	public String getOpenTime() {
+		return this.address != null ? this.address : "기본 주소 없음";
+	}
+
+	public String getCloseTime() {
+		return this.phone != null ? this.phone : "전화번호 없음";
+	}
     public void updateRequestStatus(StoreRequestStatus storeRequestStatus) {
         this.requestStatus = storeRequestStatus;
     }

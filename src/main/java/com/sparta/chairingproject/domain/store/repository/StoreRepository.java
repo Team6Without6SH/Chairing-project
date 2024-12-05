@@ -1,5 +1,9 @@
 package com.sparta.chairingproject.domain.store.repository;
 
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
@@ -9,8 +13,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    List<Store> findAllByRequestStatusAndStatus(StoreRequestStatus requestStatus,
-        StoreStatus status);
+	List<Store> findAllByRequestStatusAndStatus(StoreRequestStatus requestStatus, StoreStatus status);
+	boolean existsByOwner(Member owner);
 
-    boolean existsByOwner(Member owner);
+	List<Store> findByStatus(StoreStatus status);
+
+	List<Store> findByStatusAndRequestStatus(StoreStatus status, StoreRequestStatus requestStatus);
 }
