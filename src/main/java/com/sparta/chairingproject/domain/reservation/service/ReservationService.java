@@ -44,6 +44,9 @@ public class ReservationService {
                 () -> new GlobalException(ExceptionCode.RESERVATION_NOT_FOUND)
         );
 
+        if (reservation.getStatus() != ReservationStatus.PENDING && reservation.getStatus() != ReservationStatus.APPROVED) {
+            throw new GlobalException(ExceptionCode.CANNOT_REJECT_RESERVATION);
+        }
 
         ReservationStatus status = ReservationStatus.parse(req.getStatus());
 

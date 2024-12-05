@@ -34,6 +34,7 @@ public enum ExceptionCode {
 	/* --- 예약 --- */
 	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약을 찾을 수 없습니다."),
 	RESERVATION_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "올바르지 않은 상태값입니다."),
+	CANNOT_REJECT_RESERVATION(HttpStatus.UNPROCESSABLE_ENTITY, "예약을 취소할 수 없습니다."),
 
 
 	//----------메뉴----------
