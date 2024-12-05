@@ -1,10 +1,13 @@
 package com.sparta.chairingproject.domain.order.service;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sparta.chairingproject.config.exception.customException.GlobalExceptions;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
@@ -24,13 +27,13 @@ public class OrderService {
 
 	@Transactional
 	public OrderResponse createOrder(Long storeId, UserDetailsImpl authMember, OrderRequest orderRequest) {
-		List<Menu> menus = menuRepository.findAllByStoreIdAndMenuIds(storeId,orderRequest.getMenuIds());
+		List<Menu> menus = menuRepository.findAllByStoreIdAndMenuIds(storeId, orderRequest.getMenuIds());
 		if (menus.size() != orderRequest.getMenuIds().size()) {
-			throw new IllegalArgumentException("유효하지 않은 메뉴 ID가 포함되어 있습니다.");
+			throw new GlobalExceptions(NOT_ORDER_THIS_STORE);
 		}
 
 		int totalPrice = menus.stream().mapToInt(Menu::getPrice).sum();
-		if(totalPrice != orderRequest.getTotalPrice()) {
+		if (totalPrice != orderRequest.getTotalPrice()) {
 			throw new IllegalArgumentException("결제하는 총 가격이 일치하지 않습니다.");
 		}
 
