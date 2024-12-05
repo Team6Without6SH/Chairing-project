@@ -20,7 +20,7 @@ public class ReservationResponse {
 
     private LocalDate date;
 
-    private LocalTime time;
+    private String time;
 
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;

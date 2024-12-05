@@ -4,6 +4,7 @@ import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
 import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
 import com.sparta.chairingproject.domain.reservation.service.ReservationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +21,13 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @Secured("ROLE_MEMBER")
+    @Secured("ROLE_USER")
     @PostMapping("/stores/{storeId}/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@PathVariable Long storeId,
-                                                                 @RequestBody CreateReservationRequest requestDto,
+                                                                 @Valid @RequestBody CreateReservationRequest req,
                                                                  @AuthenticationPrincipal UserDetailsImpl authUser) {
         return new ResponseEntity<>(
-                reservationService.createReservation(storeId, requestDto, authUser),
+                reservationService.createReservation(storeId, req, authUser),
                 HttpStatus.OK);
     }
 }
