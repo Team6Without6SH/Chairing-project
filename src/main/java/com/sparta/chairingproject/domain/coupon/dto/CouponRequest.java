@@ -18,6 +18,6 @@ public class CouponRequest extends RequestDto {
         @Min(value = 1, message = "수량은 1 이상이어야 합니다.")
         private int quantity;
 
-        @Min(value = 0, message = "할인 가격은 0 이상이어야 합니다.")
+        @Min(value = 1, message = "할인 가격은 1 이상이어야 합니다.")
         private int discountPrice;
 }
