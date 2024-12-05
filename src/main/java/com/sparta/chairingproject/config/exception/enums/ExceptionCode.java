@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.config.exception.enums;
 
+import org.springframework.boot.actuate.autoconfigure.observation.ObservationProperties;
 import org.springframework.http.HttpStatus;
 
 import lombok.Getter;
@@ -62,6 +63,11 @@ public enum ExceptionCode {
 	SCORE_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "점수는 1 에서 5 사이 숫자에서 골라주세요"),
 	REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "동일한 주문에 대해 이미 리뷰가 작성되었습니다"),
 	NOT_ORDER_STATUS_COMPLETED(HttpStatus.FORBIDDEN, "주문이 배달 완료 상태가 아닙니다."),
+
+	//----------쿠폰----------
+	COUPON_OUT_OF_STOCK(HttpStatus.CONFLICT, "쿠폰 수량이 부족합니다."),
+	COUPON_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 쿠폰을 찾을 수 없습니다."),
+	COUPON_ALREADY_ISSUED(HttpStatus.CONFLICT, "이미 해당 쿠폰을 발급받았습니다."),
 
 	//권한
 	ONLY_OWNER_ALLOWED(HttpStatus.FORBIDDEN, "사장님만 가능합니다"),

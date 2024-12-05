@@ -1,5 +1,7 @@
 package com.sparta.chairingproject.domain.coupon.service;
 
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
 import com.sparta.chairingproject.domain.coupon.dto.CouponRequest;
@@ -18,7 +20,7 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final IssuanceRepository issuanceRepository;
 
-    public CouponResponse createCoupon(CouponRequest request, Member member) {
+    public CouponResponse createCoupon(CouponRequest request) {
         Coupon coupon = Coupon.builder()
                 .name(request.name())
                 .quantity(request.quantity())
@@ -36,17 +38,12 @@ public class CouponService {
                 .build();
     }
 
-    // TODO: 글로벌 예외처리
     public void issueCoupon(Long couponId, Member member) {
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 쿠폰을 찾을 수 없습니다. ID: " + couponId));
-
-        if (!MemberRole.USER.equals(member.getMemberRole())) {
-            throw new IllegalStateException("쿠폰 발급 권한이 없습니다.");
-        }
+                .orElseThrow(() -> new GlobalException(ExceptionCode.COUPON_NOT_FOUND));
 
         if (issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId).isPresent()) {
-            throw new IllegalStateException("이미 해당 쿠폰을 발급받았습니다.");
+            throw new GlobalException(ExceptionCode.COUPON_ALREADY_ISSUED);
         }
 
         coupon.validateQuantity();

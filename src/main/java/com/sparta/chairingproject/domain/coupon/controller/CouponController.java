@@ -22,8 +22,8 @@ public class CouponController {
 
     @Secured("ROLE_ADMIN") // ADMIN 권한만 접근 가능
     @PostMapping
-    public ResponseEntity<CouponResponse> createCoupon(@Valid @RequestBody CouponRequest request, @AuthenticationPrincipal UserDetailsImpl authMember) {
-        CouponResponse response = couponService.createCoupon(request, authMember.getMember());
+    public ResponseEntity<CouponResponse> createCoupon(@Valid @RequestBody CouponRequest request) {
+        CouponResponse response = couponService.createCoupon(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
