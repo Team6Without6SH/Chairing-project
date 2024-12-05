@@ -1,14 +1,20 @@
 package com.sparta.chairingproject.domain.store.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+
 import com.sparta.chairingproject.config.JwtUtil;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.entity.Store;
+import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
+import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -47,6 +53,22 @@ public class StoreService {
 		storeRepository.save(store); // 저장
 
 	}
+	public List<StoreResponse> getAllApprovedStores() {
+		// StoreStatus.APPROVED 상태만 조회
+		List<Store> stores = storeRepository.findAllByStatus(StoreStatus.OPEN);
+
+		//조회된 가게가 없는 경우
+		if (stores.isEmpty()) {
+			throw new GlobalException(ExceptionCode.NOT_FOUND_STORE);
+		}
+
+		// Store 데이터를 StoreResponse DTO로 변환하여 반환
+		return stores.stream()
+			.map(store -> new StoreResponse(
+				store.getName(),
+				store.getImage(),
+				store.getDescription()
+			))
+			.toList();
+	}
 }
-
-

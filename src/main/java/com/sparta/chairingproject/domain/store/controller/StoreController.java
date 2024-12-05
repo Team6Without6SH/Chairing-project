@@ -1,12 +1,17 @@
 package com.sparta.chairingproject.domain.store.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
+
+import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.domain.store.service.StoreService;
 import com.sparta.chairingproject.util.ResponseBodyDto;
 
@@ -26,5 +31,9 @@ public class StoreController {
 	) {
 		storeService.registerStore(storeRequest, authMember);
 		return ResponseEntity.ok().build();
+	@GetMapping
+	public ResponseEntity<List<StoreResponse>> getAllApprovedStores() {
+		List<StoreResponse> stores = storeService.getAllApprovedStores();
+		return ResponseEntity.ok(stores);
 	}
 }
