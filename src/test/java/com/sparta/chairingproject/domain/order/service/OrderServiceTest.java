@@ -47,6 +47,7 @@ class OrderServiceTest {
 	private Member owner;
 	private Menu menu1;
 	private Menu menu2;
+	private Store store;
 
 	// @BeforeEach
 	// void setUp() throws Exception {
@@ -70,7 +71,7 @@ class OrderServiceTest {
 			.thenReturn(Arrays.asList(menu1, menu2));
 
 		// 주문 생성 Mocking
-		Order savedOrder = Order.createOf(member, Arrays.asList(menu1, menu2), OrderStatus.WAITING, totalPrice);
+		Order savedOrder = Order.createOf(member, store, Arrays.asList(menu1, menu2), OrderStatus.WAITING, totalPrice);
 		when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
 
 		// when

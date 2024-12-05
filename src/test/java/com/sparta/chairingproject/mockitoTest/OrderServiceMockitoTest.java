@@ -51,6 +51,7 @@ public class OrderServiceMockitoTest {
 
 		order = Order.createOf(
 			member,
+			store,
 			List.of(menu1, menu2),
 			OrderStatus.WAITING,
 			20000
