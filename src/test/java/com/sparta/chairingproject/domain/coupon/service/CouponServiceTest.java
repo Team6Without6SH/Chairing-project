@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.coupon.service;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+import com.sparta.chairingproject.domain.Issuance.dto.IssuanceResponse;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
 import com.sparta.chairingproject.domain.coupon.dto.CouponRequest;
@@ -17,6 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +34,7 @@ class CouponServiceTest {
 
     @Mock
     private IssuanceRepository issuanceRepository;
-
+    // 이 3가지를 목으로 받아서 주입해주는 것임
     @InjectMocks
     private CouponService couponService;
 
@@ -124,5 +127,68 @@ class CouponServiceTest {
         assertEquals(ExceptionCode.COUPON_ALREADY_ISSUED.getMessage(), exception.getMessage());
         verify(couponRepository, times(1)).findById(couponId);
         verify(issuanceRepository, times(1)).findByMemberIdAndCouponId(member.getId(), couponId);
+    }
+
+    @Test
+    @DisplayName("쿠폰 조회 성공 - 발급받은 쿠폰이 존재")
+    void getIssuedCoupons_success() {
+        // Given
+        Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
+        Coupon coupon1 = Coupon.builder()
+                .id(1L)
+                .name("Spring Sale")
+                .quantity(10)
+                .discountPrice(5000)
+                .build();
+        Coupon coupon2 = Coupon.builder()
+                .id(2L)
+                .name("Winter Sale")
+                .quantity(10)
+                .discountPrice(10000)
+                .build();
+
+        Issuance issuance1 = Issuance.builder()
+                .member(member)
+                .coupon(coupon1)
+                .build();
+        Issuance issuance2 = Issuance.builder()
+                .member(member)
+                .coupon(coupon2)
+                .build();
+
+        when(issuanceRepository.findAllByMemberId(member.getId()))
+                .thenReturn(List.of(issuance1, issuance2));
+
+        // When
+        List<IssuanceResponse> response = couponService.getIssuedCoupons(member);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(2, response.size());
+        System.out.println("조회된 쿠폰 개수: " + response.size());
+        System.out.println("첫 번째 쿠폰 이름: " + response.get(0).getName());
+        assertEquals("Spring Sale", response.get(0).getName());
+        assertEquals(5000, response.get(0).getDiscountPrice());
+        assertEquals("Winter Sale", response.get(1).getName());
+        assertEquals(10000, response.get(1).getDiscountPrice());
+        verify(issuanceRepository, times(1)).findAllByMemberId(member.getId());
+    }
+
+    @Test
+    @DisplayName("쿠폰 조회 성공 - 발급받은 쿠폰이 없는 경우")
+    void getIssuedCoupons_empty() {
+        // Given
+        Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
+
+        when(issuanceRepository.findAllByMemberId(member.getId()))
+                .thenReturn(Collections.emptyList());
+
+        // When
+        List<IssuanceResponse> response = couponService.getIssuedCoupons(member);
+
+        // Then
+        assertNotNull(response);
+        assertTrue(response.isEmpty());
+        verify(issuanceRepository, times(1)).findAllByMemberId(member.getId());
     }
 }

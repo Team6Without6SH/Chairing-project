@@ -1,7 +1,6 @@
 package com.sparta.chairingproject.domain.coupon.entity;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import jakarta.persistence.*;
@@ -12,6 +11,8 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.COUPON_OUT_OF_STOCK;
 
 @Getter
 @Entity
@@ -37,7 +38,7 @@ public class Coupon extends Timestamped {
 
     public void validateQuantity() {
         if (this.quantity <= 0) {
-            throw new GlobalException(ExceptionCode.COUPON_OUT_OF_STOCK);
+            throw new GlobalException(COUPON_OUT_OF_STOCK);
         }
     }
 

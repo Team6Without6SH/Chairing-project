@@ -1,7 +1,7 @@
 package com.sparta.chairingproject.domain.coupon.service;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+import com.sparta.chairingproject.domain.Issuance.dto.IssuanceResponse;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
 import com.sparta.chairingproject.domain.coupon.dto.CouponRequest;
@@ -9,10 +9,14 @@ import com.sparta.chairingproject.domain.coupon.dto.CouponResponse;
 import com.sparta.chairingproject.domain.coupon.entity.Coupon;
 import com.sparta.chairingproject.domain.coupon.repository.CouponRepository;
 import com.sparta.chairingproject.domain.member.entity.Member;
-import com.sparta.chairingproject.domain.member.entity.MemberRole;
-import com.sparta.chairingproject.util.ResponseBodyDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.COUPON_ALREADY_ISSUED;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.COUPON_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -40,10 +44,10 @@ public class CouponService {
 
     public void issueCoupon(Long couponId, Member member) {
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new GlobalException(ExceptionCode.COUPON_NOT_FOUND));
+                .orElseThrow(() -> new GlobalException(COUPON_NOT_FOUND));
 
         if (issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId).isPresent()) {
-            throw new GlobalException(ExceptionCode.COUPON_ALREADY_ISSUED);
+            throw new GlobalException(COUPON_ALREADY_ISSUED);
         }
 
         coupon.validateQuantity();
@@ -54,5 +58,17 @@ public class CouponService {
                 .coupon(coupon)
                 .build();
         issuanceRepository.save(issuance);
+    }
+
+    public List<IssuanceResponse> getIssuedCoupons(Member member) {
+        List<Issuance> issuances = issuanceRepository.findAllByMemberId(member.getId());
+
+        return issuances.stream()
+                .map(issuance -> new IssuanceResponse(
+                        issuance.getCoupon().getId(),
+                        issuance.getCoupon().getName(),
+                        issuance.getCoupon().getDiscountPrice(),
+                        issuance.getCoupon().getCreatedAt()
+                )).toList();
     }
 }
