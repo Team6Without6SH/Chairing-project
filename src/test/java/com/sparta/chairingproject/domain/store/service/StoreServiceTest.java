@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
@@ -125,5 +127,17 @@ class StoreServiceTest {
 		assertThrows(IllegalArgumentException.class, () -> {
 			storeService.registerStore(request, testUserDetails);
 		});
+	}
+	@Test
+	@DisplayName("사장님 정보 없음")
+	void registerStore_Fail_UserNotFound() {
+		StoreRequest request = new StoreRequest("Test Store", "123 Test Address", "010-1234-5678", "09:00", "18:00", List.of(), "Description", List.of());
+
+		given(memberRepository.findById(any())).willReturn(Optional.empty());
+
+		GlobalException exception = assertThrows(
+			GlobalException.class, () -> storeService.registerStore(request, testUserDetails));
+
+		assertEquals(ExceptionCode.NOT_FOUND_USER, exception.getExceptionCode());
 	}
 }
