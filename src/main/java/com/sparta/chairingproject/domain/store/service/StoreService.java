@@ -24,6 +24,14 @@ public class StoreService {
 		Member owner = memberRepository.findById(authMember.getMember().getId())
 			.orElseThrow(() -> new IllegalArgumentException("해당 사장님 정보를 찾을 수 없습니다."));
 
+		if (storeRepository.existsByOwner(owner)) {
+			throw new IllegalStateException("이미 매장이 등록되어 있습니다.");
+		}
+
+		if ((request.getOpenTime() == null) != (request.getCloseTime() == null)) {
+			throw new IllegalArgumentException("영업 시작 시간과 종료 시간을 모두 입력해야 합니다.");
+		}
+
 		// Store 엔터티 생성 및 저장
 		Store store = new Store(
 			request.getName(),
@@ -33,6 +41,7 @@ public class StoreService {
 		);
 
 		storeRepository.save(store); // 저장
+
 	}
 }
 
