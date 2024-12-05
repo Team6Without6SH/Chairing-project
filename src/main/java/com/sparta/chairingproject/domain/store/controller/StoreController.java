@@ -10,6 +10,7 @@ import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.service.StoreService;
 import com.sparta.chairingproject.util.ResponseBodyDto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -19,11 +20,11 @@ public class StoreController {
 	private final StoreService storeService;
 
 	@PostMapping("/owners/stores/register")
-	public ResponseEntity<ResponseBodyDto<Void>> registerStore(
-		@RequestBody StoreRequest storeRequest,
+	public ResponseEntity<Void> registerStore(
+		@Valid @RequestBody StoreRequest storeRequest,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
 		storeService.registerStore(storeRequest, authMember);
-		return ResponseEntity.ok(ResponseBodyDto.success("신청 성공"));
+		return ResponseEntity.ok().build();
 	}
 }
