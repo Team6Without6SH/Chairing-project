@@ -22,9 +22,9 @@ public class CouponService {
 
     public CouponResponse createCoupon(CouponRequest request) {
         Coupon coupon = Coupon.builder()
-                .name(request.name())
-                .quantity(request.quantity())
-                .discountPrice(request.discountPrice())
+                .name(request.getName())
+                .quantity(request.getQuantity())
+                .discountPrice(request.getDiscountPrice())
                 .build();
 
         couponRepository.save(coupon);

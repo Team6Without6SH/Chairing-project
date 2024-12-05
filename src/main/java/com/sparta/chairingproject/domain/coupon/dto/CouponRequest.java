@@ -1,14 +1,21 @@
 package com.sparta.chairingproject.domain.coupon.dto;
 
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-public record CouponRequest(
+@Getter
+@NoArgsConstructor
+public class CouponRequest extends RequestDto {
+
         @NotNull(message = "쿠폰 이름이 비었습니다.")
-        String name,
+        private String name;
+
         @Min(value = 1, message = "수량은 1 이상이어야 합니다.")
-        int quantity,
+        private int quantity;
+
         @Min(value = 0, message = "할인 가격은 0 이상이어야 합니다.")
-        int discountPrice
-) {
+        private int discountPrice;
 }
