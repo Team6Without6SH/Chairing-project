@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 public enum ExceptionCode {
 
     //----------MEMBER----------
-    NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "멤버를 찾을 수 없습니다"),
+    NOT_FOUND_USER(HttpStatus.NOT_FOUND, "멤버를 찾을 수 없습니다"),
     NAME_TOO_LONG(HttpStatus.BAD_REQUEST, "이름은 최대 4글자까지 가능합니다"),
     USERNAME_REQUIRED(HttpStatus.BAD_REQUEST, "이름이 누락되었습니다"),
     MEMBER_ALREADY_DELETED(HttpStatus.NOT_FOUND, "이미 삭제된 회원입니다"),

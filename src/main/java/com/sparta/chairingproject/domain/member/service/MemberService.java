@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.domain.member.service;
 
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.NOT_FOUND_MEMBER;
+
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.NOT_FOUND_USER;
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.NOT_MATCH_PASSWORD;
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.SAME_BEFORE_PASSWORD;
 
@@ -32,14 +33,14 @@ public class MemberService {
 
     public MemberResponse getMember(UserDetailsImpl authMember) {
         Member member = memberRepository.findById(authMember.getMember().getId())
-            .orElseThrow(() -> new GlobalException(NOT_FOUND_MEMBER));
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
         return new MemberResponse(member.getEmail(), member.getName());
     }
 
     @Transactional
     public void updatePassword(UserDetailsImpl authMember, MemberPasswordRequest request) {
         Member member = memberRepository.findById(authMember.getMember().getId())
-            .orElseThrow(() -> new GlobalException(NOT_FOUND_MEMBER));
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
             throw new GlobalException(NOT_MATCH_PASSWORD);
@@ -60,7 +61,7 @@ public class MemberService {
     public Page<MemberOrderResponse> getOrdersByMember(UserDetailsImpl authMember,
         RequestDto request, int page, int size) {
         Member member = memberRepository.findById(authMember.getMember().getId())
-            .orElseThrow(() -> new GlobalException(NOT_FOUND_MEMBER));
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
         Pageable pageable = PageRequest.of(page - 1, size);
 
