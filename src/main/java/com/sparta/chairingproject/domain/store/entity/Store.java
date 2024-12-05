@@ -6,6 +6,7 @@ import java.util.List;
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
 import com.sparta.chairingproject.domain.review.entity.Review;
 
@@ -42,6 +43,9 @@ public class Store extends Timestamped {
 	@Column(nullable = true)
 	private String description;
 
+	@Column(nullable = false)
+	private int tableCount;
+
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member owner;
@@ -54,6 +58,9 @@ public class Store extends Timestamped {
 
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Reservation> reservations = new ArrayList<>();
+
+	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<Order> orders = new ArrayList<>();
 
 	public Store(String name, String image, String description, Member member) {
 		this.name = name;
