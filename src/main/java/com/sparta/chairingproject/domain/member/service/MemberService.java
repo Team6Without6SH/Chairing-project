@@ -11,7 +11,7 @@ import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
-import com.sparta.chairingproject.domain.member.dto.response.MemberCouponResponse;
+import com.sparta.chairingproject.domain.member.dto.response.MemberIssuanceResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberReservationResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
@@ -92,7 +92,7 @@ public class MemberService {
         return reservations.map(MemberReservationResponse::new);
     }
 
-    public Page<MemberCouponResponse> getCouponsByMember(UserDetailsImpl authMember,
+    public Page<MemberIssuanceResponse> getIssuanceByMember(UserDetailsImpl authMember,
         RequestDto request, int page, int size) {
         Member member = memberRepository.findById(authMember.getMember().getId())
             .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
@@ -101,7 +101,7 @@ public class MemberService {
 
         Page<Issuance> issuance = issuanceRepository.findByMember(member.getId(), pageable);
 
-        return issuance.map(MemberCouponResponse::new);
+        return issuance.map(MemberIssuanceResponse::new);
 
     }
 }
