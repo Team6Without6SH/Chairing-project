@@ -21,15 +21,19 @@ import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
+import com.sparta.chairingproject.domain.store.dto.StoreResponse;
+import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
 @SpringBootTest
 class StoreServiceTest {
+
 	@Autowired
 	private StoreService storeService;
 
-	@MockBean
+	@Autowired
 	private StoreRepository storeRepository;
+
 
 	@MockBean
 	private MemberRepository memberRepository;
@@ -69,7 +73,7 @@ class StoreServiceTest {
 		then(storeRepository).should().save(Mockito.any());
 	}
 
-	@Test
+
 	@DisplayName("이미 등록한 가게")
 	void registerStore_Fail_ExistingStore() {
 		//Given
@@ -139,5 +143,26 @@ class StoreServiceTest {
 			GlobalException.class, () -> storeService.registerStore(request, testUserDetails));
 
 		assertEquals(ExceptionCode.NOT_FOUND_USER, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("승인된 가게만 조회")
+	void getAllApprovedStores() {
+		// given
+		Store store1=new Store("가게1","image1.jap","설명",null);
+		Store store2 = new Store("가게2", "image2.jpg", "설명2", null);
+		Store store3 = new Store("가게3", "image3.jpg", "설명3", null);
+
+		store1.updateStoreStatus(StoreStatus.APPROVED); // 가게1 승인
+		storeRepository.save(store1);
+		storeRepository.save(store2);
+		storeRepository.save(store3);
+
+		// When: 승인된 가게만 조회
+		List<StoreResponse> stores = storeService.getAllApprovedStores();
+
+		// Then: 승인된 가게만 포함되어야 함
+		assertEquals(1, stores.size());
+		assertEquals("가게1", stores.get(0).getName());
 	}
 }
