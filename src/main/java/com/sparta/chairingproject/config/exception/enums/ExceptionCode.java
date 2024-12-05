@@ -38,7 +38,6 @@ public enum ExceptionCode {
 	NOT_FOUND_OPTION(HttpStatus.NOT_FOUND, "해당 옵션이 없습니다"),
 	OPTION_NOT_BELONG_TO_MENU(HttpStatus.NOT_FOUND, "해당 옵션은 선택한 메뉴에 포함되어 있지 않습니다"),
 
-
 	//----------주문----------
 	STORE_CLOSED(HttpStatus.GONE, "영업 시간이 아닙니다"),
 	LOWER_THAN_MIN_ORDER(HttpStatus.BAD_REQUEST, "주문 금액이 최소 주문 금액보다 작습니다"),
@@ -52,10 +51,11 @@ public enum ExceptionCode {
 	ONLY_ORDER_ALLOWED(HttpStatus.FORBIDDEN, "주문한 사람만 수정 가능합니다"),
 	CANCEL_ONLY_PENDING(HttpStatus.FORBIDDEN, "대기 상태일때만 취소 가능합니다"),
 	ORDER_NOT_DELIVERED(HttpStatus.FORBIDDEN, "주문이 배달 완료 상태가 아닙니다"),
-	STORE_CLOSED_BY_OWER(HttpStatus.GONE,"해당 가게는 개인사정으로 문을 닫았습니다"),
-	NOT_ORDER_THIS_STORE(HttpStatus.BAD_REQUEST,"선택한 메뉴는 주문할 수 없습니다."),
-	NOT_REJECTED_ACCEPT(HttpStatus.BAD_REQUEST,"완료된 주문은 취소할 수 없습니다."),
-
+	STORE_CLOSED_BY_OWER(HttpStatus.GONE, "해당 가게는 개인사정으로 문을 닫았습니다"),
+	NOT_ORDER_THIS_STORE(HttpStatus.BAD_REQUEST, "선택한 메뉴는 주문할 수 없습니다."),
+	NOT_REJECTED_ACCEPT(HttpStatus.BAD_REQUEST, "완료된 주문은 취소할 수 없습니다."),
+	PAYED_NOT_EQUAL_BILL(HttpStatus.BAD_REQUEST, "총 가격과 결제 가격이 일치하지 않습니다."),
+	CANCELLED_COMPLETED_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "완료되거나 이미 취소된 주문은 취소 요청할 수 없습니다."),
 
 	//----------리뷰----------
 	NOT_FOUND_REVIEW(HttpStatus.NOT_FOUND, "해당 리뷰가 없습니다"),
@@ -75,8 +75,7 @@ public enum ExceptionCode {
 	NOT_SUPPORT_ENCODING_COOKIE(HttpStatus.BAD_REQUEST, "Not support encoding cookie"),
 	HAS_NOT_TOKEN(HttpStatus.BAD_REQUEST, "Request has not token"),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "Token is expired"),
-	NOT_SUPPORT_TOKEN(HttpStatus.UNAUTHORIZED, "Is not support token")
-	;
+	NOT_SUPPORT_TOKEN(HttpStatus.UNAUTHORIZED, "Is not support token");
 
 	private final HttpStatus httpStatus;
 	private final String message;

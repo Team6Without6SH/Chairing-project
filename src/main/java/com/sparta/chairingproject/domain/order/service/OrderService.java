@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
+import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
@@ -34,7 +36,7 @@ public class OrderService {
 
 		int totalPrice = menus.stream().mapToInt(Menu::getPrice).sum();
 		if (totalPrice != orderRequest.getTotalPrice()) {
-			throw new IllegalArgumentException("결제하는 총 가격이 일치하지 않습니다.");
+			throw new GlobalException(PAYED_NOT_EQUAL_BILL);
 		}
 
 		Order order = Order.createOf(
@@ -54,5 +56,23 @@ public class OrderService {
 			.menuNames(menuNames)
 			.totalPrice(order.getPrice())
 			.build();
+	}
+
+	@Transactional
+	public void requestOrderCancellation(Long storeId, Long orderId, Member member, OrderCancelRequest memberId) {
+		Order order = orderRepository.findById(orderId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_ORDER));
+
+		if (!order.getMember().getId().equals(member.getId())) {
+			throw new GlobalException(ONLY_ORDER_ALLOWED);
+		}
+		if (order.getMenus().stream().noneMatch(menu -> menu.getStore().getId().equals(storeId))) {
+			throw new GlobalException(NOT_ORDER_THIS_STORE);
+		}
+
+		if (order.getStatus() == OrderStatus.CANCELLED || order.getStatus() == OrderStatus.COMPLETED) {
+			throw new GlobalException(CANCELLED_COMPLETED_NOT_ALLOWED);
+		}
+		order.changeStatus(OrderStatus.CANCEL_REQUEST);
 	}
 }
