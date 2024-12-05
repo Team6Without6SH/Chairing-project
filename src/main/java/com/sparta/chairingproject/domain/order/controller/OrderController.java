@@ -17,6 +17,7 @@ import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
+import com.sparta.chairingproject.domain.order.dto.request.OrderStatusChangeRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderStatusChangeResponse;
@@ -70,11 +71,10 @@ public class OrderController {
 	public ResponseEntity<OrderStatusChangeResponse> updateOrderStatus(
 		@PathVariable Long storeId,
 		@PathVariable Long orderId,
-		@RequestParam OrderStatus newStatus,
 		@AuthenticationPrincipal UserDetailsImpl authMember,
-		@RequestBody RequestDto request
+		@RequestBody OrderStatusChangeRequest newStatus
 	) {
 		return ResponseEntity.ok(
-			orderService.updateOrderStatus(storeId, orderId, newStatus, authMember.getMember(), request));
+			orderService.updateOrderStatus(storeId, orderId, newStatus, authMember.getMember()));
 	}
 }
