@@ -1,28 +1,32 @@
 package com.sparta.chairingproject.domain.reservation.controller;
 
-import com.sparta.chairingproject.domain.reservation.dto.ReservationResponseDto;
-import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequestDto;
+import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
+import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
 import com.sparta.chairingproject.domain.reservation.service.ReservationService;
-import com.sparta.chairingproject.util.ResponseBodyDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/coupons")
 @RequiredArgsConstructor
 public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @PostMapping
-    public ResponseEntity<ResponseBodyDto<ReservationResponseDto>> createCoupon(@RequestBody CreateReservationRequestDto requestDto) {
+    @Secured("ROLE_MEMBER")
+    @PostMapping("/stores/{storeId}/reservations")
+    public ResponseEntity<ReservationResponse> createReservation(@PathVariable Long storeId,
+                                                                 @RequestBody CreateReservationRequest requestDto,
+                                                                 @AuthenticationPrincipal UserDetailsImpl authUser) {
         return new ResponseEntity<>(
-                ResponseBodyDto.success("예약 완료", reservationService.createReservation(requestDto)),
+                reservationService.createReservation(storeId, requestDto, authUser),
                 HttpStatus.OK);
     }
 }
