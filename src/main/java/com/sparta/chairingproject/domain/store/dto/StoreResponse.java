@@ -20,5 +20,4 @@ public class StoreResponse {
 	private String description;       // 가게 설명
 	private List<String> images;      // 이미지 리스트
 	private String ownerName;         // 사장님 이름
-
 }
