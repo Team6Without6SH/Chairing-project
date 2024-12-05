@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
+import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.service.OrderService;
 
@@ -38,13 +39,12 @@ public class OrderController {
 
 	@Secured("ROLE_USER")
 	@PutMapping("/{storeId}/orders/{orderId}")
-	public ResponseEntity<String> requestOrderCancellation(
+	public ResponseEntity<OrderCancelResponse> requestOrderCancellation(
 		@PathVariable Long storeId,
 		@PathVariable Long orderId,
 		@AuthenticationPrincipal UserDetailsImpl authMember,
 		@RequestBody OrderCancelRequest memberId
 	) {
-		orderService.requestOrderCancellation(storeId, orderId, authMember.getMember(), memberId);
-		return ResponseEntity.ok("주문 취소 요청이 완료되었습니다.");
+		return ResponseEntity.ok(orderService.requestOrderCancellation(storeId, orderId, authMember.getMember(), memberId));
 	}
 }

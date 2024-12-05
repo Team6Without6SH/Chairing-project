@@ -14,6 +14,7 @@ import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
+import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
@@ -59,7 +60,7 @@ public class OrderService {
 	}
 
 	@Transactional
-	public void requestOrderCancellation(Long storeId, Long orderId, Member member, OrderCancelRequest memberId) {
+	public OrderCancelResponse requestOrderCancellation(Long storeId, Long orderId, Member member, OrderCancelRequest memberId) {
 		Order order = orderRepository.findById(orderId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_ORDER));
 
@@ -74,5 +75,10 @@ public class OrderService {
 			throw new GlobalException(CANCELLED_COMPLETED_NOT_ALLOWED);
 		}
 		order.changeStatus(OrderStatus.CANCEL_REQUEST);
+
+		return OrderCancelResponse.builder()
+			.orderId(order.getId())
+			.orderStatus(order.getStatus())
+			.build();
 	}
 }
