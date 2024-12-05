@@ -1,11 +1,12 @@
 package com.sparta.chairingproject.domain.member.dto.request;
 
-import com.sparta.chairingproject.domain.common.dto.MemberIdDto;
+
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-public class MemberPasswordRequest extends MemberIdDto {
+public class MemberPasswordRequest extends RequestDto {
 
     @NotBlank
     private String password;

@@ -6,7 +6,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.SA
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
-import com.sparta.chairingproject.domain.common.dto.MemberIdDto;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
@@ -58,7 +58,7 @@ public class MemberService {
 
 
     public Page<MemberOrderResponse> getOrdersByMember(UserDetailsImpl authMember,
-        MemberIdDto request, int page, int size) {
+        RequestDto request, int page, int size) {
         Member member = memberRepository.findById(authMember.getMember().getId())
             .orElseThrow(() -> new GlobalException(NOT_FOUND_MEMBER));
 
