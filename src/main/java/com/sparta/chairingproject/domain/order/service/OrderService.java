@@ -4,6 +4,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
+import com.sparta.chairingproject.domain.order.dto.request.OrderStatusChangeRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderStatusChangeResponse;
@@ -137,8 +139,8 @@ public class OrderService {
 	}
 
 	@Transactional
-	public OrderStatusChangeResponse updateOrderStatus(Long storeId, Long orderId, OrderStatus newStatus, Member member,
-		RequestDto request) {
+	public OrderStatusChangeResponse updateOrderStatus(Long storeId, Long orderId, OrderStatusChangeRequest request,
+		Member member) {
 		Store store = storeRepository.findById(storeId) //가게 검증
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 		if (!store.getOwner().getId().equals(member.getId())) {
@@ -149,25 +151,29 @@ public class OrderService {
 		if (!order.getStore().getId().equals(storeId)) {
 			throw new GlobalException(NOT_ORDER_THIS_STORE);
 		}
+
 		//현재 상태에 따라 다양한 검증 후 상태를 변경 아래에 다양한 조건이 잔뜩
+		OrderStatus newStatus = OrderStatus.fromString(request.getStatus());
 		OrderStatus currentOrderStatus = order.getStatus();
-		if (newStatus == OrderStatus.CANCEL_REQUEST) {
+		if (Objects.equals(newStatus, OrderStatus.CANCEL_REQUEST)) {
 			throw new GlobalException(CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER);
 		}
 		if (currentOrderStatus == OrderStatus.COMPLETED || currentOrderStatus == OrderStatus.CANCELLED) {
 			throw new GlobalException(CANNOT_CHANGE_COMPLETED_OR_CANCELLED);
 		}
-		if (newStatus == OrderStatus.IN_PROGRESS) {
+		if (Objects.equals(newStatus, OrderStatus.IN_PROGRESS)) {
 			int inProgressCount = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS);
 			if (inProgressCount >= store.getTableCount()) {
 				throw new GlobalException(TABLE_FULL_CANNOT_SET_IN_PROGRESS);
 			}
 		}
-		if (currentOrderStatus == OrderStatus.WAITING && newStatus != OrderStatus.ADMISSION) {
+		if (currentOrderStatus == OrderStatus.WAITING && !Objects.equals(newStatus,
+			OrderStatus.ADMISSION)) {
 			throw new GlobalException(ONLY_ADMISSION_ALLOWED_FROM_WAITING);
 		}
-		if (currentOrderStatus == OrderStatus.ADMISSION && !(newStatus == OrderStatus.IN_PROGRESS
-			|| newStatus == OrderStatus.CANCELLED)) {
+		if (currentOrderStatus == OrderStatus.ADMISSION && !(
+			Objects.equals(newStatus, OrderStatus.IN_PROGRESS)
+				|| Objects.equals(newStatus, OrderStatus.CANCELLED))) {
 			throw new GlobalException(ONLY_IN_PROGRESS_OR_CANCELLED_ALLOWED_FROM_ADMISSION);
 		}
 		order.changeStatus(newStatus);

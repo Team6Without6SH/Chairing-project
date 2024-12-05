@@ -16,4 +16,13 @@ public enum OrderStatus {
 	OrderStatus(String description) {
 		this.description = description;
 	}
+
+	public static OrderStatus fromString(String status) {
+		for (OrderStatus orderStatus : values()) {
+			if (orderStatus.name().equalsIgnoreCase(status)) {
+				return orderStatus;
+			}
+		}
+		throw new IllegalArgumentException("유효하지 않은 OrderStatus: " + status);
+	}
 }
