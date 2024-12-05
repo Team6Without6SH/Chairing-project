@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.domain.coupon.service;
 
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
 import com.sparta.chairingproject.domain.coupon.dto.CouponRequest;
@@ -7,10 +8,11 @@ import com.sparta.chairingproject.domain.coupon.dto.CouponResponse;
 import com.sparta.chairingproject.domain.coupon.entity.Coupon;
 import com.sparta.chairingproject.domain.coupon.repository.CouponRepository;
 import com.sparta.chairingproject.domain.member.entity.Member;
-import com.sparta.chairingproject.domain.member.entity.MemberRole;
-import com.sparta.chairingproject.util.ResponseBodyDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.COUPON_ALREADY_ISSUED;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.COUPON_NOT_FOUND;
 
 @Service
 @RequiredArgsConstructor
@@ -18,11 +20,11 @@ public class CouponService {
     private final CouponRepository couponRepository;
     private final IssuanceRepository issuanceRepository;
 
-    public CouponResponse createCoupon(CouponRequest request, Member member) {
+    public CouponResponse createCoupon(CouponRequest request) {
         Coupon coupon = Coupon.builder()
-                .name(request.name())
-                .quantity(request.quantity())
-                .discountPrice(request.discountPrice())
+                .name(request.getName())
+                .quantity(request.getQuantity())
+                .discountPrice(request.getDiscountPrice())
                 .build();
 
         couponRepository.save(coupon);
@@ -36,17 +38,12 @@ public class CouponService {
                 .build();
     }
 
-    // TODO: 글로벌 예외처리
-    public ResponseBodyDto<String> issueCoupon(Long couponId, Member member) {
+    public void issueCoupon(Long couponId, Member member) {
         Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 쿠폰을 찾을 수 없습니다. ID: " + couponId));
-
-        if (!MemberRole.USER.equals(member.getMemberRole())) {
-            throw new IllegalStateException("쿠폰 발급 권한이 없습니다.");
-        }
+                .orElseThrow(() -> new GlobalException(COUPON_NOT_FOUND));
 
         if (issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId).isPresent()) {
-            throw new IllegalStateException("이미 해당 쿠폰을 발급받았습니다.");
+            throw new GlobalException(COUPON_ALREADY_ISSUED);
         }
 
         coupon.validateQuantity();
@@ -57,7 +54,5 @@ public class CouponService {
                 .coupon(coupon)
                 .build();
         issuanceRepository.save(issuance);
-
-        return ResponseBodyDto.success("쿠폰이 성공적으로 발급되었습니다.");
     }
 }
