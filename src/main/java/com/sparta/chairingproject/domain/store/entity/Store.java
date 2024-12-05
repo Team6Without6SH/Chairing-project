@@ -77,16 +77,11 @@ public class Store extends Timestamped {
 	@Column(nullable = false)
 	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
 
-
-	// // TEST
-	// public Store(String name, String image, String description, Member owner) {
-	// 	this.name = name;
-	// 	this.image = image;
-	// 	this.description = description;
-	// 	this.owner = owner;
-	// }
-
 	public void updateStoreStatus(StoreStatus status) {
 		this.status = status;
+	}
+
+	public void updateRequestStatus(StoreRequestStatus storeRequestStatus) {
+		this.requestStatus = storeRequestStatus;
 	}
 }
