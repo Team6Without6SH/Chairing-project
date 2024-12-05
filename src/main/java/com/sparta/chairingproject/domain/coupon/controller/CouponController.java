@@ -1,12 +1,16 @@
 package com.sparta.chairingproject.domain.coupon.controller;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.coupon.dto.CouponRequest;
 import com.sparta.chairingproject.domain.coupon.dto.CouponResponse;
 import com.sparta.chairingproject.domain.coupon.service.CouponService;
 import com.sparta.chairingproject.util.ResponseBodyDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Response;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -31,5 +35,17 @@ public class CouponController {
     public ResponseEntity<Void> issueCoupon(@PathVariable Long couponId, @AuthenticationPrincipal UserDetailsImpl authMember) {
         couponService.issueCoupon(couponId, authMember.getMember());
         return ResponseEntity.ok().build();
+    }
+
+    @Secured("ROLE_ADMIN")
+    @GetMapping
+    public ResponseEntity<Page<CouponResponse>> getAllCoupons(
+            @RequestBody RequestDto request,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageRequest pageRequest = PageRequest.of(page - 1, size);
+        Page<CouponResponse> response = couponService.getAllCoupons(request, pageRequest);
+        return ResponseEntity.ok(response);
     }
 }
