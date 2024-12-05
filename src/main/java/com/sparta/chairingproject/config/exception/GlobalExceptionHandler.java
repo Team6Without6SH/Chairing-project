@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(GlobalException.class)
-	public ResponseEntity<Object> handleOrderExceptions(GlobalException e) {
+	public ResponseEntity<Object> handleGlobalException(GlobalException e) {
 		ExceptionCode exceptionCode = e.getExceptionCode();
 		log.error("{}: {}", exceptionCode, exceptionCode.getMessage());
 		return ResponseEntity.status(exceptionCode.getHttpStatus())
