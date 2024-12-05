@@ -21,8 +21,15 @@ import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+import com.sparta.chairingproject.domain.member.entity.Member;
+import com.sparta.chairingproject.domain.member.entity.MemberRole;
+import com.sparta.chairingproject.domain.member.repository.MemberRepository;
+import com.sparta.chairingproject.domain.member.service.MemberService;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.domain.store.entity.Store;
+import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
 @SpringBootTest
@@ -34,6 +41,8 @@ class StoreServiceTest {
 	@Autowired
 	private StoreRepository storeRepository;
 
+	@Autowired
+	private MemberRepository memberRepository;
 
 	@MockBean
 	private MemberRepository memberRepository;
@@ -164,5 +173,54 @@ class StoreServiceTest {
 		// Then: 승인된 가게만 포함되어야 함
 		assertEquals(1, stores.size());
 		assertEquals("가게1", stores.get(0).getName());
+	}
+
+	@Test
+	@DisplayName("Member 객체 생성 및 Store 연관 테스트")
+	void createMemberAndStore() {
+		// Given: Member 생성
+		Member owner = new Member(
+			"가게주인",                 // name
+			"owner@example.com",       // email
+			"password",                // password
+			MemberRole.OWNER           // memberRole
+		);
+
+		// Given: Member를 데이터베이스에 저장
+		memberRepository.save(owner);
+
+		// Given: Store 생성
+		Store store = new Store(
+			"가게1",                   // name
+			"image1.jpg",              // image
+			"설명1",                   // description
+			owner                      // owner (Member)
+		);
+
+		// When: Store 저장
+		storeRepository.save(store);
+
+		// Then: Store가 올바르게 저장되었는지 확인
+		Store savedStore = storeRepository.findById(store.getId())
+			.orElseThrow(() -> new IllegalArgumentException("Store not found"));
+
+		assertEquals("가게1", savedStore.getName());
+		assertEquals(owner.getId(), savedStore.getOwner().getId());
+		assertEquals("owner@example.com", savedStore.getOwner().getEmail());
+	}
+
+	@Test
+	@DisplayName("조회 가능한 가게가 없을 경우 예외 발생")
+	void getAllApprovedStores_NoStores() {
+		// Given: 가게 데이터 없음
+		storeRepository.deleteAll();
+
+		// When & Then: 가게가 없으면 예외 발생
+		GlobalException exception = assertThrows(
+			GlobalException.class,
+			() -> storeService.getAllApprovedStores()
+		);
+
+		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
 	}
 }
