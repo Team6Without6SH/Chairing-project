@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public abstract class RequestDto {
+public class RequestDto {
 	private Long memberId;
 }

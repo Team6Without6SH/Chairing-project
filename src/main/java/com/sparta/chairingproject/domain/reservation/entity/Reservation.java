@@ -10,7 +10,6 @@ import java.time.LocalDate;
 
 @Entity
 @Getter
-@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -49,6 +48,7 @@ public class Reservation extends Timestamped {
 				time,
 				getCreatedAt(),
 				getModifiedAt(),
+				status
 		);
 	}
 
