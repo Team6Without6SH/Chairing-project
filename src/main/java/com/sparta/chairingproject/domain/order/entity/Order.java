@@ -60,4 +60,8 @@ public class Order extends Timestamped {
 	public static Order createOf(Member member, List<Menu> menus, OrderStatus status, int price) {
 		return new Order(member, menus, status, price);
 	}
+
+	public void changeStatus(OrderStatus status) {
+		this.status = status;
+	}
 }
