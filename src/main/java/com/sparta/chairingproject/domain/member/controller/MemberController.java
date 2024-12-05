@@ -1,7 +1,7 @@
 package com.sparta.chairingproject.domain.member.controller;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
-import com.sparta.chairingproject.domain.common.dto.MemberIdDto;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
@@ -41,7 +41,7 @@ public class MemberController {
     @GetMapping("/orders")
     public ResponseEntity<Page<MemberOrderResponse>> getOrdersByMember(
         @AuthenticationPrincipal UserDetailsImpl authMember,
-        MemberIdDto request,
+        RequestDto request,
         @RequestParam(defaultValue = "1") int page,
         @RequestParam(defaultValue = "5") int size
     ) {
