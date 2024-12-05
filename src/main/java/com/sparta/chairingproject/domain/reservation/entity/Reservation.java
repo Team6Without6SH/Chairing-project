@@ -1,23 +1,22 @@
 package com.sparta.chairingproject.domain.reservation.entity;
 
+import com.sparta.chairingproject.domain.common.entity.Timestamped;
+import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
+import com.sparta.chairingproject.domain.store.entity.Store;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import lombok.*;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.sparta.chairingproject.domain.common.entity.Timestamped;
-import com.sparta.chairingproject.domain.store.entity.Store;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Getter;
-
 @Entity
 @Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "reservations")
 public class Reservation extends Timestamped {
 	@Id
@@ -25,16 +24,36 @@ public class Reservation extends Timestamped {
 	private Long id;
 
 	@Column(nullable = false)
-	private String holder;
+	@NotEmpty(message = "회원 아이디는 필수 입력 항목입니다.")
+	private Long memberId;
 
 	@Column(nullable = false)
+	@NotEmpty(message = "인원 수는 필수 입력 항목입니다.")
+	@Min(value = 1, message = "인원 수는 1명 이상이어야 합니다.")
+	private int guestCount;
+
+	@Column(nullable = false)
+	@NotEmpty(message = "날짜는 필수 입력 항목입니다.")
 	private LocalDate date;
 
 	@Column(nullable = false)
-	private LocalTime time; //ERD 따라 만들긴했는데 LocalDateTime 형식이면 시간도 포함이긴한데
-	//내가 Time 타입 참조변수를 잘 모름
+	@NotEmpty(message = "시간은 필수 입력 항목입니다.")
+	private LocalTime time;
 
 	@ManyToOne
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
+
+	public ReservationResponse toResponse() {
+		return new ReservationResponse(
+				id,
+				memberId,
+				store.getId(),
+				guestCount,
+				date,
+				time,
+				getCreatedAt(),
+				getModifiedAt()
+		);
+	}
 }
