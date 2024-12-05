@@ -1,23 +1,18 @@
 package com.sparta.chairingproject.domain.reservation.entity;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
+import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
 import com.sparta.chairingproject.domain.store.entity.Store;
+import jakarta.persistence.*;
+import lombok.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Getter;
+import java.time.LocalDate;
 
 @Entity
 @Getter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "reservations")
 public class Reservation extends Timestamped {
 	@Id
@@ -25,16 +20,31 @@ public class Reservation extends Timestamped {
 	private Long id;
 
 	@Column(nullable = false)
-	private String holder;
+	private Long memberId;
+
+	@Column(nullable = false)
+	private int guestCount;
 
 	@Column(nullable = false)
 	private LocalDate date;
 
 	@Column(nullable = false)
-	private LocalTime time; //ERD 따라 만들긴했는데 LocalDateTime 형식이면 시간도 포함이긴한데
-	//내가 Time 타입 참조변수를 잘 모름
+	private String time;
 
 	@ManyToOne
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
+
+	public ReservationResponse toResponse() {
+		return new ReservationResponse(
+				id,
+				memberId,
+				store.getId(),
+				guestCount,
+				date,
+				time,
+				getCreatedAt(),
+				getModifiedAt()
+		);
+	}
 }
