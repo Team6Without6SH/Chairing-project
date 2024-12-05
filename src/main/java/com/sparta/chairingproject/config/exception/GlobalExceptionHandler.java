@@ -19,40 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j(topic = "ControllerException")
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-	@ExceptionHandler(OrderExceptions.class)
-	public ResponseEntity<Object> handleOrderExceptions(OrderExceptions e) {
-		ExceptionCode exceptionCode = e.getExceptionCode();
-		log.error("{}: {}", exceptionCode, exceptionCode.getMessage());
-		return ResponseEntity.status(exceptionCode.getHttpStatus())
-			.body(makeResponseExceptionCode(exceptionCode));
-	}
 
-	@ExceptionHandler(MenuExceptions.class)
-	public ResponseEntity<Object> handleMenuExceptions(MenuExceptions e) {
-		ExceptionCode exceptionCode = e.getExceptionCode();
-		log.error("{}: {}", exceptionCode, exceptionCode.getMessage());
-		return ResponseEntity.status(exceptionCode.getHttpStatus())
-			.body(makeResponseExceptionCode(exceptionCode));
-	}
-
-	@ExceptionHandler(ReviewExceptions.class)
-	public ResponseEntity<Object> handleReviewExceptions(ReviewExceptions e) {
-		ExceptionCode exceptionCode = e.getExceptionCode();
-		log.error("{}: {}", exceptionCode, exceptionCode.getMessage());
-		return ResponseEntity.status(exceptionCode.getHttpStatus())
-			.body(makeResponseExceptionCode(exceptionCode));
-	}
-
-	@ExceptionHandler(StoreExceptions.class)
-	public ResponseEntity<Object> handleStoreExceptions(StoreExceptions e) {
-		ExceptionCode exceptionCode = e.getExceptionCode();
-		log.error("{}: {}", exceptionCode, exceptionCode.getMessage());
-		return ResponseEntity.status(exceptionCode.getHttpStatus())
-			.body(makeResponseExceptionCode(exceptionCode));
-	}
-
-	@ExceptionHandler(MemberExceptions.class)
-	public ResponseEntity<Object> handleUserExceptions(MemberExceptions e) {
+	@ExceptionHandler(GlobalException.class)
+	public ResponseEntity<Object> handleGlobalException(GlobalException e) {
 		ExceptionCode exceptionCode = e.getExceptionCode();
 		log.error("{}: {}", exceptionCode, exceptionCode.getMessage());
 		return ResponseEntity.status(exceptionCode.getHttpStatus())

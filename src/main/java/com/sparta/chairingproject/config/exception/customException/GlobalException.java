@@ -5,10 +5,10 @@ import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import lombok.Getter;
 
 @Getter
-public class GlobalExceptions extends RuntimeException {
+public class GlobalException extends RuntimeException {
 	private final ExceptionCode exceptionCode;
 
-	public GlobalExceptions(ExceptionCode exceptionCode) {
+	public GlobalException(ExceptionCode exceptionCode) {
 		this.exceptionCode = exceptionCode;
 	}
 }
