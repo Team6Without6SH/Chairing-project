@@ -62,6 +62,11 @@ public enum ExceptionCode {
 	NOT_REJECTED_ACCEPT(HttpStatus.BAD_REQUEST, "완료된 주문은 취소할 수 없습니다."),
 	PAYED_NOT_EQUAL_BILL(HttpStatus.BAD_REQUEST, "총 가격과 결제 가격이 일치하지 않습니다."),
 	CANCELLED_COMPLETED_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "완료되거나 이미 취소된 주문은 취소 요청할 수 없습니다."),
+	CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER(HttpStatus.FORBIDDEN, "가게 사장님은 취소 요청을 보낼 수 없습니다."),
+	CANNOT_CHANGE_COMPLETED_OR_CANCELLED(HttpStatus.BAD_REQUEST, "완료되거나 이미 취소된 주문은 상태를 변경할 수 없습니다"), //사장님 전용
+	TABLE_FULL_CANNOT_SET_IN_PROGRESS(HttpStatus.CONFLICT, "만석 상태에서는 진행중 상태로 변경할 수 없습니다."),
+	ONLY_ADMISSION_ALLOWED_FROM_WAITING(HttpStatus.BAD_REQUEST, "웨이팅인 사람만 입장으로 변경 시킬 수 있습니다."),
+	ONLY_IN_PROGRESS_OR_CANCELLED_ALLOWED_FROM_ADMISSION(HttpStatus.BAD_REQUEST, "입장 상태에서는 진행중 또는 취소 상태로만 변경가능합니다."),
 
 	//----------리뷰----------
 	NOT_FOUND_REVIEW(HttpStatus.NOT_FOUND, "해당 리뷰가 없습니다"),

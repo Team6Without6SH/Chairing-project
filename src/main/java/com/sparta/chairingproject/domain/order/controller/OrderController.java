@@ -4,11 +4,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
@@ -17,7 +19,9 @@ import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
+import com.sparta.chairingproject.domain.order.dto.response.OrderStatusChangeResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
+import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.order.service.OrderService;
 
 import jakarta.validation.Valid;
@@ -59,5 +63,18 @@ public class OrderController {
 		@RequestBody RequestDto request
 	) {
 		return ResponseEntity.ok(orderService.createWaiting(storeId, authMember.getMember(), request));
+	}
+
+	@Secured("ROLE_OWNER")
+	@PatchMapping("/{storeId}/orders/{orderId}/status")
+	public ResponseEntity<OrderStatusChangeResponse> updateOrderStatus(
+		@PathVariable Long storeId,
+		@PathVariable Long orderId,
+		@RequestParam OrderStatus newStatus,
+		@AuthenticationPrincipal UserDetailsImpl authMember,
+		@RequestBody RequestDto request
+	) {
+		return ResponseEntity.ok(
+			orderService.updateOrderStatus(storeId, orderId, newStatus, authMember.getMember(), request));
 	}
 }
