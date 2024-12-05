@@ -10,11 +10,14 @@ import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
+import com.sparta.chairingproject.domain.member.dto.response.MemberReservationResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
+import com.sparta.chairingproject.domain.reservation.entity.Reservation;
+import com.sparta.chairingproject.domain.reservation.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +33,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final OrderRepository orderRepository;
+    private final ReservationRepository reservationRepository;
 
     public MemberResponse getMember(UserDetailsImpl authMember) {
         Member member = memberRepository.findById(authMember.getMember().getId())
@@ -69,5 +73,18 @@ public class MemberService {
 
         return orders.map(MemberOrderResponse::new);
 
+    }
+
+    public Page<MemberReservationResponse> getReservationsByMember(UserDetailsImpl authMember,
+        RequestDto request, int page, int size) {
+        Member member = memberRepository.findById(authMember.getMember().getId())
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Reservation> reservations = reservationRepository.findByMember(member.getId(),
+            pageable);
+
+        return reservations.map(MemberReservationResponse::new);
     }
 }
