@@ -3,6 +3,7 @@ package com.sparta.chairingproject.domain.member.controller;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
+import com.sparta.chairingproject.domain.member.dto.response.MemberCouponResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberReservationResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
@@ -58,6 +59,16 @@ public class MemberController {
     ) {
         return ResponseEntity.ok(
             memberService.getReservationsByMember(authMember, request, page, size));
+    }
+
+
+    @GetMapping("/coupons")
+    public ResponseEntity<Page<MemberCouponResponse>> getCouponsByMember(
+        @AuthenticationPrincipal UserDetailsImpl authMember,
+        @RequestBody RequestDto request,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "5") int size) {
+        return ResponseEntity.ok(memberService.getCouponsByMember(authMember, request, page, size));
     }
 
 }

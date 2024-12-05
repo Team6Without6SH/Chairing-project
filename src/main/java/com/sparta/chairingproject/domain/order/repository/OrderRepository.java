@@ -12,7 +12,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 	int countByStoreIdAndStatus(Long storeId, OrderStatus orderStatus);
 
 
-    @Query("SELECT o FROM Order o JOIN o.member m JOIN o.menus menu JOIN menu.store s WHERE m.id = :memberId")
+    @Query("SELECT o FROM Order o JOIN o.member m WHERE m.id = :memberId")
     Page<Order> findByMember(@Param("memberId") Long memberId, Pageable pageable);
 
 }
