@@ -4,6 +4,7 @@ import com.sparta.chairingproject.config.exception.customException.GlobalExcepti
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.coupon.dto.CouponRequest;
 import com.sparta.chairingproject.domain.coupon.dto.CouponResponse;
 import com.sparta.chairingproject.domain.coupon.entity.Coupon;
@@ -16,7 +17,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.test.context.support.WithMockUser;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -124,5 +130,42 @@ class CouponServiceTest {
         assertEquals(ExceptionCode.COUPON_ALREADY_ISSUED.getMessage(), exception.getMessage());
         verify(couponRepository, times(1)).findById(couponId);
         verify(issuanceRepository, times(1)).findByMemberIdAndCouponId(member.getId(), couponId);
+    }
+
+    @Test
+    @WithMockUser(username = "admin", roles = {"ADMIN"})
+    @DisplayName("쿠폰 전체 조회 성공")
+    void getAllCoupons_success() {
+        // Given
+        PageRequest pageRequest = PageRequest.of(1, 10);
+
+        Coupon coupon1 = Coupon.builder()
+                .id(1L)
+                .name("Spring Sale")
+                .quantity(50)
+                .discountPrice(5000)
+                .build();
+
+        Coupon coupon2 = Coupon.builder()
+                .id(2L)
+                .name("Winter Sale")
+                .quantity(30)
+                .discountPrice(10000)
+                .build();
+
+        when(couponRepository.findAll(pageRequest))
+                .thenReturn(new PageImpl<>(List.of(coupon1, coupon2)));
+
+        // When
+        Page<CouponResponse> response = couponService.getAllCoupons(new RequestDto(1L), pageRequest);
+
+        // Then
+        assertNotNull(response);
+        assertEquals(2, response.getTotalElements());
+        assertEquals("Spring Sale", response.getContent().get(0).name());
+        assertEquals("Winter Sale", response.getContent().get(1).name());
+        assertEquals(50, response.getContent().get(0).quantity());
+        assertEquals(5000, response.getContent().get(0).discountPrice());
+        verify(couponRepository, times(1)).findAll(pageRequest);
     }
 }

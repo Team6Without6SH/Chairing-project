@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.domain.coupon.controller;
 
 import com.sparta.chairingproject.domain.coupon.repository.CouponRepository;
+import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,6 +29,9 @@ class CouponControllerTest {
     @Autowired
     private CouponRepository couponRepository;
 
+    @Autowired
+    MemberRepository memberRepository;
+
     private String adminToken;
     private String userToken;
 
@@ -40,6 +45,7 @@ class CouponControllerTest {
     @AfterEach
     void tearDown() {
         couponRepository.deleteAll();
+        memberRepository.deleteAll();
     }
 
     @Test
@@ -112,22 +118,6 @@ class CouponControllerTest {
                 .andDo(print());
     }
 
-//    @Test
-//    @WithMockUser(username = "user", roles = {"USER"})
-//    @DisplayName("권한 검증 - USER 권한으로 쿠폰 발급 성공")
-//    void issueCoupon_success_withUserRole() throws Exception {
-//        // Given
-//        Long couponId = 1L;
-//
-//        // When & Then
-//        mockMvc.perform(post("/coupons/" + couponId)
-//                        .header("Authorization", userToken) // 유저 토큰 추가
-//                        .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk()) // HTTP 200 OK
-//                .andDo(print());
-//    }
-
-
     @Test
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @DisplayName("권한 검증 - ADMIN 권한으로 쿠폰 발급 금지")
@@ -135,15 +125,39 @@ class CouponControllerTest {
         // Given
         Long couponId = 1L;
         String requestBody = """
-            {
-                "couponId": %d
-            }
-            """.formatted(couponId);
+                {
+                    "couponId": %d
+                }
+                """.formatted(couponId);
 
         // When & Then
         mockMvc.perform(post("/coupons/" + couponId)
                         .header("Authorization", adminToken)
                         .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden()) // HTTP 403 Forbidden
+                .andDo(print());
+    }
+
+
+    @Test
+    @WithMockUser(username = "user", roles = {"USER"})
+    @DisplayName("USER 권한으로 쿠폰 전체 조회 실패")
+    void getAllCoupons_forbidden_withUserRole() throws Exception {
+        // Given
+        int page = 1;
+        int size = 10;
+        String requestBody = """
+                {
+                    "memberId": 1
+                }
+                """;
+
+        // When & Then
+        mockMvc.perform(get("/coupons")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody)) // 요청 본문 추가
                 .andExpect(status().isForbidden()) // HTTP 403 Forbidden
                 .andDo(print());
     }
