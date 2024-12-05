@@ -16,27 +16,26 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/coupons")
 @RequiredArgsConstructor
 public class CouponController {
     private final CouponService couponService;
 
     @Secured("ROLE_ADMIN") // ADMIN 권한만 접근 가능
-    @PostMapping
+    @PostMapping("/coupons")
     public ResponseEntity<CouponResponse> createCoupon(@Valid @RequestBody CouponRequest request) {
         CouponResponse response = couponService.createCoupon(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @Secured("ROLE_USER")
-    @PostMapping("/{couponId}")
+    @PostMapping("/coupons/{couponId}")
     public ResponseEntity<Void> issueCoupon(@PathVariable Long couponId, @AuthenticationPrincipal UserDetailsImpl authMember) {
         couponService.issueCoupon(couponId, authMember.getMember());
         return ResponseEntity.ok().build();
     }
 
     @Secured("ROLE_USER")
-    @GetMapping("/members")
+    @GetMapping("/members/coupons")
     public ResponseEntity<List<IssuanceResponse>> getIssuedCoupons(@AuthenticationPrincipal UserDetailsImpl authmember) {
         List<IssuanceResponse> response = couponService.getIssuedCoupons(authmember.getMember());
         return ResponseEntity.ok(response);
