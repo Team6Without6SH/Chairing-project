@@ -1,12 +1,24 @@
 package com.sparta.chairingproject.domain.member.service;
 
+
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.NOT_FOUND_USER;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.NOT_MATCH_PASSWORD;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.SAME_BEFORE_PASSWORD;
+
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
+import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
-import com.sun.jdi.request.InvalidRequestStateException;
+import com.sparta.chairingproject.domain.order.entity.Order;
+import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,30 +29,45 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final OrderRepository orderRepository;
 
     public MemberResponse getMember(UserDetailsImpl authMember) {
         Member member = memberRepository.findById(authMember.getMember().getId())
-            .orElseThrow(() -> new InvalidRequestStateException("Member not found"));
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
         return new MemberResponse(member.getEmail(), member.getName());
     }
 
     @Transactional
     public void updatePassword(UserDetailsImpl authMember, MemberPasswordRequest request) {
         Member member = memberRepository.findById(authMember.getMember().getId())
-            .orElseThrow(() -> new InvalidRequestStateException("Member not found"));
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
         if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
-            throw new InvalidRequestStateException("기존 비밀번호가 다릅니다");
+            throw new GlobalException(NOT_MATCH_PASSWORD);
         }
 
         if (passwordEncoder.matches(request.getUpdatePassword(), member.getPassword())) {
-            throw new InvalidRequestStateException("기존 비밀번호와 같습니다.");
+            throw new GlobalException(SAME_BEFORE_PASSWORD);
         }
 
         if (!request.getUpdatePassword().equals(request.getConfirmPassword())) {
-            throw new InvalidRequestStateException("비밀번호가 일치하지 않습니다");
+            throw new GlobalException(NOT_MATCH_PASSWORD);
         }
 
         member.updatePassword(passwordEncoder.encode(request.getUpdatePassword()));
+    }
+
+
+    public Page<MemberOrderResponse> getOrdersByMember(UserDetailsImpl authMember,
+        RequestDto request, int page, int size) {
+        Member member = memberRepository.findById(authMember.getMember().getId())
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Order> orders = orderRepository.findByMember(member.getId(), pageable);
+
+        return orders.map(MemberOrderResponse::new);
+
     }
 }
