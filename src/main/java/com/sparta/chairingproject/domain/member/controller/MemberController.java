@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.domain.member.controller;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.MemberIdDto;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -38,8 +40,11 @@ public class MemberController {
 
     @GetMapping("/orders")
     public ResponseEntity<Page<MemberOrderResponse>> getOrdersByMember(
-        @AuthenticationPrincipal UserDetailsImpl authMember
+        @AuthenticationPrincipal UserDetailsImpl authMember,
+        MemberIdDto request,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "5") int size
     ) {
-        return memberService.getOrdersByMember(authMember, request);
+        return ResponseEntity.ok(memberService.getOrdersByMember(authMember, request, page, size));
     }
 }
