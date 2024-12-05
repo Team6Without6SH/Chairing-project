@@ -18,6 +18,7 @@ import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
+import com.sparta.chairingproject.domain.order.dto.response.OrderStatusChangeResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
@@ -132,6 +133,49 @@ public class OrderService {
 			.orderId(order.getId())
 			.orderStatus(order.getStatus())
 			.waitingTeams(waitingTeams)
+			.build();
+	}
+
+	@Transactional
+	public OrderStatusChangeResponse updateOrderStatus(Long storeId, Long orderId, OrderStatus newStatus, Member member,
+		RequestDto request) {
+		Store store = storeRepository.findById(storeId) //가게 검증
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+		if (!store.getOwner().getId().equals(member.getId())) {
+			throw new GlobalException(ONLY_OWNER_ALLOWED);
+		}
+		Order order = orderRepository.findById(orderId) //가게에 있는 주문검증
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_ORDER));
+		if (!order.getStore().getId().equals(storeId)) {
+			throw new GlobalException(NOT_ORDER_THIS_STORE);
+		}
+		//현재 상태에 따라 다양한 검증 후 상태를 변경 아래에 다양한 조건이 잔뜩
+		OrderStatus currentOrderStatus = order.getStatus();
+		if (newStatus == OrderStatus.CANCEL_REQUEST) {
+			throw new GlobalException(CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER);
+		}
+		if (currentOrderStatus == OrderStatus.COMPLETED || currentOrderStatus == OrderStatus.CANCELLED) {
+			throw new GlobalException(CANNOT_CHANGE_COMPLETED_OR_CANCELLED);
+		}
+		if (newStatus == OrderStatus.IN_PROGRESS) {
+			int inProgressCount = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS);
+			if (inProgressCount >= store.getTableCount()) {
+				throw new GlobalException(TABLE_FULL_CANNOT_SET_IN_PROGRESS);
+			}
+		}
+		if (currentOrderStatus == OrderStatus.WAITING && newStatus != OrderStatus.ADMISSION) {
+			throw new GlobalException(ONLY_ADMISSION_ALLOWED_FROM_WAITING);
+		}
+		if (currentOrderStatus == OrderStatus.ADMISSION && !(newStatus == OrderStatus.IN_PROGRESS
+			|| newStatus == OrderStatus.CANCELLED)) {
+			throw new GlobalException(ONLY_IN_PROGRESS_OR_CANCELLED_ALLOWED_FROM_ADMISSION);
+		}
+		order.changeStatus(newStatus);
+		orderRepository.save(order);
+
+		return OrderStatusChangeResponse.builder()
+			.orderId(order.getId())
+			.orderStatus(order.getStatus().name())
 			.build();
 	}
 }
