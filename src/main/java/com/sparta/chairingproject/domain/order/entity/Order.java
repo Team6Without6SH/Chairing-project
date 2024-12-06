@@ -1,10 +1,12 @@
 package com.sparta.chairingproject.domain.order.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.store.entity.Store;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,6 +36,10 @@ public class Order extends Timestamped {
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
 
+	@ManyToOne
+	@JoinColumn(name = "store_id", nullable = false)
+	private Store store; // 가게 정보 추가
+
 	// 주문 하나에 많은 메뉴를 받을 수 있게 하기 위해 중간테이블 설정 없이 다대다 관계로
 	@ManyToMany
 	@JoinTable(
@@ -41,7 +47,7 @@ public class Order extends Timestamped {
 		joinColumns = @JoinColumn(name = "order_id"),
 		inverseJoinColumns = @JoinColumn(name = "menu_id")
 	)
-	private List<Menu> menus;
+	private List<Menu> menus = new ArrayList<>();
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -50,15 +56,16 @@ public class Order extends Timestamped {
 	@Column(nullable = false)
 	private int price;
 
-	private Order(Member member, List<Menu> menus, OrderStatus status, int price) {
+	private Order(Member member, Store store, List<Menu> menus, OrderStatus status, int price) {
 		this.member = member;
+		this.store = store;
 		this.menus = menus;
 		this.status = status;
 		this.price = price;
 	}
 
-	public static Order createOf(Member member, List<Menu> menus, OrderStatus status, int price) {
-		return new Order(member, menus, status, price);
+	public static Order createOf(Member member, Store store, List<Menu> menus, OrderStatus status, int price) {
+		return new Order(member, store, menus, status, price);
 	}
 
 	public void changeStatus(OrderStatus status) {

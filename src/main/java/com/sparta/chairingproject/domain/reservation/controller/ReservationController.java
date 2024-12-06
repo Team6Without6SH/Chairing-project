@@ -25,11 +25,11 @@ public class ReservationController {
     @Secured("ROLE_USER")
     @PostMapping("/stores/{storeId}/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@PathVariable Long storeId,
-                                                                 @Valid @RequestBody CreateReservationRequest req,
-                                                                 @AuthenticationPrincipal UserDetailsImpl authUser) {
+        @Valid @RequestBody CreateReservationRequest req,
+        @AuthenticationPrincipal UserDetailsImpl authUser) {
         return new ResponseEntity<>(
-                reservationService.createReservation(storeId, req, authUser),
-                HttpStatus.OK);
+            reservationService.createReservation(storeId, req, authUser),
+            HttpStatus.OK);
     }
 
     @Secured("ROLE_USER")
