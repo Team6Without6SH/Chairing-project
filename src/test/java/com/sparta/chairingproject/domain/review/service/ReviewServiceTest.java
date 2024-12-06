@@ -1,8 +1,11 @@
 package com.sparta.chairingproject.domain.review.service;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +19,10 @@ import com.sparta.chairingproject.config.exception.customException.GlobalExcepti
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
+import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.order.entity.Order;
+import com.sparta.chairingproject.domain.order.entity.OrderStatus;
+import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.review.dto.ReviewRequest;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
@@ -31,11 +38,14 @@ public class ReviewServiceTest {
 	@Mock
 	private StoreRepository storeRepository;
 
+	@Mock
+	private OrderRepository orderRepository;
+
 	@InjectMocks
 	private ReviewService reviewService;
 
 	@Test
-	@DisplayName("리뷰 작성 성공")
+	@DisplayName("리뷰 작성 성공 - 가게 OPEN 상태 및 주문 완료 상태")
 	void createReview_success() {
 		//Given
 		Long storeId = 1L;
@@ -44,7 +54,11 @@ public class ReviewServiceTest {
 		Store store = new Store("Test name", "Test image", "Test description", member);
 		store.updateStoreStatus(StoreStatus.OPEN);
 
+		List<Menu> menu = new ArrayList<>();
+		Order order = Order.createOf(member, store, menu, OrderStatus.COMPLETED, 10000);
+
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findByMemberAndStore(member, store)).thenReturn(Optional.of(order));
 		when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		// When
@@ -58,7 +72,35 @@ public class ReviewServiceTest {
 		assertEquals(member, savedReview.getMember());
 
 		verify(storeRepository, times(1)).findById(storeId);
+		verify(orderRepository, times(1)).findByMemberAndStore(member, store);
 		verify(reviewRepository, times(1)).save(any(Review.class));
+	}
+
+	@Test
+	@DisplayName("리뷰 작성 실패 - 가게 OPEN 상태지만 주문 미완료 상태")
+	void createReview_fail_orderNotCompleted() {
+		// Given
+		Long storeId = 1L;
+		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
+		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
+		Store store = new Store("Test name", "Test image", "Test description", member);
+		store.updateStoreStatus(StoreStatus.OPEN);
+
+		List<Menu> menus = new ArrayList<>();
+		Order order = Order.createOf(member, store, menus, OrderStatus.WAITING, 10000); // 주문 미완료 상태 생성
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findByMemberAndStore(member, store)).thenReturn(Optional.of(order));
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.createReview(storeId, request, member));
+
+		assertEquals(ORDER_NOT_COMPLETED_CANNOT_REVIEW.getMessage(), exception.getMessage());
+
+		verify(storeRepository, times(1)).findById(storeId);
+		verify(orderRepository, times(1)).findByMemberAndStore(member, store);
+		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
 	@Test
@@ -78,9 +120,10 @@ public class ReviewServiceTest {
 		GlobalException exception = assertThrows(GlobalException.class,
 			() -> reviewService.createReview(storeId, request, member));
 
-		assertEquals(ExceptionCode.STORE_PENDING.getMessage(), exception.getMessage());
+		assertEquals(ExceptionCode.STORE_PENDING_CANNOT_REVIEW.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
+		verify(orderRepository, never()).findByMemberAndStore(any(), any());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
@@ -101,6 +144,7 @@ public class ReviewServiceTest {
 		assertEquals(ExceptionCode.NOT_FOUND_STORE.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
+		verify(orderRepository, never()).findByMemberAndStore(any(), any());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 }
