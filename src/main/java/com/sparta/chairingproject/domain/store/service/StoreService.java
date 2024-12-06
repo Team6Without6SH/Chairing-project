@@ -1,25 +1,24 @@
 package com.sparta.chairingproject.domain.store.service;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
-
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.member.entity.Member;
+import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuSummaryResponse;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.review.dto.ReviewResponse;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
-import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
-import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.store.dto.StoreOwnerResponse;
-import com.sparta.chairingproject.domain.store.dto.StoreResponse;
-import com.sparta.chairingproject.config.security.UserDetailsImpl;
-import com.sparta.chairingproject.domain.member.entity.Member;
-import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
+import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;

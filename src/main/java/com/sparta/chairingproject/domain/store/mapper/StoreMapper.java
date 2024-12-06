@@ -4,7 +4,6 @@ import com.sparta.chairingproject.domain.store.dto.StoreAdminResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.domain.store.entity.Store;
 
-
 import java.util.List;
 
 public class StoreMapper {
