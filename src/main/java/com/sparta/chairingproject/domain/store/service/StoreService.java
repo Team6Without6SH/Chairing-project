@@ -2,10 +2,16 @@ package com.sparta.chairingproject.domain.store.service;
 
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
@@ -14,6 +20,7 @@ import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;
+import com.sparta.chairingproject.domain.store.mapper.StoreMapper;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +38,8 @@ public class StoreService {
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
 		// 이미 등록된 가게 여부 확인
-		if (storeRepository.existsByOwner(owner)) {
+		int exitingStoreCount = storeRepository.countByOwner(owner);
+		if (exitingStoreCount >= 3) {
 			throw new GlobalException(CANNOT_EXCEED_STORE_LIMIT);
 		}
 
@@ -47,9 +55,7 @@ public class StoreService {
 			request.getDescription(),
 			authMember.getMember()
 		);
-
 		storeRepository.save(store); // 저장
-
 	}
 
 	public List<StoreResponse> getAllOpenedStores() {
@@ -64,12 +70,7 @@ public class StoreService {
 		}
 
 		// Store 데이터를 StoreResponse DTO로 변환하여 반환
-		return stores.stream()
-			.map(store -> new StoreResponse(
-				store.getName(),
-				store.getImage(),
-				store.getDescription()
-			))
-			.toList();
+		return StoreMapper.toStoreResponseList(stores);
 	}
+
 }
