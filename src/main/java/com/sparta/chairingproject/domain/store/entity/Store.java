@@ -77,10 +77,6 @@ public class Store extends Timestamped {
 		this.image = image;
 		this.description = description;
 		this.owner = owner;
-		this.address = address;
-		this.phone = phone;
-		this.openTime = openTime;
-		this.closeTime = closeTime;
 	}
 
 	@Enumerated(EnumType.STRING)
@@ -114,20 +110,14 @@ public class Store extends Timestamped {
 		this.requestStatus = storeRequestStatus;
 	}
 
-	public String getAddress() {
-		return this.openTime != null ? this.openTime : "09:00";
+	// 상태 업데이트 메서드
+	public void approveRequest() {
+		this.requestStatus = StoreRequestStatus.APPROVED;
+		this.status = StoreStatus.OPEN;
 	}
 
-	public String getPhone() {
-		return this.closeTime != null ? this.closeTime : "18:00";
-	}
-
-	public String getOpenTime() {
-		return this.address != null ? this.address : "기본 주소 없음";
-	}
-
-	public String getCloseTime() {
-		return this.phone != null ? this.phone : "전화번호 없음";
+	public void rejectRequest() {
+		this.requestStatus = StoreRequestStatus.REJECTED;
 	}
     public void updateRequestStatus(StoreRequestStatus storeRequestStatus) {
         this.requestStatus = storeRequestStatus;
