@@ -3,6 +3,7 @@ package com.sparta.chairingproject.domain.menu.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -11,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuRequest;
+import com.sparta.chairingproject.domain.menu.dto.request.MenuUpdateRequest;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
+import com.sparta.chairingproject.domain.menu.dto.response.MenuUpdateResponse;
 import com.sparta.chairingproject.domain.menu.service.MenuService;
 
 import jakarta.validation.Valid;
@@ -32,5 +35,16 @@ public class MenuController {
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
 		return ResponseEntity.ok(menuService.createMenu(storeId, request, authMember.getMember()));
+	}
+
+	@Secured("ROLE_OWNER")
+	@PatchMapping("/menus/{menuId}")
+	public ResponseEntity<MenuUpdateResponse> updateMenu(
+		@PathVariable Long storeId,
+		@PathVariable Long menuId,
+		@RequestBody MenuUpdateRequest request,
+		@AuthenticationPrincipal UserDetailsImpl authMember
+	) {
+		return ResponseEntity.ok(menuService.updateMenu(storeId, menuId, request, authMember.getMember()));
 	}
 }
