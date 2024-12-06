@@ -36,4 +36,15 @@ public class AdminStoreController {
 		StoreResponseAdmin store = adminStoreService.getStoreById(storeId);
 		return ResponseEntity.ok(store);
 	}
+
+	// 가게 등록 신청 상태 변경
+	@Secured("ROLE_ADMIN")
+	@PutMapping("/{storeId}/request-status")
+	public ResponseEntity<Void> updateStoreRequestStatus(
+		@PathVariable Long storeId,
+		@RequestParam StoreRequestStatus status
+	) {
+		adminStoreService.updateStoreRequestStatus(storeId, status);
+		return ResponseEntity.ok().build();
+	}
 }

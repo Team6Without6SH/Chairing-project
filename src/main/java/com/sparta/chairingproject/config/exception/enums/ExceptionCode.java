@@ -96,7 +96,8 @@ public enum ExceptionCode {
 	NOT_SUPPORT_ENCODING_COOKIE(HttpStatus.BAD_REQUEST, "Not support encoding cookie"),
 	HAS_NOT_TOKEN(HttpStatus.BAD_REQUEST, "Request has not token"),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "Token is expired"),
-	NOT_SUPPORT_TOKEN(HttpStatus.UNAUTHORIZED, "Is not support token");
+	NOT_SUPPORT_TOKEN(HttpStatus.UNAUTHORIZED, "Is not support token"),
+	INVALID_REQUEST_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 요청 상태입니다");
 
 	private final HttpStatus httpStatus;
 	private final String message;

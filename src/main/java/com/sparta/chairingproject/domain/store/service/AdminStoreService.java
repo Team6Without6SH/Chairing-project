@@ -37,6 +37,20 @@ public class AdminStoreService {
 		return StoreMapper.toAdminStoreResponse(store);
 	}
 
+	// 가게 상태
+	public void updateStoreRequestStatus(Long storeId, StoreRequestStatus status) {
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
+		if (status == StoreRequestStatus.APPROVED) {
+			store.approveRequest();
+		} else if (status == StoreRequestStatus.REJECTED) {
+			store.rejectRequest();
+		} else {
+			throw new GlobalException(INVALID_REQUEST_STATUS);
+		}
+
+		storeRepository.save(store);
+	}
 }
 
