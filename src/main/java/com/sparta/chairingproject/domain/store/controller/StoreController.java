@@ -35,6 +35,7 @@ public class StoreController {
 	private final StoreService storeService;
 	private final OrderService orderService;
 
+	@Secured("ROLE_ADMIN")
 	@PostMapping("/owners/stores/register")
 	public ResponseEntity<Void> registerStore(
 		@Valid @RequestBody StoreRequest storeRequest,

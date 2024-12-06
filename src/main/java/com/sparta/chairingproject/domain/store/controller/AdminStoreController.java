@@ -7,10 +7,13 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.sparta.chairingproject.domain.store.dto.StoreResponseAdmin;
+
+import com.sparta.chairingproject.domain.store.dto.StoreAdminResponse;
+import com.sparta.chairingproject.domain.store.dto.UpdateStoreStatusRequest;
 import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.service.AdminStoreService;
 import lombok.RequiredArgsConstructor;
@@ -24,27 +27,26 @@ public class AdminStoreController {
 
 	@Secured("ROLE_ADMIN")
 	@GetMapping
-	public ResponseEntity<List<StoreResponseAdmin>> getAllStores() {
-		List<StoreResponseAdmin> stores = adminStoreService.getAllStores();
+	public ResponseEntity<List<StoreAdminResponse>> getAllStores() {
+		List<StoreAdminResponse> stores = adminStoreService.getAllStores();
 		return ResponseEntity.ok(stores);
 	}
 
 	// 단일 가게 조회
 	@Secured("ROLE_ADMIN")
 	@GetMapping("/{storeId}")
-	public ResponseEntity<StoreResponseAdmin> getStoreById(@PathVariable Long storeId) {
-		StoreResponseAdmin store = adminStoreService.getStoreById(storeId);
-		return ResponseEntity.ok(store);
+	public ResponseEntity<StoreAdminResponse> getStoreById(@PathVariable Long storeId) {
+		return ResponseEntity.ok(adminStoreService.getStoreById(storeId));
 	}
 
 	// 가게 등록 신청 상태 변경
 	@Secured("ROLE_ADMIN")
-	@PutMapping("/{storeId}/status")
-	public ResponseEntity<Void> updateStoreRequestStatus(
-		@PathVariable Long storeId,
-		@RequestParam StoreRequestStatus status
-	) {
-		adminStoreService.updateStoreRequestStatus(storeId, status);
-		return ResponseEntity.ok().build();
+	@PutMapping("/status/request")
+	public ResponseEntity<StoreAdminResponse> updateStoreRequestStatus(
+		@RequestBody UpdateStoreStatusRequest request) {
+
+		adminStoreService.updateStoreRequestStatus(request);
+
+		return ResponseEntity.ok(adminStoreService.getStoreById(request.getStoreId()));
 	}
 }

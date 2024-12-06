@@ -17,7 +17,6 @@ import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
-import com.sparta.chairingproject.domain.store.dto.StoreResponseAdmin;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;
@@ -39,7 +38,8 @@ public class StoreService {
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
 		// 이미 등록된 가게 여부 확인
-		if (storeRepository.existsByOwner(owner)) {
+		int exitingStoreCount = storeRepository.countByOwner(owner);
+		if (exitingStoreCount > 3) {
 			throw new GlobalException(CANNOT_EXCEED_STORE_LIMIT);
 		}
 

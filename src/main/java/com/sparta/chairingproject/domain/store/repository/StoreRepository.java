@@ -15,4 +15,6 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
 	List<Store> findAllByRequestStatusAndStatus(StoreRequestStatus requestStatus, StoreStatus status);
 	boolean existsByOwner(Member owner);
+
+	int countByOwner(Member owner);
 }

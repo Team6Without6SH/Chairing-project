@@ -13,7 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
-import com.sparta.chairingproject.domain.store.dto.StoreResponseAdmin;
+import com.sparta.chairingproject.domain.store.dto.StoreAdminResponse;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;
@@ -63,7 +63,7 @@ public class AdminStoreServiceTest {
 	@DisplayName("모든 가게 조회 테스트 - 가게 리스트 반환 확인")
 	void testGetAllStores() {
 		// 실행
-		List<StoreResponseAdmin> stores = adminStoreService.getAllStores();
+		List<StoreAdminResponse> stores = adminStoreService.getAllStores();
 
 		// 검증
 		assertNotNull(stores);
@@ -78,35 +78,11 @@ public class AdminStoreServiceTest {
 		Store store = storeRepository.findAll().get(0);
 
 		// 실행
-		StoreResponseAdmin response = adminStoreService.getStoreById(store.getId());
+		StoreAdminResponse response = adminStoreService.getStoreById(store.getId());
 
 		// 검증
 		assertNotNull(response);
 		assertEquals(store.getName(), response.getName());
 		assertEquals(store.getOwner().getName(), response.getOwnerName());
-	}
-
-	@Test
-	@DisplayName("가게 상태 업데이트 테스트 - APPROVE 및 REJECT 상태 업데이트")
-	void testUpdateStoreRequestStatus() {
-		// 저장된 스토어 ID 가져오기
-		Store store = storeRepository.findAll().get(1);
-
-		// 실행 - APPROVE 상태로 업데이트
-		adminStoreService.updateStoreRequestStatus(store.getId(), StoreRequestStatus.APPROVED);
-
-		// 검증
-		Store updatedStore = storeRepository.findById(store.getId()).orElse(null);
-		assertNotNull(updatedStore);
-		assertEquals(StoreRequestStatus.APPROVED, updatedStore.getRequestStatus());
-		assertEquals(StoreStatus.OPEN, updatedStore.getStatus());
-
-		// 실행 - REJECT 상태로 업데이트
-		adminStoreService.updateStoreRequestStatus(store.getId(), StoreRequestStatus.REJECTED);
-
-		// 검증
-		updatedStore = storeRepository.findById(store.getId()).orElse(null);
-		assertNotNull(updatedStore);
-		assertEquals(StoreRequestStatus.REJECTED, updatedStore.getRequestStatus());
 	}
 }

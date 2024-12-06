@@ -1,7 +1,7 @@
 package com.sparta.chairingproject.domain.store.mapper;
 
+import com.sparta.chairingproject.domain.store.dto.StoreAdminResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
-import com.sparta.chairingproject.domain.store.dto.StoreResponseAdmin;
 import com.sparta.chairingproject.domain.store.entity.Store;
 
 
@@ -30,8 +30,8 @@ public class StoreMapper {
 		);
 	}
 
-	public static StoreResponseAdmin toAdminStoreResponse(Store store) {
-		return new StoreResponseAdmin(
+	public static StoreAdminResponse toAdminStoreResponse(Store store) {
+		return new StoreAdminResponse(
 			store.getId(),
 			store.getName(),
 			store.getOwner().getName(),
@@ -40,7 +40,7 @@ public class StoreMapper {
 		);
 	}
 
-	public static List<StoreResponseAdmin> toAdminStoreResponseList(List<Store> stores) {
+	public static List<StoreAdminResponse> toAdminStoreResponseList(List<Store> stores) {
 		return stores.stream()
 			.map(StoreMapper::toAdminStoreResponse) // 개별 Store -> StoreResponseAdmin 변환
 			.toList();

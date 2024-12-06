@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class StoreResponseAdmin {
+public class StoreAdminResponse {
 	private Long id;                  // 가게 ID
 	private String name;              // 가게 이름
 	private String ownerName;         // 사장님 이름
