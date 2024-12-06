@@ -30,7 +30,7 @@ public class ReservationService {
     /* 일반 사용자 */
 
     public ReservationResponse createReservation(Long storeId, CreateReservationRequest req, UserDetailsImpl authUser) {
-        Long memberId = resolveMember(req, authUser).getId();
+        Long memberId = findAuthUser(req, authUser).getId();
 
         Store store = storeRepository.findById(storeId).orElseThrow(
                 () -> new GlobalException(NOT_FOUND_STORE)
@@ -42,7 +42,7 @@ public class ReservationService {
     }
 
     public ReservationResponse cancelReservation(Long reservationId, RequestDto req, UserDetailsImpl authUser) {
-        Long memberId = resolveMember(req, authUser).getId();
+        Long memberId = findAuthUser(req, authUser).getId();
 
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
                 () -> new GlobalException(RESERVATION_NOT_FOUND)
@@ -65,7 +65,7 @@ public class ReservationService {
     /* 사장 */
 
     public ReservationResponse updateReservation(Long storeId, Long reservationId, @Valid UpdateReservationRequest req, UserDetailsImpl authUser) {
-        resolveMember(req, authUser);
+        findAuthUser(req, authUser);
 
         Store store = storeRepository.findById(storeId).orElseThrow(
                 () -> new GlobalException(NOT_FOUND_STORE)
@@ -89,7 +89,7 @@ public class ReservationService {
 
     /* 공통 */
 
-    private Member resolveMember(RequestDto req, UserDetailsImpl authUser) {
+    private Member findAuthUser(RequestDto req, UserDetailsImpl authUser) {
         if (req.getMemberId() == null || req.getMemberId() == 0) {
             return authUser.getMember();
         } else {
