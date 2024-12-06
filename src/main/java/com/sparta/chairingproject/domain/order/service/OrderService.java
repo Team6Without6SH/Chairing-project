@@ -206,7 +206,7 @@ public class OrderService {
 		if (endDate == null && startDate != null) {
 			endDate = startDate.plusDays(days); // 조회 기간 days 를 기준으로 앞뒤에 기간을 추가해서 조회
 		}
-		return orderRepository.findByStoreAndCreatedAtBetween(storeId, startDate.atStartOfDay(), endDate.atTime(23, 59, 59), pageable)
+		return orderRepository.findByStoreAndCreatedAtBetween(store.getId(), startDate.atStartOfDay(), endDate.atTime(23, 59, 59), pageable)
 			.map(OrderPageResponse::from);
 	}
 }
