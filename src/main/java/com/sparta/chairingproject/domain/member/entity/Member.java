@@ -44,13 +44,17 @@ public class Member extends Timestamped {
 	@Enumerated(EnumType.STRING)
 	private MemberRole memberRole;
 
-	public Member(String name, @NotBlank @Email String email, String password,
-		MemberRole memberRole) {
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.memberRole = memberRole;
-	}
+    @Column(nullable = false)
+    private boolean deleted;
+
+    public Member(String name, @NotBlank @Email String email, String password,
+        MemberRole memberRole) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.memberRole = memberRole;
+    }
+
 
 	public Member(Long id, String name, @NotBlank @Email String email, String password,
 		MemberRole memberRole) {
@@ -61,7 +65,14 @@ public class Member extends Timestamped {
 		this.memberRole = memberRole;
 	}
 
-	public void updatePassword(String updatePassword) {
-		this.password = updatePassword;
-	}
+
+    public void updatePassword(String updatePassword) {
+        this.password = updatePassword;
+    }
+
+    public void updateDelete(boolean b) {
+        this.deleted = b;
+    }
+
+
 }

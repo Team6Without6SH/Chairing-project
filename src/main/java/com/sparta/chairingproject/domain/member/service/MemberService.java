@@ -104,4 +104,12 @@ public class MemberService {
         return issuance.map(MemberIssuanceResponse::new);
 
     }
+
+    @Transactional
+    public void deleteMember(UserDetailsImpl authMember, RequestDto request) {
+        Member member = memberRepository.findById(authMember.getMember().getId())
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+        member.updateDelete(true);
+
+    }
 }
