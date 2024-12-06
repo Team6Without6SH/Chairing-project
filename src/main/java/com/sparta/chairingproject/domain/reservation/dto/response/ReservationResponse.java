@@ -1,11 +1,11 @@
 package com.sparta.chairingproject.domain.reservation.dto.response;
 
+import com.sparta.chairingproject.domain.reservation.entity.ReservationStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Getter
 @AllArgsConstructor
@@ -24,4 +24,6 @@ public class ReservationResponse {
 
     private LocalDateTime createdAt;
     private LocalDateTime modifiedAt;
+
+    private ReservationStatus status;
 }
