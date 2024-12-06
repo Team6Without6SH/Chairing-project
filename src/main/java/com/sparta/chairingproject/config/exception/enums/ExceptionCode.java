@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.config.exception.enums;
 
 import lombok.Getter;
+
 import org.springframework.http.HttpStatus;
 
 @Getter
@@ -36,6 +37,7 @@ public enum ExceptionCode {
 	NOT_FOUND_CATEGORY(HttpStatus.NOT_FOUND, "해당 카테고리가 없습니다"),
 	NOT_FOUND_OPTION(HttpStatus.NOT_FOUND, "해당 옵션이 없습니다"),
 	OPTION_NOT_BELONG_TO_MENU(HttpStatus.NOT_FOUND, "해당 옵션은 선택한 메뉴에 포함되어 있지 않습니다"),
+	DUPLICATED_MENU(HttpStatus.CONFLICT, "이미 존재하는 메뉴입니다."),
 	/* --- 예약 --- */
 	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약을 찾을 수 없습니다."),
 	RESERVATION_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "올바르지 않은 상태값입니다."),
@@ -73,7 +75,7 @@ public enum ExceptionCode {
 
 	//----------쿠폰----------
 	COUPON_OUT_OF_STOCK(HttpStatus.CONFLICT, "쿠폰 수량이 부족합니다."),
-	COUPON_NOT_FOUND(HttpStatus.NOT_FOUND,"해당 쿠폰을 찾을 수 없습니다."),
+	COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 쿠폰을 찾을 수 없습니다."),
 	COUPON_ALREADY_ISSUED(HttpStatus.CONFLICT, "이미 해당 쿠폰을 발급받았습니다."),
 
 	//권한
