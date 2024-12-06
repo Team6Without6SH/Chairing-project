@@ -1,16 +1,26 @@
 package com.sparta.chairingproject.domain.member.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.order.entity.Order;
-import jakarta.persistence.*;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Getter
@@ -44,15 +54,6 @@ public class Member extends Timestamped {
 
 	public Member(Long id, String name, @NotBlank @Email String email, String password,
 		MemberRole memberRole) {
-		this.id = id;
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.memberRole = memberRole;
-	}
-
-	// TEST
-	public Member(Long id, String name,@NotBlank @Email String email, String password, MemberRole memberRole) {
 		this.id = id;
 		this.name = name;
 		this.email = email;
