@@ -81,6 +81,7 @@ public class Menu extends Timestamped {
 	public void updateSoldOut(boolean soldOut) {
 		this.soldOut = soldOut;
 	}
+
 	public void delete() {
 		this.inActive = true;
 	}
