@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @Setter
-public class OrderStatusChangeRequest extends RequestDto {
+public class OrderStatusUpdateRequest extends RequestDto {
 	@NotEmpty(message = "예약 상태는 필수 입력 항목입니다.")
 	private String status;
 }

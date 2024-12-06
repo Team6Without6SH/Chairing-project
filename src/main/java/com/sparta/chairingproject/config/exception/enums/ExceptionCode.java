@@ -63,6 +63,7 @@ public enum ExceptionCode {
 	TABLE_FULL_CANNOT_SET_IN_PROGRESS(HttpStatus.CONFLICT, "만석 상태에서는 진행중 상태로 변경할 수 없습니다."),
 	ONLY_ADMISSION_ALLOWED_FROM_WAITING(HttpStatus.BAD_REQUEST, "웨이팅인 사람만 입장으로 변경 시킬 수 있습니다."),
 	ONLY_IN_PROGRESS_OR_CANCELLED_ALLOWED_FROM_ADMISSION(HttpStatus.BAD_REQUEST, "입장 상태에서는 진행중 또는 취소 상태로만 변경가능합니다."),
+	NOT_VALID_STATUS_NAME(HttpStatus.BAD_REQUEST, "상태값이 잘못 입력되었습니다."),
 
 	//----------리뷰----------
 	NOT_FOUND_REVIEW(HttpStatus.NOT_FOUND, "해당 리뷰가 없습니다"),

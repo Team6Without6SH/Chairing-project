@@ -4,7 +4,6 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,21 +16,18 @@ import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
-import com.sparta.chairingproject.domain.order.dto.request.OrderStatusChangeRequest;
+import com.sparta.chairingproject.domain.order.dto.request.OrderStatusUpdateRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
-import com.sparta.chairingproject.domain.order.dto.response.OrderStatusChangeResponse;
+import com.sparta.chairingproject.domain.order.dto.response.OrderStatusUpdateResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
-import java.util.Collections;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -147,7 +143,7 @@ public class OrderService {
 	}
 
 	@Transactional
-	public OrderStatusChangeResponse updateOrderStatus(Long storeId, Long orderId, OrderStatusChangeRequest request,
+	public OrderStatusUpdateResponse updateOrderStatus(Long storeId, Long orderId, OrderStatusUpdateRequest request,
 		Member member) {
 		Store store = storeRepository.findById(storeId) //가게 검증
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
@@ -160,34 +156,31 @@ public class OrderService {
 			throw new GlobalException(NOT_ORDER_THIS_STORE);
 		}
 
-		//현재 상태에 따라 다양한 검증 후 상태를 변경 아래에 다양한 조건이 잔뜩
 		OrderStatus newStatus = OrderStatus.fromString(request.getStatus());
 		OrderStatus currentOrderStatus = order.getStatus();
-		if (Objects.equals(newStatus, OrderStatus.CANCEL_REQUEST)) {
+		if (newStatus.equals(OrderStatus.CANCEL_REQUEST)) {
 			throw new GlobalException(CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER);
 		}
-		if (currentOrderStatus == OrderStatus.COMPLETED || currentOrderStatus == OrderStatus.CANCELLED) {
+		if (currentOrderStatus.equals(OrderStatus.COMPLETED) || currentOrderStatus.equals(OrderStatus.CANCELLED)) {
 			throw new GlobalException(CANNOT_CHANGE_COMPLETED_OR_CANCELLED);
 		}
-		if (Objects.equals(newStatus, OrderStatus.IN_PROGRESS)) {
+		if (newStatus.equals(OrderStatus.IN_PROGRESS)) {
 			int inProgressCount = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS);
 			if (inProgressCount >= store.getTableCount()) {
 				throw new GlobalException(TABLE_FULL_CANNOT_SET_IN_PROGRESS);
 			}
 		}
-		if (currentOrderStatus == OrderStatus.WAITING && !Objects.equals(newStatus,
-			OrderStatus.ADMISSION)) {
+		if (currentOrderStatus.equals(OrderStatus.WAITING) && !newStatus.equals(OrderStatus.ADMISSION)) {
 			throw new GlobalException(ONLY_ADMISSION_ALLOWED_FROM_WAITING);
 		}
-		if (currentOrderStatus == OrderStatus.ADMISSION && !(
-			Objects.equals(newStatus, OrderStatus.IN_PROGRESS)
-				|| Objects.equals(newStatus, OrderStatus.CANCELLED))) {
+		if (currentOrderStatus.equals(OrderStatus.ADMISSION) && !(newStatus.equals(OrderStatus.IN_PROGRESS)
+				|| newStatus.equals(OrderStatus.CANCELLED))) {
 			throw new GlobalException(ONLY_IN_PROGRESS_OR_CANCELLED_ALLOWED_FROM_ADMISSION);
 		}
 		order.changeStatus(newStatus);
 		orderRepository.save(order);
 
-		return OrderStatusChangeResponse.builder()
+		return OrderStatusUpdateResponse.builder()
 			.orderId(order.getId())
 			.orderStatus(order.getStatus().name())
 			.build();
