@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.config.security;
 
+import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,47 +25,51 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @EnableGlobalMethodSecurity(securedEnabled = true)
 public class WebSecurityConfig {
-	private final JwtUtil jwtUtil;
-	private final UserDetailsServiceImpl userDetailsServiceImpl;
-	private final AuthenticationConfiguration authenticationConfiguration;
 
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws
-		Exception {
-		return authenticationConfiguration.getAuthenticationManager();
-	}
+    private final JwtUtil jwtUtil;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final MemberRepository memberRepository;
 
-	@Bean
-	public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-		JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
-		filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
-		return filter;
-	}
+    @Bean
+    public AuthenticationManager authenticationManager(
+        AuthenticationConfiguration authenticationConfiguration) throws
+        Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
 
-	@Bean
-	public JwtAuthorizationFilter jwtAuthorizationFilter() {
-		return new JwtAuthorizationFilter(jwtUtil, userDetailsServiceImpl);
-	}
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, memberRepository);
+        filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
+        return filter;
+    }
 
-	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable());
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter() {
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsServiceImpl);
+    }
 
-		http.authorizeHttpRequests((authorizeHttpRequests) ->
-			authorizeHttpRequests
-				.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll() // resources 접근 허용 설정
-				.requestMatchers("/auth/**").permitAll() // '/auth/'로 시작하는 요청 모두 접근 허가
-				.anyRequest().authenticated() // 그 외 모든 요청 인증처리
-		);
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable());
 
-		http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
-		http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.authorizeHttpRequests((authorizeHttpRequests) ->
+            authorizeHttpRequests
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations())
+                .permitAll() // resources 접근 허용 설정
+                .requestMatchers("/auth/**").permitAll() // '/auth/'로 시작하는 요청 모두 접근 허가
+                .anyRequest().authenticated() // 그 외 모든 요청 인증처리
+        );
 
-		return http.build();
-	}
+        http.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

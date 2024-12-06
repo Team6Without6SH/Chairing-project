@@ -43,6 +43,8 @@ public class Member extends Timestamped {
     private String password;
     @Enumerated(EnumType.STRING)
     private MemberRole memberRole;
+    @Column(nullable = false)
+    private boolean deleted;
 
     public Member(String name, @NotBlank @Email String email, String password,
         MemberRole memberRole) {
@@ -64,4 +66,9 @@ public class Member extends Timestamped {
     public void updatePassword(String updatePassword) {
         this.password = updatePassword;
     }
+
+    public void updateDelete(boolean b) {
+        this.deleted = b;
+    }
+
 }

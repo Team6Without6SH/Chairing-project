@@ -61,7 +61,6 @@ public class MemberController {
             memberService.getReservationsByMember(authMember, request, page, size));
     }
 
-
     @GetMapping("/coupons")
     public ResponseEntity<Page<MemberIssuanceResponse>> getIssuanceByMember(
         @AuthenticationPrincipal UserDetailsImpl authMember,
@@ -70,6 +69,13 @@ public class MemberController {
         @RequestParam(defaultValue = "5") int size) {
         return ResponseEntity.ok(
             memberService.getIssuanceByMember(authMember, request, page, size));
+    }
+
+    @PatchMapping("/delete")
+    public void deletedMember(
+        @RequestBody RequestDto request,
+        @AuthenticationPrincipal UserDetailsImpl authMember) {
+        memberService.deleteMember(authMember, request);
     }
 
 }
