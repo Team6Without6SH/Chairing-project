@@ -3,6 +3,10 @@ package com.sparta.chairingproject.domain.reservation.entity;
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
 import com.sparta.chairingproject.domain.store.entity.Store;
+
+import jakarta.persistence.*;
+import lombok.*;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
