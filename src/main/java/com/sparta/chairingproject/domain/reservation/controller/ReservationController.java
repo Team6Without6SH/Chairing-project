@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.domain.reservation.controller;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
 import com.sparta.chairingproject.domain.reservation.dto.request.UpdateReservationRequest;
 import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
@@ -19,6 +20,8 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
+    /* 일반 사용자 */
+
     @Secured("ROLE_USER")
     @PostMapping("/stores/{storeId}/reservations")
     public ResponseEntity<ReservationResponse> createReservation(@PathVariable Long storeId,
@@ -28,6 +31,19 @@ public class ReservationController {
             reservationService.createReservation(storeId, req, authUser),
             HttpStatus.OK);
     }
+
+    @Secured("ROLE_USER")
+    @DeleteMapping("/members/reservations/{reservationId}")
+    public ResponseEntity<ReservationResponse> cancelReservation(@PathVariable Long reservationId,
+                                                                 @RequestBody RequestDto req,
+                                                                 @AuthenticationPrincipal UserDetailsImpl authUser) {
+        return new ResponseEntity<>(
+                reservationService.cancelReservation(reservationId, req, authUser),
+                HttpStatus.OK);
+    }
+
+
+    /* 사장 */
 
     @Secured("ROLE_OWNER")
     @PatchMapping("/stores/{storeId}/reservations/{reservationId}")

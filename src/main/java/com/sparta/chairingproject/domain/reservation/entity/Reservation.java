@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "reservations")
 public class Reservation extends Timestamped {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -65,4 +66,5 @@ public class Reservation extends Timestamped {
     public void updateStatus(ReservationStatus status) {
         this.status = status;
     }
+
 }

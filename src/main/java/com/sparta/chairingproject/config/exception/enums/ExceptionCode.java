@@ -31,6 +31,13 @@ public enum ExceptionCode {
 	NOT_FOUND_STORE(HttpStatus.NOT_FOUND, "해당 가게가 없습니다"),
 	CANNOT_EXCEED_STORE_LIMIT(HttpStatus.FORBIDDEN, "최대 가게 3개만 소유 가능합니다."),
 
+	/* --- 예약 --- */
+	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약을 찾을 수 없습니다."),
+	RESERVATION_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "올바르지 않은 상태값입니다."),
+	CANCELLATION_NOT_ALLOWED(HttpStatus.UNPROCESSABLE_ENTITY, "대기 중인 예약이 아니기 때문에 취소할 수 없습니다."),
+	CANNOT_CANCEL_OTHERS_RESERVATION(HttpStatus.FORBIDDEN, "다른 사람의 예약은 취소할 수 없습니다."),
+	CANNOT_REJECT_RESERVATION(HttpStatus.UNPROCESSABLE_ENTITY, "예약을 취소할 수 없습니다."),
+
 	//----------메뉴----------
 	NOT_FOUND_MENU(HttpStatus.NOT_FOUND, "해당 메뉴가 없습니다"),
 	MENU_ALREADY_DELETED(HttpStatus.NOT_FOUND, "이미 삭제된 메뉴입니다"),
@@ -42,6 +49,7 @@ public enum ExceptionCode {
 	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약을 찾을 수 없습니다."),
 	RESERVATION_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "올바르지 않은 상태값입니다."),
 	CANNOT_REJECT_RESERVATION(HttpStatus.UNPROCESSABLE_ENTITY, "예약을 취소할 수 없습니다."),
+
 
 	//----------주문----------
 	STORE_CLOSED(HttpStatus.GONE, "영업 시간이 아닙니다"),
