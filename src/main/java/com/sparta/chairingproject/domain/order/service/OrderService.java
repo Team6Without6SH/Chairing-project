@@ -1,13 +1,5 @@
 package com.sparta.chairingproject.domain.order.service;
 
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
-
-import java.util.Collections;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
@@ -26,8 +18,14 @@ import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Collections;
+import java.util.List;
+
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 @Service
 @RequiredArgsConstructor

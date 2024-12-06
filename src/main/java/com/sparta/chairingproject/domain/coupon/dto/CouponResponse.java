@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.domain.coupon.dto;
 
 import lombok.Builder;
+import lombok.Getter;
 
 import java.time.LocalDateTime;
 
