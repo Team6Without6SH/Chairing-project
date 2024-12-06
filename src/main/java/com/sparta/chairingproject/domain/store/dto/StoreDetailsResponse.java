@@ -2,8 +2,8 @@ package com.sparta.chairingproject.domain.store.dto;
 
 import java.util.List;
 
-import com.sparta.chairingproject.domain.menu.dto.MenuDto;
-import com.sparta.chairingproject.domain.review.dto.ReviewDto;
+import com.sparta.chairingproject.domain.menu.dto.response.MenuSummaryResponse;
+import com.sparta.chairingproject.domain.review.dto.ReviewResponse;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,7 +17,7 @@ public class StoreDetailsResponse {
 	private String image;
 	private String description;
 	private String address;
-	private List<MenuDto> menus;
-	private List<ReviewDto> reviews;
+	private List<MenuSummaryResponse> menus;
+	private List<ReviewResponse> reviews;
 	private int waitingCount;
 }

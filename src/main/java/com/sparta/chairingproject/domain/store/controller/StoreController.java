@@ -64,7 +64,7 @@ public class StoreController {
 		return ResponseEntity.ok(orderService.getOrdersByStore(storeId, pageable, startDate, endDate, days));
 	}
 
-	@Secured("ROLE_MEMBER")
+	@Secured("ROLE_USER")
 	@GetMapping("/stores/{storeId}")
 	public ResponseEntity<StoreDetailsResponse> getStoreDetails(
 		@PathVariable("storeId") Long storeId) {

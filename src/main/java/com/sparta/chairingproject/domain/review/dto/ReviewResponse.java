@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReviewDto {
+public class ReviewResponse {
 	private String userName;  // 작성자 이름
 	private String content;   // 리뷰 내용
 	private int rating;       // 평점
