@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.reservation.dto.request;
 
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
+import com.sparta.chairingproject.domain.reservation.entity.ReservationStatus;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
@@ -36,6 +37,7 @@ public class CreateReservationRequest extends RequestDto {
                 .guestCount(guestCount)
                 .date(ld)
                 .time(time)
+                .status(ReservationStatus.PENDING)
                 .store(store)
                 .build();
     }

@@ -1,5 +1,9 @@
 package com.sparta.chairingproject.domain.order.entity;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
+
 import lombok.Getter;
 
 @Getter
@@ -15,5 +19,14 @@ public enum OrderStatus {
 
 	OrderStatus(String description) {
 		this.description = description;
+	}
+
+	public static OrderStatus fromString(String status) {
+		for (OrderStatus orderStatus : values()) {
+			if (orderStatus.name().equalsIgnoreCase(status)) {
+				return orderStatus;
+			}
+		}
+		throw new GlobalException(NOT_VALID_STATUS_NAME);
 	}
 }

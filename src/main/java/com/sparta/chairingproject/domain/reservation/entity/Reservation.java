@@ -31,6 +31,9 @@ public class Reservation extends Timestamped {
 	@Column(nullable = false)
 	private String time;
 
+	@Column(nullable = false)
+	private ReservationStatus status;
+
 	@ManyToOne
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
@@ -44,7 +47,11 @@ public class Reservation extends Timestamped {
 				date,
 				time,
 				getCreatedAt(),
-				getModifiedAt()
+				getModifiedAt(),
 		);
+	}
+
+	public void updateStatus(ReservationStatus status) {
+		this.status = status;
 	}
 }
