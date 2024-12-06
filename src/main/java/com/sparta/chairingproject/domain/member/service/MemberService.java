@@ -7,8 +7,11 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.SA
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
+import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
+import com.sparta.chairingproject.domain.member.dto.response.MemberIssuanceResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberReservationResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberResponse;
@@ -34,6 +37,8 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final OrderRepository orderRepository;
     private final ReservationRepository reservationRepository;
+    private final IssuanceRepository issuanceRepository;
+
 
     public MemberResponse getMember(UserDetailsImpl authMember) {
         Member member = memberRepository.findById(authMember.getMember().getId())
@@ -61,7 +66,6 @@ public class MemberService {
         member.updatePassword(passwordEncoder.encode(request.getUpdatePassword()));
     }
 
-
     public Page<MemberOrderResponse> getOrdersByMember(UserDetailsImpl authMember,
         RequestDto request, int page, int size) {
         Member member = memberRepository.findById(authMember.getMember().getId())
@@ -86,5 +90,18 @@ public class MemberService {
             pageable);
 
         return reservations.map(MemberReservationResponse::new);
+    }
+
+    public Page<MemberIssuanceResponse> getIssuanceByMember(UserDetailsImpl authMember,
+        RequestDto request, int page, int size) {
+        Member member = memberRepository.findById(authMember.getMember().getId())
+            .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Issuance> issuance = issuanceRepository.findByMember(member.getId(), pageable);
+
+        return issuance.map(MemberIssuanceResponse::new);
+
     }
 }

@@ -11,6 +11,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @Query("SELECT r FROM Reservation r JOIN r.store s  WHERE r.memberId = :memberId")
+    @Query("SELECT r FROM Reservation r WHERE r.memberId = :memberId")
     Page<Reservation> findByMember(@Param("memberId") Long memberId, Pageable pageable);
 }
