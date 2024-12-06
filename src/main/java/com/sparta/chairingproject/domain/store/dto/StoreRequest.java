@@ -1,12 +1,6 @@
 package com.sparta.chairingproject.domain.store.dto;
 
 import java.util.List;
-
-import org.aspectj.bridge.Message;
-
-import com.sparta.chairingproject.config.security.UserDetailsImpl;
-import com.sparta.chairingproject.domain.member.entity.Member;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;

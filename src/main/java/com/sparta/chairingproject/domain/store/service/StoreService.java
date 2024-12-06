@@ -39,7 +39,7 @@ public class StoreService {
 
 		// 이미 등록된 가게 여부 확인
 		int exitingStoreCount = storeRepository.countByOwner(owner);
-		if (exitingStoreCount > 3) {
+		if (exitingStoreCount >= 3) {
 			throw new GlobalException(CANNOT_EXCEED_STORE_LIMIT);
 		}
 

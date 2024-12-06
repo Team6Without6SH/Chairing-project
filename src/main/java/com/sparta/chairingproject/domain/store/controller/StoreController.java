@@ -35,7 +35,7 @@ public class StoreController {
 	private final StoreService storeService;
 	private final OrderService orderService;
 
-	@Secured("ROLE_ADMIN")
+	@Secured("ROLE_OWNER")
 	@PostMapping("/owners/stores/register")
 	public ResponseEntity<Void> registerStore(
 		@Valid @RequestBody StoreRequest storeRequest,
@@ -45,7 +45,7 @@ public class StoreController {
 		return ResponseEntity.ok().build();
 	}
 
-	@GetMapping("/owners/stores")
+	@GetMapping("/members/stores")
 	public ResponseEntity<List<StoreResponse>> getAllOpenedStores() {
 		List<StoreResponse> stores = storeService.getAllOpenedStores();
 		return ResponseEntity.ok(stores);
