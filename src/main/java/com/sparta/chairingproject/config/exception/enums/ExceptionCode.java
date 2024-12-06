@@ -76,6 +76,7 @@ public enum ExceptionCode {
 	SCORE_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "점수는 1 에서 5 사이 숫자에서 골라주세요"),
 	REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "동일한 주문에 대해 이미 리뷰가 작성되었습니다"),
 	NOT_ORDER_STATUS_COMPLETED(HttpStatus.FORBIDDEN, "주문이 배달 완료 상태가 아닙니다."),
+	STORE_PENDING(HttpStatus.FORBIDDEN, "가게가 등록 대기 상태입니다."),
 
 	//----------쿠폰----------
 	COUPON_OUT_OF_STOCK(HttpStatus.CONFLICT, "쿠폰 수량이 부족합니다."),
