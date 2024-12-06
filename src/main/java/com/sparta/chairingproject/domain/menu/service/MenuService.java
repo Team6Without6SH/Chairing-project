@@ -5,8 +5,11 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import org.springframework.stereotype.Service;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuRequest;
+import com.sparta.chairingproject.domain.menu.dto.response.MenuDeleteResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
@@ -38,5 +41,19 @@ public class MenuService {
 		Menu menu = Menu.createOf(request.getName(), request.getPrice(), request.getImage(), store);
 		menuRepository.save(menu);
 		return MenuResponse.from(menu);
+	}
+
+	@Transactional
+	public MenuDeleteResponse deleteMenu(Long storeId, Long menuId, Member member, RequestDto request) {
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+		if (!store.getOwner().getId().equals(member.getId())) {
+			throw new GlobalException(ONLY_OWNER_ALLOWED);
+		}
+		Menu menu = menuRepository.findByIdAndStoreIdAndInActiveFalse(menuId, storeId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_MENU));
+		menu.delete();
+
+		return new MenuDeleteResponse(menuId, menu.getName(), menu.isInActive());
 	}
 }

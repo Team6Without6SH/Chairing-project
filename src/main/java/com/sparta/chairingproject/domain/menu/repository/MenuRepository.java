@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.domain.menu.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,4 +17,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 	List<Menu> findAllByStoreIdAndMenuIds(@Param("storeId") Long storeId, @Param("menuIds") List<Long> menuIds);
 
 	boolean existsByStoreAndName(Store store, @NotEmpty(message = "메뉴 이름은 필수 입력 항목입니다.") String name);
+
+	Optional<Menu> findByIdAndStoreIdAndInActiveFalse(Long menuId, Long storeId);
 }
