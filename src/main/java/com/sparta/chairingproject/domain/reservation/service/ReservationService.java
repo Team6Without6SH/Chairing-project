@@ -1,7 +1,6 @@
 package com.sparta.chairingproject.domain.reservation.service;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
@@ -16,8 +15,9 @@ import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
+
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +33,7 @@ public class ReservationService {
         Long memberId = resolveMember(req, authUser).getId();
 
         Store store = storeRepository.findById(storeId).orElseThrow(
-                () -> new GlobalException(ExceptionCode.NOT_FOUND_STORE)
+                () -> new GlobalException(NOT_FOUND_STORE)
         );
 
         Reservation savedReservation = reservationRepository.save(req.toEntity(memberId, store));
@@ -45,15 +45,15 @@ public class ReservationService {
         Long memberId = resolveMember(req, authUser).getId();
 
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
-                () -> new GlobalException(ExceptionCode.RESERVATION_NOT_FOUND)
+                () -> new GlobalException(RESERVATION_NOT_FOUND)
         );
 
         if (!reservation.getMemberId().equals(memberId)){
-            throw new GlobalException(ExceptionCode.CANNOT_CANCEL_OTHERS_RESERVATION);
+            throw new GlobalException(CANNOT_CANCEL_OTHERS_RESERVATION);
         }
 
         if (reservation.getStatus() != ReservationStatus.PENDING){
-            throw new GlobalException(ExceptionCode.CANCELLATION_NOT_ALLOWED);
+            throw new GlobalException(CANCELLATION_NOT_ALLOWED);
         }
 
         reservation.updateStatus(ReservationStatus.CANCELED);
@@ -68,15 +68,15 @@ public class ReservationService {
         resolveMember(req, authUser);
 
         Store store = storeRepository.findById(storeId).orElseThrow(
-                () -> new GlobalException(ExceptionCode.NOT_FOUND_STORE)
+                () -> new GlobalException(NOT_FOUND_STORE)
         );
 
         Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
-                () -> new GlobalException(ExceptionCode.RESERVATION_NOT_FOUND)
+                () -> new GlobalException(RESERVATION_NOT_FOUND)
         );
 
         if (reservation.getStatus() != ReservationStatus.PENDING && reservation.getStatus() != ReservationStatus.APPROVED) {
-            throw new GlobalException(ExceptionCode.CANNOT_REJECT_RESERVATION);
+            throw new GlobalException(CANNOT_REJECT_RESERVATION);
         }
 
         ReservationStatus status = ReservationStatus.parse(req.getStatus());
@@ -94,7 +94,7 @@ public class ReservationService {
             return authUser.getMember();
         } else {
             return memberRepository.findById(req.getMemberId()).orElseThrow(
-                    () -> new GlobalException(ExceptionCode.NOT_FOUND_USER)
+                    () -> new GlobalException(NOT_FOUND_USER)
             );
         }
     }

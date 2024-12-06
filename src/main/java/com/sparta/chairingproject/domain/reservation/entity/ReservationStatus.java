@@ -1,7 +1,10 @@
 package com.sparta.chairingproject.domain.reservation.entity;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+
+
 
 public enum ReservationStatus {
     PENDING("대기 중"),
@@ -21,7 +24,7 @@ public enum ReservationStatus {
         try {
             return ReservationStatus.valueOf(status.toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new GlobalException(ExceptionCode.RESERVATION_STATUS_NOT_FOUND);
+            throw new GlobalException(RESERVATION_STATUS_NOT_FOUND);
         }
     }
 }
