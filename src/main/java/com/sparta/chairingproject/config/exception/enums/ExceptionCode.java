@@ -1,8 +1,8 @@
 package com.sparta.chairingproject.config.exception.enums;
 
-import lombok.Getter;
-
 import org.springframework.http.HttpStatus;
+
+import lombok.Getter;
 
 @Getter
 public enum ExceptionCode {
@@ -88,6 +88,7 @@ public enum ExceptionCode {
 	ONLY_OWNER_ALLOWED(HttpStatus.FORBIDDEN, "사장님만 가능합니다"),
 	HAS_NOT_PERMISSION(HttpStatus.FORBIDDEN, "권한이 없습니다"),
 	ROLE_REQUIRED(HttpStatus.BAD_REQUEST, "OWNER과 USER중 하나를 입력하세요"),
+	UNAUTHORIZED_OWNER(HttpStatus.UNAUTHORIZED, "해당 가게의 사장님만 가능합니다"),
 
 	//토큰
 	NOT_VALID_TOKEN(HttpStatus.UNAUTHORIZED, "인증 토큰이 잘못되었거나 누락되었습니다"),

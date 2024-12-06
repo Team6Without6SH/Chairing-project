@@ -12,9 +12,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "comments")
 public class Comment extends Timestamped {
 	@Id
@@ -27,4 +29,9 @@ public class Comment extends Timestamped {
 	@ManyToOne
 	@JoinColumn(name = "review_id", nullable = false)
 	private Review review;
+
+	public Comment(String content, Review review) {
+		this.content = content;
+		this.review = review;
+	}
 }
