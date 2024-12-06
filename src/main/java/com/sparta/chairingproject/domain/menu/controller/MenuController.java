@@ -25,7 +25,7 @@ public class MenuController {
 	private final MenuService menuService;
 
 	@Secured("ROLE_OWNER")
-	@PostMapping
+	@PostMapping("/menus")
 	public ResponseEntity<MenuResponse> createMenu(
 		@PathVariable Long storeId,
 		@Valid @RequestBody MenuRequest request,
