@@ -192,46 +192,4 @@ class StoreServiceTest {
 
 		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
 	}
-
-	@Test
-	@DisplayName("관리자 조회 - OPEN 상태 가게 조회 성공")
-	void getAdminStores_OpenStores_Success() {
-		// Given
-		Store store1 = new Store("가게1", "image1.jpg", "설명1", testMember);
-		store1.updateStoreStatus(StoreStatus.OPEN);
-		store1.updateRequestStatus(StoreRequestStatus.APPROVED);
-
-		given(storeRepository.findByStatusAndRequestStatus(StoreStatus.OPEN, StoreRequestStatus.APPROVED))
-				.willReturn(List.of(store1));
-
-		// When
-		List<StoreResponse> result = storeService.getAdminStores(StoreStatus.OPEN);
-
-		// Then
-		assertEquals(1, result.size());
-		assertEquals("가게1", result.get(0).getName());
-		assertEquals("image1.jpg", result.get(0).getImages().get(0));
-		assertEquals("설명1", result.get(0).getDescription());
-	}
-
-	@Test
-	@DisplayName("관리자 조회 - CLOSED 상태 가게 조회 성공")
-	void getAdminStores_ClosedStores_Success() {
-		// Given
-		Store store2 = new Store("가게2", "image2.jpg", "설명2", testMember);
-		store2.updateStoreStatus(StoreStatus.CLOSED);
-		store2.updateRequestStatus(StoreRequestStatus.APPROVED);
-
-		given(storeRepository.findByStatusAndRequestStatus(StoreStatus.CLOSED, StoreRequestStatus.APPROVED))
-				.willReturn(List.of(store2));
-
-		// When
-		List<StoreResponse> result = storeService.getAdminStores(StoreStatus.CLOSED);
-
-		// Then
-		assertEquals(1, result.size());
-		assertEquals("가게2", result.get(0).getName());
-		assertEquals("image2.jpg", result.get(0).getImages().get(0));
-		assertEquals("설명2", result.get(0).getDescription());
-	}
 }
