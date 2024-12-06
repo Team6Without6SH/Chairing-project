@@ -39,7 +39,7 @@ public class AdminStoreController {
 
 	// 가게 등록 신청 상태 변경
 	@Secured("ROLE_ADMIN")
-	@PutMapping("/{storeId}/request-status")
+	@PutMapping("/{storeId}/status")
 	public ResponseEntity<Void> updateStoreRequestStatus(
 		@PathVariable Long storeId,
 		@RequestParam StoreRequestStatus status
