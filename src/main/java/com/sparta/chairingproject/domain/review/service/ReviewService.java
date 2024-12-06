@@ -16,7 +16,6 @@ import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -26,7 +25,7 @@ public class ReviewService {
 	private final StoreRepository storeRepository;
 	private final OrderRepository orderRepository;
 
-	public Review createReview(Long storeId, @Valid ReviewRequest request, Member member) {
+	public Review createReview(Long storeId, ReviewRequest request, Member member) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
