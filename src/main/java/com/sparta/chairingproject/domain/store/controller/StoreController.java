@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderPageResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.service.OrderService;
@@ -61,5 +62,13 @@ public class StoreController {
 		@RequestParam(required = false, defaultValue = "2") int days
 	) {
 		return ResponseEntity.ok(orderService.getOrdersByStore(storeId, pageable, startDate, endDate, days));
+	}
+
+	@Secured("ROLE_MEMBER")
+	@GetMapping("/stores/{storeId}")
+	public ResponseEntity<StoreDetailsResponse> getStoreDetails(
+		@PathVariable("storeId") Long storeId) {
+		StoreDetailsResponse response = storeService.getStoreDetails(storeId);
+		return ResponseEntity.ok(response);
 	}
 }

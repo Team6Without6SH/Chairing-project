@@ -2,16 +2,15 @@ package com.sparta.chairingproject.domain.store.service;
 
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.domain.menu.dto.MenuDto;
+import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
+import com.sparta.chairingproject.domain.review.dto.ReviewDto;
+import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
+import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
@@ -31,6 +30,8 @@ public class StoreService {
 
 	private final StoreRepository storeRepository;
 	private final MemberRepository memberRepository;
+	private final MenuRepository menuRepository;
+	private final ReviewRepository reviewRepository;
 
 	public void registerStore(StoreRequest request, UserDetailsImpl authMember) {
 		// 사장님 정보 확인
@@ -73,4 +74,36 @@ public class StoreService {
 		return StoreMapper.toStoreResponseList(stores);
 	}
 
+
+	public StoreDetailsResponse getStoreDetails(Long storeId) {
+		// 1. 가게 조회
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+
+		// 2. 메뉴 리스트 조회
+		List<MenuDto> menus = menuRepository.findByStoreId(storeId)
+			.stream()
+			.map(menu -> new MenuDto(menu.getName(), menu.getPrice()))
+			.toList();
+
+		// 3. 리뷰 리스트 조회
+		List<ReviewDto> reviews = reviewRepository.findByStoreId(storeId)
+			.stream()
+			.map(review -> new ReviewDto(review.getMember().getName(), review.getContent(), review.getRating()))
+			.toList();
+
+		// 4. 현재 대기자 수 계산 (예: DB에 대기자 수 저장된 경우)
+		int waitingCount = store.getReservations().size(); // 가게 예약 리스트 크기 사용
+
+		// 5. 응답 객체 생성 및 반환
+		return new StoreDetailsResponse(
+			store.getName(),
+			store.getImage(),
+			store.getDescription(),
+			store.getAddress(),
+			menus,
+			reviews,
+			waitingCount
+		);
+	}
 }
