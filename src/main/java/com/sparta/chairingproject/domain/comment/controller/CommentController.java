@@ -22,13 +22,14 @@ import lombok.RequiredArgsConstructor;
 public class CommentController {
 	private final CommentService commentService;
 
-	@PostMapping("/owners/stores/reviews/{reviewId}/comments")
+	@PostMapping("/owners/stores/{storeId}/reviews/{reviewId}/comments")
 	public ResponseEntity<Void> createComment(
+		@PathVariable Long storeId,
 		@PathVariable Long reviewId,
 		@RequestBody @Valid CommentRequest commentRequest,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
-		commentService.createComment(reviewId, commentRequest, authMember.getMember());
+		commentService.createComment(storeId, reviewId, commentRequest, authMember.getMember());
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 }
