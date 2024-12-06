@@ -1,10 +1,12 @@
 package com.sparta.chairingproject.domain.store.service;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.store.dto.StoreAdminResponse;
 import com.sparta.chairingproject.domain.store.dto.UpdateStoreStatusRequest;
@@ -38,12 +40,12 @@ public class AdminStoreService {
 		return StoreMapper.toAdminStoreResponse(store);
 	}
 
+	@Transactional
 	// 가게 상태
-	public void updateStoreRequestStatus(UpdateStoreStatusRequest request) {
+	public StoreAdminResponse updateStoreRequestStatus(UpdateStoreStatusRequest request) {
 
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
-
 		StoreRequestStatus status = StoreRequestStatus.valueOf(request.getStatus());
 		if (status == StoreRequestStatus.APPROVED) {
 			store.approveRequest();
@@ -54,6 +56,7 @@ public class AdminStoreService {
 		}
 
 		storeRepository.save(store);
+		return new StoreAdminResponse(store.getId(), store.getName(), store.getStatus().name());
 	}
 }
 

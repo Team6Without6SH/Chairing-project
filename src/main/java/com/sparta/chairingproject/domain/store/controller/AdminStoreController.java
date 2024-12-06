@@ -9,13 +9,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.domain.store.dto.StoreAdminResponse;
 import com.sparta.chairingproject.domain.store.dto.UpdateStoreStatusRequest;
-import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.service.AdminStoreService;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -45,8 +44,8 @@ public class AdminStoreController {
 	public ResponseEntity<StoreAdminResponse> updateStoreRequestStatus(
 		@RequestBody UpdateStoreStatusRequest request) {
 
-		adminStoreService.updateStoreRequestStatus(request);
+		StoreAdminResponse response = adminStoreService.updateStoreRequestStatus(request);
 
-		return ResponseEntity.ok(adminStoreService.getStoreById(request.getStoreId()));
+		return ResponseEntity.ok(response);
 	}
 }
