@@ -43,6 +43,9 @@ public class Menu extends Timestamped {
 	@Column(nullable = true)
 	private String image;
 
+	@Column(nullable = false)
+	private boolean inActive = false;
+
 	@ManyToOne
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
@@ -78,4 +81,8 @@ public class Menu extends Timestamped {
 	public void updateSoldOut(boolean soldOut) {
 		this.soldOut = soldOut;
 	}
+	public void delete() {
+		this.inActive = true;
+	}
+
 }

@@ -19,4 +19,6 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 	boolean existsByStoreAndName(Store store, @NotEmpty(message = "메뉴 이름은 필수 입력 항목입니다.") String name);
 
 	Optional<Menu> findByIdAndStore(Long menuId, Store store);
+
+	Optional<Menu> findByIdAndStoreIdAndInActiveFalse(Long menuId, Long storeId);
 }
