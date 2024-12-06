@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.domain.store.dto;
 
 import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -27,7 +28,7 @@ public class StoreRequest {
 	private List<String> categories;
 
 	@NotBlank(message = "매장 설명은 필수 입력 항목입니다.")
-	@Size(max = 500 , message = "설명은 500자를 초과할 수 없습니다.")
+	@Size(max = 500, message = "설명은 500자를 초과할 수 없습니다.")
 	private String description;
 
 	private List<String> images;

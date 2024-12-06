@@ -10,18 +10,18 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
-import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderPageResponse;
-import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.service.OrderService;
+import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
+import com.sparta.chairingproject.domain.store.dto.StoreOwnerResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.domain.store.service.StoreService;
@@ -70,5 +70,15 @@ public class StoreController {
 		@PathVariable("storeId") Long storeId) {
 		StoreDetailsResponse response = storeService.getStoreDetails(storeId);
 		return ResponseEntity.ok(response);
+	}
+
+	@Secured("ROLE_OWNER")
+	@GetMapping("/owners/stores/{storeId}")
+	public ResponseEntity<StoreOwnerResponse> getStore(
+		@PathVariable Long storeId,
+		@AuthenticationPrincipal UserDetailsImpl authMember
+	) {
+		Long ownerId = authMember.getMember().getId(); // 현재 로그인된 가게 사장 ID
+		return ResponseEntity.ok(storeService.getStoreById(storeId, ownerId));
 	}
 }

@@ -22,10 +22,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -62,8 +58,12 @@ public class Store extends Timestamped {
 	@Column(nullable = true)
 	private String closeTime;
 
+	private String Category;
+
 	@Column(nullable = false)
 	private int tableCount;
+
+	private boolean approved;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)

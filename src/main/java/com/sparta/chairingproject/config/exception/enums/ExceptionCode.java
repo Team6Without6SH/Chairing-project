@@ -102,7 +102,8 @@ public enum ExceptionCode {
 	HAS_NOT_TOKEN(HttpStatus.BAD_REQUEST, "Request has not token"),
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "Token is expired"),
 	NOT_SUPPORT_TOKEN(HttpStatus.UNAUTHORIZED, "Is not support token"),
-	INVALID_REQUEST_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 요청 상태입니다");
+	INVALID_REQUEST_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 요청 상태입니다"),
+	APPROVAL_PENDING(HttpStatus.CONFLICT, "승인 대기중입니다");
 
 	private final HttpStatus httpStatus;
 	private final String message;
