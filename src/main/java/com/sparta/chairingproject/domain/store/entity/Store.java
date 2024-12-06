@@ -62,8 +62,12 @@ public class Store extends Timestamped {
 	@Column(nullable = true)
 	private String closeTime;
 
+	private String Category;
+
 	@Column(nullable = false)
 	private int tableCount;
+
+	private boolean approved;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)

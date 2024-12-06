@@ -12,6 +12,9 @@ import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.review.dto.ReviewResponse;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
+import com.sparta.chairingproject.domain.store.dto.StoreOwnerResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
@@ -38,7 +41,7 @@ public class StoreService {
 
 		Member owner = memberRepository.findById(authMember.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
-		
+
 		int exitingStoreCount = storeRepository.countByOwner(owner);
 		if (exitingStoreCount >= 3) {
 			throw new GlobalException(CANNOT_EXCEED_STORE_LIMIT);
@@ -54,7 +57,7 @@ public class StoreService {
 			request.getDescription(),
 			authMember.getMember()
 		);
-		storeRepository.save(store); // 저장
+		storeRepository.save(store);
 	}
 
 	public List<StoreResponse> getAllOpenedStores() {
@@ -95,6 +98,31 @@ public class StoreService {
 			menus,
 			reviews,
 			waitingCount
+		);
+	}
+
+	public StoreOwnerResponse getStoreById(Long storeId, Long ownerId) {
+
+		Store store = storeRepository.findByIdAndOwnerId(storeId, ownerId)
+			.orElseThrow(() -> new GlobalException(ExceptionCode.NOT_FOUND_STORE));
+
+		if (!store.isApproved()) {
+			if (store.getStatus() == StoreStatus.PENDING) {
+				throw new GlobalException(ExceptionCode.APPROVAL_PENDING);
+			}
+			throw new GlobalException(ExceptionCode.STORE_OUT_OF_BUSINESS);
+		}
+
+		return new StoreOwnerResponse(
+			store.getName(),
+			store.getAddress(),
+			store.getPhone(),
+			store.getOpenTime(),
+			store.getCloseTime(),
+			store.getCategory(),
+			store.getDescription(),
+			List.of(store.getImage()),
+			true
 		);
 	}
 }
