@@ -1,6 +1,11 @@
 package com.sparta.chairingproject.domain.menu.entity;
 
+import java.util.List;
+
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
+import com.sparta.chairingproject.domain.member.entity.Member;
+import com.sparta.chairingproject.domain.order.entity.Order;
+import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.store.entity.Store;
 
 import jakarta.persistence.Column;
@@ -35,4 +40,15 @@ public class Menu extends Timestamped {
 	@ManyToOne
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
+
+	private Menu(String name, int price, String image, Store store) {
+		this.name = name;
+		this.price = price;
+		this.image = image;
+		this.store = store;
+	}
+
+	public static Menu createOf(String name, int price, String image, Store store) {
+		return new Menu(name, price, image, store);
+	}
 }
