@@ -82,4 +82,28 @@ public class CommentServiceTest {
 		verify(reviewRepository, times(1)).findById(reviewId);
 		verify(commentRepository, never()).save(any(Comment.class));
 	}
+
+	@Test
+	@DisplayName("댓글 작성 실패 - 권한 없는 OWNER")
+	void createComment_fail_unauthorizedOwner() {
+		// Given
+		Long storeId = 1L;
+		Long reviewId = 1L;
+		Member owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
+		Member differentOwner = new Member("Another Owner", "different@example.com", "password", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "storeImage", "description", owner);
+		Review review = new Review("Good service", 5, store, owner);
+
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+		CommentRequest request = new CommentRequest("Thank you for your review!");
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> commentService.createComment(storeId, reviewId, request, differentOwner));
+		assertEquals(ExceptionCode.UNAUTHORIZED_OWNER.getMessage(), exception.getMessage());
+
+		verify(reviewRepository, times(1)).findById(reviewId);
+		verify(commentRepository, never()).save(any(Comment.class));
+	}
 }
