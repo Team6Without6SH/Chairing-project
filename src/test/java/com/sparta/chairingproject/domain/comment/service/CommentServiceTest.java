@@ -106,4 +106,25 @@ public class CommentServiceTest {
 		verify(reviewRepository, times(1)).findById(reviewId);
 		verify(commentRepository, never()).save(any(Comment.class));
 	}
+
+	@Test
+	@DisplayName("댓글 작성 실패 - 리뷰 없음")
+	void createComment_fail_reviewNotFound() {
+		// Given
+		Long storeId = 1L;
+		Long reviewId = 1L;
+		Member owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
+
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
+
+		CommentRequest request = new CommentRequest("Thank you for your review!");
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> commentService.createComment(storeId, reviewId, request, owner));
+		assertEquals(ExceptionCode.NOT_FOUND_REVIEW.getMessage(), exception.getMessage());
+
+		verify(reviewRepository, times(1)).findById(reviewId);
+		verify(commentRepository, never()).save(any(Comment.class));
+	}
 }
