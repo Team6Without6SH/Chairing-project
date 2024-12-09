@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
@@ -157,5 +156,30 @@ public class OrderServiceTest {
 		assertEquals(OrderStatus.WAITING.name(), response.getOrderStatus()); // 상태 WAITING
 		assertEquals(0, response.getTotalPrice()); // 금액 0 d인지 확인
 		assertTrue(response.getMenuNames().isEmpty()); // 메뉴는 신청 잘 안했는지
+	}
+
+	@Test
+	@DisplayName("메뉴를 선택하지 않고, 웨이팅을 신청할 때, 테이블에 자리가 없고, WAITING 인 상태가 3팀인 경우 3이 반환이 된다.")
+	public void createOrder_ReturnWaiting_WithTheNumberOfTeams_When_NoMenu_TableFull() {
+		//given
+		Long storeId = 1L;
+		Member member = new Member(1L, "Test Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		OrderRequest orderRequest = new OrderRequest(Collections.emptyList(), 0);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(5);
+		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING)).thenReturn(3);
+
+		// when
+		OrderResponse response = orderService.createOrder(storeId, member, orderRequest);
+
+		//then
+		assertNotNull(response);
+		assertEquals(OrderStatus.WAITING.name(), response.getOrderStatus()); // 상태는 WAITING
+		assertEquals(0, response.getTotalPrice()); // 총 금액은 0
+		assertEquals(3, response.getWaitingTeams()); // 앞에 대기 팀 수 3팀
 	}
 }
