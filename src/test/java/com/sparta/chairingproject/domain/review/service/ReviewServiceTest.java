@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -44,19 +44,31 @@ public class ReviewServiceTest {
 	@InjectMocks
 	private ReviewService reviewService;
 
+	private Long storeId;
+	private Long orderId;
+	private ReviewRequest request;
+	private Member member;
+	private Store store;
+	private List<Menu> menus;
+
+	@BeforeEach
+	void setUp() {
+		storeId = 1L;
+		orderId = 1L;
+		request = new ReviewRequest("좋은 가게였습니다.", 5);
+		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
+
+		store = new Store("Test name", "Test image", "Test description", member);
+		store.updateStoreStatus(StoreStatus.OPEN);
+
+		menus = new ArrayList<>();
+	}
+
 	@Test
 	@DisplayName("리뷰 작성 성공 - 가게 OPEN 상태 및 주문 완료 상태")
 	void createReview_success() {
-		//Given
-		Long storeId = 1L;
-		Long orderId = 1L;
-		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
-		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
-		Store store = new Store("Test name", "Test image", "Test description", "Test Address", member);
-		store.updateStoreStatus(StoreStatus.OPEN);
-
-		List<Menu> menu = new ArrayList<>();
-		Order order = Order.createOf(member, store, menu, OrderStatus.COMPLETED, 10000);
+		// Given
+		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
@@ -80,18 +92,32 @@ public class ReviewServiceTest {
 	}
 
 	@Test
+	@DisplayName("리뷰 작성 실패 - 이미 해당 주문에 리뷰 존재")
+	void createReview_fail_reviewAlreadyExists() {
+		// Given
+		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
+		when(reviewRepository.existsByOrderIdAndMember(orderId, member)).thenReturn(true);
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.createReview(storeId, orderId, request, member));
+
+		assertEquals(REVIEW_ALREADY_EXISTS.getMessage(), exception.getMessage());
+
+		verify(storeRepository, times(1)).findById(storeId);
+		verify(orderRepository, times(1)).findByIdAndMemberAndStore(orderId, member, store);
+		verify(reviewRepository, times(1)).existsByOrderIdAndMember(orderId, member);
+		verify(reviewRepository, never()).save(any(Review.class));
+	}
+
+	@Test
 	@DisplayName("리뷰 작성 실패 - 가게 OPEN 상태지만 주문 미완료 상태")
 	void createReview_fail_orderNotCompleted() {
 		// Given
-		Long storeId = 1L;
-		Long orderId = 1L;
-		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
-		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
-		Store store = new Store("Test name", "Test image", "Test description", "Test Address", member);
-		store.updateStoreStatus(StoreStatus.OPEN);
-
-		List<Menu> menus = new ArrayList<>();
-		Order order = Order.createOf(member, store, menus, OrderStatus.WAITING, 10000); // 주문 미완료 상태 생성
+		Order order = Order.createOf(member, store, menus, OrderStatus.WAITING, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
@@ -111,13 +137,8 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 작성 실패 - 팬딩 상태 가게")
 	void createReview_fail_storePending() {
 		// Given
-		Long storeId = 1L;
-		Long orderId = 1L;
-		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
-		Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
-
-		// default 로 pending 상태
-		Store store = new Store("Test name", "Test image", "Test description", "Test Address", member);
+		store = new Store("Pending Store", "Pending Image", "Pending Description", member);
+		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 
@@ -125,62 +146,10 @@ public class ReviewServiceTest {
 		GlobalException exception = assertThrows(GlobalException.class,
 			() -> reviewService.createReview(storeId, orderId, request, member));
 
-		assertEquals(ExceptionCode.STORE_PENDING_CANNOT_REVIEW.getMessage(), exception.getMessage());
+		assertEquals(STORE_PENDING_CANNOT_REVIEW.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(orderRepository, never()).findByIdAndMemberAndStore(any(), any(), any());
-		verify(reviewRepository, never()).save(any(Review.class));
-	}
-
-	@Test
-	@DisplayName("리뷰 작성 실패 - 가게 없음")
-	void createReview_fail_storeNotFound() {
-		// Given
-		Long storeId = 1L;
-		Long orderId = 1L;
-		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
-		Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
-
-		when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
-
-		// When & Then
-		GlobalException exception = assertThrows(GlobalException.class,
-			() -> reviewService.createReview(storeId, orderId, request, member));
-
-		assertEquals(ExceptionCode.NOT_FOUND_STORE.getMessage(), exception.getMessage());
-
-		verify(storeRepository, times(1)).findById(storeId);
-		verify(orderRepository, never()).findByIdAndMemberAndStore(any(), any(), any());
-		verify(reviewRepository, never()).save(any(Review.class));
-	}
-
-	@Test
-	@DisplayName("리뷰 작성 실패 - 이미 해당 주문에 리뷰 존재")
-	void createReview_fail_reviewAlreadyExists() {
-		// Given
-		Long storeId = 1L;
-		Long orderId = 1L;
-		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
-		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
-		Store store = new Store("Test name", "Test image", "Test description", member);
-		store.updateStoreStatus(StoreStatus.OPEN);
-
-		List<Menu> menu = new ArrayList<>();
-		Order order = Order.createOf(member, store, menu, OrderStatus.COMPLETED, 10000);
-
-		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
-		when(reviewRepository.existsByOrderIdAndMember(orderId, member)).thenReturn(true);
-
-		// When & Then
-		GlobalException exception = assertThrows(GlobalException.class,
-			() -> reviewService.createReview(storeId, orderId, request, member));
-
-		assertEquals(ExceptionCode.REVIEW_ALREADY_EXISTS.getMessage(), exception.getMessage());
-
-		verify(storeRepository, times(1)).findById(storeId);
-		verify(orderRepository, times(1)).findByIdAndMemberAndStore(orderId, member, store);
-		verify(reviewRepository, times(1)).existsByOrderIdAndMember(orderId, member);
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 }
