@@ -80,6 +80,8 @@ public class OrderService {
 		);
 		orderRepository.save(order);
 
+		int waitingTeams = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING);
+
 		List<String> menuNames = menus.stream()
 			.map(Menu::getName)
 			.toList();
@@ -87,6 +89,7 @@ public class OrderService {
 			.orderId(order.getId())
 			.orderStatus(order.getStatus().name())
 			.menuNames(menuNames)
+			.waitingTeams(waitingTeams)
 			.totalPrice(order.getPrice())
 			.build();
 	}
@@ -206,7 +209,8 @@ public class OrderService {
 		if (endDate == null && startDate != null) {
 			endDate = startDate.plusDays(days); // 조회 기간 days 를 기준으로 앞뒤에 기간을 추가해서 조회
 		}
-		return orderRepository.findByStoreAndCreatedAtBetween(store.getId(), startDate.atStartOfDay(), endDate.atTime(23, 59, 59), pageable)
+		return orderRepository.findByStoreAndCreatedAtBetween(store.getId(), startDate.atStartOfDay(),
+				endDate.atTime(23, 59, 59), pageable)
 			.map(OrderPageResponse::from);
 	}
 }

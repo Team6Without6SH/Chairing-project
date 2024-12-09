@@ -12,4 +12,5 @@ public class OrderResponse {
 	private String orderStatus;
 	private int totalPrice;
 	private List<String> menuNames;
+	private int waitingTeams;
 }
