@@ -70,7 +70,7 @@ public class AdminStoreService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		if (store.getIsInActive() == null || !store.getIsInActive()) {
+		if (store.getInActive() == null || !store.getInActive()) {
 			throw new GlobalException(STORE_ALREADY_DELETED);
 		}
 
