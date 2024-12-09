@@ -9,6 +9,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,11 +37,11 @@ public class Order extends Timestamped {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store; // 가게 정보 추가
 
@@ -75,16 +76,6 @@ public class Order extends Timestamped {
 		this.store = store;
 		this.status = status;
 		this.price = price;
-	}
-
-	// 주문 취소 테스트용2
-	public Order(Long id, Member member, Store store, OrderStatus status, int price, List<Menu> menus) {
-		this.id = id;
-		this.member = member;
-		this.store = store;
-		this.status = status;
-		this.price = price;
-		this.menus = menus;
 	}
 
 	public static Order createOf(Member member, Store store, List<Menu> menus, OrderStatus status,
