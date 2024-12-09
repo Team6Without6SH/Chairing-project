@@ -4,6 +4,7 @@ import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.store.entity.Store;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -16,8 +17,10 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,48 +32,57 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Order extends Timestamped {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+	@ManyToOne
+	@JoinColumn(name = "member_id", nullable = false)
+	private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "store_id", nullable = false)
-    private Store store; // 가게 정보 추가
+	@ManyToOne
+	@JoinColumn(name = "store_id", nullable = false)
+	private Store store; // 가게 정보 추가
 
-    // 주문 하나에 많은 메뉴를 받을 수 있게 하기 위해 중간테이블 설정 없이 다대다 관계로
-    @ManyToMany
-    @JoinTable(
-        name = "order_menu",
-        joinColumns = @JoinColumn(name = "order_id"),
-        inverseJoinColumns = @JoinColumn(name = "menu_id")
-    )
-    private List<Menu> menus = new ArrayList<>();
+	// 주문 하나에 많은 메뉴를 받을 수 있게 하기 위해 중간테이블 설정 없이 다대다 관계로
+	@ManyToMany
+	@JoinTable(
+		name = "order_menu",
+		joinColumns = @JoinColumn(name = "order_id"),
+		inverseJoinColumns = @JoinColumn(name = "menu_id")
+	)
+	private List<Menu> menus = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private OrderStatus status;
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private OrderStatus status;
 
-    @Column(nullable = false)
-    private int price;
+	@Column(nullable = false)
+	private int price;
 
-    private Order(Member member, Store store, List<Menu> menus, OrderStatus status, int price) {
-        this.member = member;
-        this.store = store;
-        this.menus = menus;
-        this.status = status;
-        this.price = price;
-    }
+	private Order(Member member, Store store, List<Menu> menus, OrderStatus status, int price) {
+		this.member = member;
+		this.store = store;
+		this.menus = menus;
+		this.status = status;
+		this.price = price;
+	}
 
-    public static Order createOf(Member member, Store store, List<Menu> menus, OrderStatus status,
-        int price) {
-        return new Order(member, store, menus, status, price);
-    }
+	// 주문 취소 테스트용
+	public Order(Long id, Member member, Store store, OrderStatus status, int price) {
+		this.id = id;
+		this.member = member;
+		this.store = store;
+		this.status = status;
+		this.price = price;
+	}
 
-    public void changeStatus(OrderStatus status) {
-        this.status = status;
-    }
+	public static Order createOf(Member member, Store store, List<Menu> menus, OrderStatus status,
+		int price) {
+		return new Order(member, store, menus, status, price);
+	}
+
+	public void changeStatus(OrderStatus status) {
+		this.status = status;
+	}
 }
