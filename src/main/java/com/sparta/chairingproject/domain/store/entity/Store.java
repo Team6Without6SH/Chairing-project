@@ -24,6 +24,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -89,7 +91,8 @@ public class Store extends Timestamped {
 	@Column(nullable = false)
 	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
 
-	public Store(String name, String image, String description, Member owner) {
+	public Store(String name, String image, String description, @NotBlank @Size String requestDescription,
+		Member owner) {
 		this.name = name;
 		this.image = image;
 		this.description = description;

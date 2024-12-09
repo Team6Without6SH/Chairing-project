@@ -51,7 +51,7 @@ public class ReviewServiceTest {
 		Long storeId = 1L;
 		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
 		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
-		Store store = new Store("Test name", "Test image", "Test description", member);
+		Store store = new Store("Test name", "Test image", "Test description", "Test Address", member);
 		store.updateStoreStatus(StoreStatus.OPEN);
 
 		List<Menu> menu = new ArrayList<>();
@@ -83,7 +83,7 @@ public class ReviewServiceTest {
 		Long storeId = 1L;
 		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
 		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
-		Store store = new Store("Test name", "Test image", "Test description", member);
+		Store store = new Store("Test name", "Test image", "Test description", "Test Address", member);
 		store.updateStoreStatus(StoreStatus.OPEN);
 
 		List<Menu> menus = new ArrayList<>();
@@ -112,7 +112,7 @@ public class ReviewServiceTest {
 		Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
 
 		// default 로 pending 상태
-		Store store = new Store("Test name", "Test image", "Test description", member);
+		Store store = new Store("Test name", "Test image", "Test description", "Test Address", member);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 

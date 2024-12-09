@@ -53,9 +53,13 @@ public class StoreService {
 			throw new GlobalException(STORE_CLOSED);
 		}
 
+		// 이미지 업로드 로직 추가 필요 (예: S3)
+		String imageUrl = request.getImage().isEmpty() ? null : request.getImage();
+
 		Store store = new Store(
 			request.getName(),
-			request.getImages().isEmpty() ? null : request.getImages().get(0), // 첫 번째 이미지 선택
+			request.getAddress(),
+			imageUrl,
 			request.getDescription(),
 			authMember.getMember()
 		);
@@ -103,7 +107,6 @@ public class StoreService {
 		);
 	}
 
-
 	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req, UserDetailsImpl authUser) {
 		Member owner = memberRepository.findById(authUser.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
@@ -122,7 +125,7 @@ public class StoreService {
 
 		List<ReviewResponse> reviews = reviewRepository.findByStoreId(storeId)
 			.stream()
-			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getRating()))
+			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getScore()))
 			.toList();
 
 		int waitingCount = store.getReservations().size(); // 가게 예약 리스트 크기 사용
