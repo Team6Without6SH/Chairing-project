@@ -203,4 +203,27 @@ public class OrderServiceTest {
 		//when then
 		assertThrows(GlobalException.class, () -> orderService.createOrder(storeId, member, orderRequest)); // 예외 발생
 	}
+
+	@Test
+	@DisplayName("주문 금액이 총 금액과 일치하지 않으면 예외가 발생한다.")
+	public void createOrder_ThrowException_When_TotalPrice_Not_Equal_To_paidPrice() {
+		// given
+		Long storeId = 1L;
+		Member member = new Member(1L, "Test Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 210); // 메뉴 가격을 잘못 입력했을 때
+
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		Menu menu1 = new Menu(1L, 90, "Menu1", store);
+		Menu menu2 = new Menu(2L, 110, "Menu2", store);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(menuRepository.findAllByStoreIdAndMenuIds(storeId, List.of(1L, 2L))).thenReturn(List.of(menu1, menu2));
+
+		// when & then
+		assertThrows(GlobalException.class, () -> orderService.createOrder(storeId, member, orderRequest));
+	}
+
 }
