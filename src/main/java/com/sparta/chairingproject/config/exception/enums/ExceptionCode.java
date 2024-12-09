@@ -9,7 +9,7 @@ public enum ExceptionCode {
 
 	//----------MEMBER----------
 	NOT_FOUND_USER(HttpStatus.NOT_FOUND, "멤버를 찾을 수 없습니다"),
-  DELETE_USER(HttpStatus.BAD_REQUEST, "탈퇴한 멤버입니다"),
+	DELETE_USER(HttpStatus.BAD_REQUEST, "탈퇴한 멤버입니다"),
 	NAME_TOO_LONG(HttpStatus.BAD_REQUEST, "이름은 최대 4글자까지 가능합니다"),
 	USERNAME_REQUIRED(HttpStatus.BAD_REQUEST, "이름이 누락되었습니다"),
 	MEMBER_ALREADY_DELETED(HttpStatus.NOT_FOUND, "이미 삭제된 회원입니다"),
@@ -103,7 +103,8 @@ public enum ExceptionCode {
 	EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "Token is expired"),
 	NOT_SUPPORT_TOKEN(HttpStatus.UNAUTHORIZED, "Is not support token"),
 	INVALID_REQUEST_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 요청 상태입니다"),
-	APPROVAL_PENDING(HttpStatus.CONFLICT, "승인 대기중입니다");
+	APPROVAL_PENDING(HttpStatus.CONFLICT, "승인 대기중입니다"),
+	STORE_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 가게입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;
