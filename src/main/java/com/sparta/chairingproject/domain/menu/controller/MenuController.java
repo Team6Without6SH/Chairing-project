@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,7 +67,7 @@ public class MenuController {
 	}
 
 	@Secured("ROLE_OWNER")
-	@DeleteMapping("/menus")
+	@GetMapping("/menus")
 	public ResponseEntity<List<MenuDetailResponse>> getAllMenusByStore(
 		@PathVariable Long storeId,
 		@AuthenticationPrincipal UserDetailsImpl authMember
