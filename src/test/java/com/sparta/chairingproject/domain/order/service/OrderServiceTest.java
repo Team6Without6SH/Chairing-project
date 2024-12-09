@@ -3,6 +3,7 @@ package com.sparta.chairingproject.domain.order.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -132,5 +133,29 @@ public class OrderServiceTest {
 		assertEquals(200, response.getTotalPrice()); // 총 가격 검증
 		assertTrue(response.getMenuNames().contains("Menu1"));
 		assertTrue(response.getMenuNames().contains("Menu2"));
+	}
+
+	@Test
+	@DisplayName("메뉴를 선택하지 않고, 웨이팅을 신청할 때, 테이블에 자리가 없으면 WAITING 상태로 주문이 생성된다.")
+	public void createOrder_ReturnWaiting_When_NoMenu_TableFull() {
+		//given
+		Long storeId = 1L;
+		Member member = new Member(1L, "Test Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		OrderRequest orderRequest = new OrderRequest(Collections.emptyList(), 0);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(5); // 진행 중인 주문 수가 5
+
+		//when
+		OrderResponse response = orderService.createOrder(storeId, member, orderRequest);
+
+		//then
+		assertNotNull(response);
+		assertEquals(OrderStatus.WAITING.name(), response.getOrderStatus()); // 상태 WAITING
+		assertEquals(0, response.getTotalPrice()); // 금액 0 d인지 확인
+		assertTrue(response.getMenuNames().isEmpty()); // 메뉴는 신청 잘 안했는지
 	}
 }
