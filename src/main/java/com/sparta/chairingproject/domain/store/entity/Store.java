@@ -64,10 +64,6 @@ public class Store extends Timestamped {
 	@Column(nullable = false)
 	private int tableCount;
 
-	@Setter
-	@Column(nullable = false)
-	private boolean approved;
-
 	@Column(nullable = true)
 	private Boolean inActive = false;
 
@@ -88,6 +84,7 @@ public class Store extends Timestamped {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private StoreStatus status = StoreStatus.PENDING;
+	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
@@ -109,7 +106,7 @@ public class Store extends Timestamped {
 
 	//테스트 용(자리선점)
 	public Store(Long id, String name, String image, String description, Member owner, int tableCount, String address,
-		String phone, String openTime, String closeTime, String category, boolean approved) {
+		String phone, String openTime, String closeTime, String category) {
 		this.id = id;
 		this.name = name;
 		this.image = image;
@@ -121,7 +118,6 @@ public class Store extends Timestamped {
 		this.openTime = openTime;
 		this.closeTime = closeTime;
 		this.category = category;
-		this.approved = approved;
 	}
 
 	public void updateStoreStatus(StoreStatus status) {

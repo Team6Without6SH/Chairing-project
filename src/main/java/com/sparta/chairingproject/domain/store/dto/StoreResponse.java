@@ -20,10 +20,4 @@ public class StoreResponse {
 	private String description;
 	private List<String> images;
 	private String ownerName;
-
-	public StoreResponse(String name, String image, String description) {
-		this.name = name;
-		this.images = List.of(image);
-		this.description = description;
-	}
 }

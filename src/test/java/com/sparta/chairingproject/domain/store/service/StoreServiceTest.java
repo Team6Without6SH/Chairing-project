@@ -59,7 +59,7 @@ class StoreServiceTest {
 			"010-1234-5678",
 			"09:00",
 			"18:00",
-			List.of("Category1", "Category2"),
+			"Category",
 			"Test Description",
 			List.of("image1.jpg", "image2.jpg")
 		);
@@ -84,7 +84,7 @@ class StoreServiceTest {
 			"010-1234-5678",
 			"09:00",
 			"18:00",
-			List.of("Category1", "Category2"),
+			"Category",
 			"Test Description",
 			List.of("image1.jpg", "image2.jpg")
 		);
@@ -111,7 +111,7 @@ class StoreServiceTest {
 			"010-1234-5678",
 			"09:00", // openTime
 			null,   // closeTime 누락
-			List.of("Category1", "Category2"),
+			"Category",
 			"Test Description",
 			List.of("image1.jpg", "image2.jpg")
 		);
@@ -138,7 +138,7 @@ class StoreServiceTest {
 			"010-1234-5678",
 			"09:00",
 			"18:00",
-			List.of("Category1", "Category2"),
+			"Category",
 			"Test Description",
 			List.of("image1.jpg", "image2.jpg")
 		);

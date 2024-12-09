@@ -25,7 +25,7 @@ public class StoreRequest {
 
 	private String closeTime;
 
-	private List<String> categories;
+	private String category;
 
 	@NotBlank(message = "매장 설명은 필수 입력 항목입니다.")
 	@Size(max = 500, message = "설명은 500자를 초과할 수 없습니다.")

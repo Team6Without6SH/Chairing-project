@@ -17,7 +17,7 @@ public class StoreOwnerResponse {
 	private String closeTime;
 	private String category;
 	private String description;
-	private List<String> images;
+	private String image;
 	private boolean approved;
 
 }

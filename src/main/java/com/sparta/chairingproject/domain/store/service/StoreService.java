@@ -142,13 +142,13 @@ public class StoreService {
 	public StoreOwnerResponse getStoreById(Long storeId, Long ownerId) {
 
 		Store store = storeRepository.findByIdAndOwnerId(storeId, ownerId)
-			.orElseThrow(() -> new GlobalException(ExceptionCode.NOT_FOUND_STORE));
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		if (!store.isApproved()) {
+		if (store.getRequestStatus() != StoreRequestStatus.APPROVED) {
 			if (store.getStatus() == StoreStatus.PENDING) {
-				throw new GlobalException(ExceptionCode.APPROVAL_PENDING);
+				throw new GlobalException(APPROVAL_PENDING);
 			}
-			throw new GlobalException(ExceptionCode.STORE_OUT_OF_BUSINESS);
+			throw new GlobalException(STORE_OUT_OF_BUSINESS);
 		}
 
 		return new StoreOwnerResponse(
@@ -159,7 +159,7 @@ public class StoreService {
 			store.getCloseTime(),
 			store.getCategory(),
 			store.getDescription(),
-			List.of(store.getImage()),
+			store.getImage(),
 			true
 		);
 	}
