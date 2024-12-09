@@ -59,4 +59,28 @@ public class OrderServiceTest {
 		assertEquals(OrderStatus.ADMISSION, response.getOrderStatus());
 		assertEquals(0, response.getWaitingTeams());
 	}
+
+	@Test
+	@DisplayName("테이블이 다 차 있으면 WAITING 상태를 반환한다.")
+	public void createWaiting_ReturnWAITING_When_Table_Full() {
+		// given
+		Long storeId = 1L;
+		Member owner = new Member(1L, "Test owner", "Test@email.com", "password123", MemberRole.OWNER);
+		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true); // 테이블 수 5으로 설정
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(
+			5); //현재 식사중인 테이블을 5로 설정
+
+		// when
+		RequestDto requestDto = new RequestDto();
+		OrderWaitingResponse response = orderService.createWaiting(storeId, member, requestDto);
+
+		// then
+		assertNotNull(response);
+		assertEquals(OrderStatus.WAITING, response.getOrderStatus());
+		assertEquals(0, response.getWaitingTeams());
+	}
 }
