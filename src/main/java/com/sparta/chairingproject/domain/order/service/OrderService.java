@@ -42,7 +42,7 @@ public class OrderService {
 	private final StoreRepository storeRepository;
 
 	@Transactional
-	public OrderResponse createOrder(Long storeId, UserDetailsImpl authMember,
+	public OrderResponse createOrder(Long storeId, Member authMember,
 		OrderRequest orderRequest) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
@@ -72,7 +72,7 @@ public class OrderService {
 		}
 
 		Order order = Order.createOf(
-			authMember.getMember(),
+			authMember,
 			store,
 			menus,
 			orderStatus,

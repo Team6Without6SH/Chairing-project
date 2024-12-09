@@ -68,6 +68,14 @@ public class Menu extends Timestamped {
 		this.store = store;
 	}
 
+	//테스트 용(주문 생성)
+	public Menu(Long id, int price, String name, Store store) {
+		this.id = id;
+		this.name = name;
+		this.price = price;
+		this.store = store;
+	}
+
 	public static Menu createOf(String name, int price, String image, Store store) {
 		return new Menu(name, price, image, store);
 	}
