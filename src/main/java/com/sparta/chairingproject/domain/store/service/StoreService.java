@@ -19,6 +19,7 @@ import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreOwnerResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
+import com.sparta.chairingproject.domain.store.dto.UpdateStoreRequest;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;
@@ -76,6 +77,40 @@ public class StoreService {
 
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+
+		List<MenuSummaryResponse> menus = menuRepository.findByStoreId(storeId)
+			.stream()
+			.map(menu -> new MenuSummaryResponse(menu.getName(), menu.getPrice()))
+			.toList();
+
+		List<ReviewResponse> reviews = reviewRepository.findByStoreId(storeId)
+			.stream()
+			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getRating()))
+			.toList();
+
+		int waitingCount = store.getReservations().size(); // 가게 예약 리스트 크기 사용
+
+		return new StoreDetailsResponse(
+			store.getName(),
+			store.getImage(),
+			store.getDescription(),
+			store.getAddress(),
+			menus,
+			reviews,
+			waitingCount
+		);
+	}
+
+	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req, UserDetailsImpl authUser) {
+		Member owner = memberRepository.findById(authUser.getMember().getId())
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+
+		Store store = storeRepository.findById(storeId).orElseThrow(
+			() -> new GlobalException(NOT_FOUND_STORE)
+		);
+
+		store.updateStore(req);
+		storeRepository.save(store);
 
 		List<MenuSummaryResponse> menus = menuRepository.findByStoreId(storeId)
 			.stream()

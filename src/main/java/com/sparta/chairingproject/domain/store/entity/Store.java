@@ -9,6 +9,7 @@ import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
 import com.sparta.chairingproject.domain.review.entity.Review;
+import com.sparta.chairingproject.domain.store.dto.UpdateStoreRequest;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -120,4 +121,14 @@ public class Store extends Timestamped {
 		this.requestStatus = StoreRequestStatus.REJECTED;
 	}
 
+	public void updateStore(UpdateStoreRequest req) {
+		this.name = req.getName();
+		this.address = req.getAddress();
+		this.phone = req.getPhone();
+		this.openTime = req.getOpenTime();
+		this.closeTime = req.getCloseTime();
+		this.category = req.getCategory();
+		this.description = req.getDescription();
+		this.image = req.getImage();
+	}
 }
