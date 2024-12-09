@@ -49,6 +49,7 @@ public class ReviewServiceTest {
 	void createReview_success() {
 		//Given
 		Long storeId = 1L;
+		Long orderId = 1L;
 		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
 		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
 		Store store = new Store("Test name", "Test image", "Test description", "Test Address", member);
@@ -58,11 +59,12 @@ public class ReviewServiceTest {
 		Order order = Order.createOf(member, store, menu, OrderStatus.COMPLETED, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(orderRepository.findByMemberAndStore(member, store)).thenReturn(Optional.of(order));
+		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
+		when(reviewRepository.existsByOrderIdAndMember(orderId, member)).thenReturn(false);
 		when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		// When
-		Review savedReview = reviewService.createReview(storeId, request, member);
+		Review savedReview = reviewService.createReview(storeId, orderId, request, member);
 
 		// Then
 		assertNotNull(savedReview);
@@ -72,7 +74,8 @@ public class ReviewServiceTest {
 		assertEquals(member, savedReview.getMember());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(orderRepository, times(1)).findByMemberAndStore(member, store);
+		verify(orderRepository, times(1)).findByIdAndMemberAndStore(orderId, member, store);
+		verify(reviewRepository, times(1)).existsByOrderIdAndMember(orderId, member);
 		verify(reviewRepository, times(1)).save(any(Review.class));
 	}
 
@@ -81,6 +84,7 @@ public class ReviewServiceTest {
 	void createReview_fail_orderNotCompleted() {
 		// Given
 		Long storeId = 1L;
+		Long orderId = 1L;
 		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
 		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
 		Store store = new Store("Test name", "Test image", "Test description", "Test Address", member);
@@ -90,16 +94,16 @@ public class ReviewServiceTest {
 		Order order = Order.createOf(member, store, menus, OrderStatus.WAITING, 10000); // 주문 미완료 상태 생성
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(orderRepository.findByMemberAndStore(member, store)).thenReturn(Optional.of(order));
+		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> reviewService.createReview(storeId, request, member));
+			() -> reviewService.createReview(storeId, orderId, request, member));
 
 		assertEquals(ORDER_NOT_COMPLETED_CANNOT_REVIEW.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(orderRepository, times(1)).findByMemberAndStore(member, store);
+		verify(orderRepository, times(1)).findByIdAndMemberAndStore(orderId, member, store);
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
@@ -108,6 +112,7 @@ public class ReviewServiceTest {
 	void createReview_fail_storePending() {
 		// Given
 		Long storeId = 1L;
+		Long orderId = 1L;
 		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
 		Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
 
@@ -118,12 +123,12 @@ public class ReviewServiceTest {
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> reviewService.createReview(storeId, request, member));
+			() -> reviewService.createReview(storeId, orderId, request, member));
 
 		assertEquals(ExceptionCode.STORE_PENDING_CANNOT_REVIEW.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(orderRepository, never()).findByMemberAndStore(any(), any());
+		verify(orderRepository, never()).findByIdAndMemberAndStore(any(), any(), any());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 
@@ -132,6 +137,7 @@ public class ReviewServiceTest {
 	void createReview_fail_storeNotFound() {
 		// Given
 		Long storeId = 1L;
+		Long orderId = 1L;
 		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
 		Member member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
 
@@ -139,12 +145,42 @@ public class ReviewServiceTest {
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> reviewService.createReview(storeId, request, member));
+			() -> reviewService.createReview(storeId, orderId, request, member));
 
 		assertEquals(ExceptionCode.NOT_FOUND_STORE.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(orderRepository, never()).findByMemberAndStore(any(), any());
+		verify(orderRepository, never()).findByIdAndMemberAndStore(any(), any(), any());
+		verify(reviewRepository, never()).save(any(Review.class));
+	}
+
+	@Test
+	@DisplayName("리뷰 작성 실패 - 이미 해당 주문에 리뷰 존재")
+	void createReview_fail_reviewAlreadyExists() {
+		// Given
+		Long storeId = 1L;
+		Long orderId = 1L;
+		ReviewRequest request = new ReviewRequest("좋은 가게였습니다.", 5);
+		Member member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
+		Store store = new Store("Test name", "Test image", "Test description", member);
+		store.updateStoreStatus(StoreStatus.OPEN);
+
+		List<Menu> menu = new ArrayList<>();
+		Order order = Order.createOf(member, store, menu, OrderStatus.COMPLETED, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
+		when(reviewRepository.existsByOrderIdAndMember(orderId, member)).thenReturn(true);
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.createReview(storeId, orderId, request, member));
+
+		assertEquals(ExceptionCode.REVIEW_ALREADY_EXISTS.getMessage(), exception.getMessage());
+
+		verify(storeRepository, times(1)).findById(storeId);
+		verify(orderRepository, times(1)).findByIdAndMemberAndStore(orderId, member, store);
+		verify(reviewRepository, times(1)).existsByOrderIdAndMember(orderId, member);
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
 }
