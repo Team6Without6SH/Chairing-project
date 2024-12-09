@@ -5,6 +5,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
@@ -36,6 +37,7 @@ public class StoreService {
 	private final MenuRepository menuRepository;
 	private final ReviewRepository reviewRepository;
 
+	@Transactional
 	public void registerStore(StoreRequest request, UserDetailsImpl authMember) {
 
 		Member owner = memberRepository.findById(authMember.getMember().getId())
@@ -100,6 +102,7 @@ public class StoreService {
 		);
 	}
 
+	@Transactional
 	public StoreOwnerResponse getStoreById(Long storeId, Long ownerId) {
 
 		Store store = storeRepository.findByIdAndOwnerId(storeId, ownerId)

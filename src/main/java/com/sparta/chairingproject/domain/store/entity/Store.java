@@ -23,9 +23,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -63,10 +63,12 @@ public class Store extends Timestamped {
 	@Column(nullable = false)
 	private int tableCount;
 
+	@Setter
+	@Column(nullable = false)
 	private boolean approved;
 
 	@Column(nullable = true)
-	private Boolean isDeleted = false;
+	private Boolean isInActive = false;
 
 	private LocalDateTime deletedAt;
 
@@ -81,6 +83,7 @@ public class Store extends Timestamped {
 	private List<Reservation> reservations = new ArrayList<>();
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Order> orders = new ArrayList<>();
+	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private StoreStatus status = StoreStatus.PENDING;
@@ -122,8 +125,7 @@ public class Store extends Timestamped {
 	}
 
 	public void markAsDeleted() {
-		this.isDeleted = true;
+		this.isInActive = true;
 		this.deletedAt = LocalDateTime.now();
 	}
-
 }

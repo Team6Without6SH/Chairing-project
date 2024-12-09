@@ -12,6 +12,7 @@ import com.sparta.chairingproject.domain.store.dto.StoreAdminResponse;
 import com.sparta.chairingproject.domain.store.dto.UpdateStoreStatusRequest;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
+import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 import com.sparta.chairingproject.domain.store.mapper.StoreMapper;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
@@ -46,15 +47,20 @@ public class AdminStoreService {
 
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+
 		StoreRequestStatus status = StoreRequestStatus.valueOf(request.getStatus());
 		if (status == StoreRequestStatus.APPROVED) {
 			store.approveRequest();
+			store.setApproved(true);
+			store.setStatus(StoreStatus.OPEN);
+			System.out.println("Store approved: " + store.getId()
+				+ ", isApproved: " + store.isApproved() + ", status: "
+				+ store.getStatus());
 		} else if (status == StoreRequestStatus.REJECTED) {
 			store.rejectRequest();
 		} else {
 			throw new GlobalException(INVALID_REQUEST_STATUS);
 		}
-
 		storeRepository.save(store);
 		return new StoreAdminResponse(store.getId(), store.getName(), store.getStatus().name());
 	}
@@ -64,7 +70,7 @@ public class AdminStoreService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		if (store.getIsDeleted() == null || !store.getIsDeleted()) {
+		if (store.getIsInActive() == null || !store.getIsInActive()) {
 			throw new GlobalException(STORE_ALREADY_DELETED);
 		}
 

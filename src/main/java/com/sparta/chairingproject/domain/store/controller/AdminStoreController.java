@@ -50,7 +50,7 @@ public class AdminStoreController {
 	}
 
 	@Secured("ROLE_ADMIN")
-	@PutMapping("/close/{storeId}")
+	@PutMapping("/{storeId}/close")
 	public ResponseEntity<Void> approveCloseStore(@PathVariable Long storeId) {
 		adminStoreService.approveCloseStore(storeId);
 		return ResponseEntity.ok().build();
