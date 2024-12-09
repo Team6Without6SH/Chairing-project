@@ -28,7 +28,7 @@ public class CommentService {
 			throw new GlobalException(NOT_MATCHING_STORE_AND_REVIEW);
 		}
 
-		if (!review.getStore().getOwner().equals(owner)) {
+		if (!review.getStore().getOwner().getId().equals(owner.getId())) {
 			throw new GlobalException(UNAUTHORIZED_OWNER);
 		}
 
