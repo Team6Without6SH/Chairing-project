@@ -13,4 +13,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT r FROM Reservation r WHERE r.memberId = :memberId")
     Page<Reservation> findByMember(@Param("memberId") Long memberId, Pageable pageable);
+
+    Page<Reservation> findByStoreId(Long storeId, Pageable pageable);
 }

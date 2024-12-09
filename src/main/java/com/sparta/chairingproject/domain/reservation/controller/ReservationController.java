@@ -4,6 +4,7 @@ import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
 import com.sparta.chairingproject.domain.reservation.dto.request.UpdateReservationRequest;
+import com.sparta.chairingproject.domain.reservation.dto.response.ReservationListResponse;
 import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
 import com.sparta.chairingproject.domain.reservation.service.ReservationService;
 
@@ -58,6 +59,20 @@ public class ReservationController {
 		@AuthenticationPrincipal UserDetailsImpl authUser) {
 		return new ResponseEntity<>(
 			reservationService.updateReservation(storeId, reservationId, req, authUser),
+			HttpStatus.OK);
+	}
+
+	@Secured("ROLE_OWNER")
+	@GetMapping("/stores/{storeId}/reservations")
+	public ResponseEntity<ReservationListResponse> getReservationList(
+		@PathVariable Long storeId,
+		@RequestParam(defaultValue = "0") int page, // 페이지 번호
+		@RequestParam(defaultValue = "10") int size, // 페이지 크기
+		//@RequestBody RequestDto req,
+		@AuthenticationPrincipal UserDetailsImpl authUser
+	) {
+		return new ResponseEntity<>(
+			reservationService.getReservationList(storeId, page, size, authUser),
 			HttpStatus.OK);
 	}
 }

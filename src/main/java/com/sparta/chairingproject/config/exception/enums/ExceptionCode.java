@@ -31,6 +31,7 @@ public enum ExceptionCode {
 	CANNOT_MODIFY_STORE_ID(HttpStatus.BAD_REQUEST, "가게 아이디는 수정할 수 없습니다"),
 	NOT_FOUND_STORE(HttpStatus.NOT_FOUND, "해당 가게가 없습니다"),
 	CANNOT_EXCEED_STORE_LIMIT(HttpStatus.FORBIDDEN, "최대 가게 3개만 소유 가능합니다."),
+	UNAUTHORIZED_STORE_ACCESS(HttpStatus.FORBIDDEN, "해당 가게의 접근 권한이 없습니다."),
 
 	/* --- 예약 --- */
 	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약을 찾을 수 없습니다."),
