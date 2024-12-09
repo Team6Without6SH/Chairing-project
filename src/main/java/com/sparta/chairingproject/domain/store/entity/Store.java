@@ -69,7 +69,7 @@ public class Store extends Timestamped {
 	private boolean approved;
 
 	@Column(nullable = true)
-	private Boolean isInActive = false;
+	private Boolean inActive = false;
 
 	private LocalDateTime deletedAt;
 
@@ -154,8 +154,7 @@ public class Store extends Timestamped {
   }
 
 	public void markAsDeleted() {
-		this.isInActive = true;
+		this.inActive = true;
 		this.deletedAt = LocalDateTime.now();
-
 	}
 }
