@@ -1,99 +1,101 @@
 package com.sparta.chairingproject.domain.order.service;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyLong;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
-import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import java.util.Optional;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
-import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
-import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
-import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
-import com.sparta.chairingproject.domain.order.entity.Order;
+import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
-import java.util.Arrays;
-import java.util.List;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
-@SpringBootTest
-@EnableAutoConfiguration(exclude = SecurityAutoConfiguration.class)
-class OrderServiceTest {
+@ExtendWith(MockitoExtension.class)
+public class OrderServiceTest {
 
-    @Mock
-    private OrderRepository orderRepository;
+	@Mock
+	private OrderRepository orderRepository;
 
-    @Mock
-    private MenuRepository menuRepository;
+	@Mock
+	private MenuRepository menuRepository;
 
-    @Mock
-    private UserDetailsService userDetailsService;
+	@Mock
+	private StoreRepository storeRepository;
 
-    @InjectMocks
-    private OrderService orderService;
+	@InjectMocks
+	private OrderService orderService;
 
-    private Member member;
-    private Member owner;
-    private Menu menu1;
-    private Menu menu2;
-    private Store store;
+	@Test
+	@DisplayName("테이블이 남아 있을때는 ADMISSION 상태를 반환한다.")
+	public void createWaiting_ReturnADMISSION_When_Table_Available() {
+		//given
+		Long storeId = 1L;
+		Member owner = new Member(1L, "Test owner", "Test@email.com", "password123", MemberRole.OWNER);
+		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00",
+			"21:00", "Korean", true);
 
-//	 @BeforeEach
-//	 void setUp() throws Exception {
-//	 	member = new Member(1L, "Test User","test@example.com", "password", MemberRole.USER);
-//
-//
-//	 	owner = new Member(2L, "Test User2","test2@example.com", "password", MemberRole.ADMIN);
-//	 	menu1 = new Menu(1L, "Pizza", 12000, new Store(1L,"Test Store","Test Image","description", owner));
-//	 	menu2 = new Menu(2L, "Burger", 8000, new Store(1L,"Test Store","Test Image","description", owner));
-//	 }
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store)); //store 반환시키기
 
-    @Test
-    void testCreateOrder() {
-        // given
-        List<Long> menuIds = Arrays.asList(menu1.getId(), menu2.getId());
-        int totalPrice = 20000;
-        UserDetailsImpl authMember = new UserDetailsImpl(member);
+		//when
+		RequestDto requestDto = new RequestDto();
+		OrderWaitingResponse response = orderService.createWaiting(storeId, member, requestDto);
 
-        // 메뉴 조회 Mocking
-        when(menuRepository.findAllByStoreIdAndMenuIds(anyLong(), eq(menuIds)))
-            .thenReturn(Arrays.asList(menu1, menu2));
+		// 결과 검증
+		assertNotNull(response);
+		assertEquals(OrderStatus.ADMISSION, response.getOrderStatus());
+		assertEquals(0, response.getWaitingTeams());
+	}
 
-        // 주문 생성 Mocking
-        Order savedOrder = Order.createOf(member, store, Arrays.asList(menu1, menu2),
-            OrderStatus.WAITING, totalPrice);
-        when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
+	@Test
+	@DisplayName("테이블이 다 차 있으면 WAITING 상태를 반환한다.")
+	public void createWaiting_ReturnWAITING_When_Table_Full() {
+		// given
+		Long storeId = 1L;
+		Member owner = new Member(1L, "Test owner", "Test@email.com", "password123", MemberRole.OWNER);
+		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true); // 테이블 수 5으로 설정
 
-        // when
-        OrderRequest requestDto = new OrderRequest(menuIds, totalPrice);
-        OrderResponse response = orderService.createOrder(1L, authMember, requestDto);
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(
+			5); //현재 식사중인 테이블을 5로 설정
 
-        // then
-        assertNotNull(response);
-        assertEquals("WAITING", response.getOrderStatus());
-        assertEquals(totalPrice, response.getTotalPrice());
-        assertEquals(2, response.getMenuNames().size());
-        assertTrue(response.getMenuNames().contains("Pizza"));
-        assertTrue(response.getMenuNames().contains("Burger"));
+		// when
+		RequestDto requestDto = new RequestDto();
+		OrderWaitingResponse response = orderService.createWaiting(storeId, member, requestDto);
 
-        // 메뉴 조회가 호출되었는지 확인
-        verify(menuRepository, times(1)).findAllByStoreIdAndMenuIds(anyLong(), eq(menuIds));
+		// then
+		assertNotNull(response);
+		assertEquals(OrderStatus.WAITING, response.getOrderStatus());
+		assertEquals(0, response.getWaitingTeams());
+	}
 
-        // 주문 저장이 호출되었는지 확인
-        verify(orderRepository, times(1)).save(any(Order.class));
-    }
+	@Test
+	@DisplayName("유효하지 않은 storeId로 주문을 시도하면 예외가 발생한다.")
+	public void createWaiting_ThrowException_When_InvalidStoreId() {
+		// given
+		Long storeId = 999L;
+		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.empty()); // store가 없을 때
+
+		// when & then
+		RequestDto requestDto = new RequestDto();
+		assertThrows(GlobalException.class, () -> orderService.createWaiting(storeId, member, requestDto));
+	}
 }

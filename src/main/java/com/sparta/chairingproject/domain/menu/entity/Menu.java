@@ -60,6 +60,14 @@ public class Menu extends Timestamped {
 		this.store = store;
 	}
 
+	//테스트 용(자리선점)
+	public Menu(Long id, String image, int price, Store store) {
+		this.id = id;
+		this.price = price;
+		this.image = image;
+		this.store = store;
+	}
+
 	public static Menu createOf(String name, int price, String image, Store store) {
 		return new Menu(name, price, image, store);
 	}
