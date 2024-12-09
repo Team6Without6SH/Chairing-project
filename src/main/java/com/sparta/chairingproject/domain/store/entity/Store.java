@@ -59,7 +59,7 @@ public class Store extends Timestamped {
 	@Column(nullable = true)
 	private String closeTime;
 
-	private String Category;
+	private String category;
 
 	@Column(nullable = false)
 	private int tableCount;
@@ -120,7 +120,7 @@ public class Store extends Timestamped {
 		this.phone = phone;
 		this.openTime = openTime;
 		this.closeTime = closeTime;
-		this.Category = category;
+		this.category = category;
 		this.approved = approved;
 	}
 
