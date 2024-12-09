@@ -1,5 +1,7 @@
 package com.sparta.chairingproject.domain.menu.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,6 +18,7 @@ import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuRequest;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuUpdateRequest;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuDeleteResponse;
+import com.sparta.chairingproject.domain.menu.dto.response.MenuDetailResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuUpdateResponse;
 import com.sparta.chairingproject.domain.menu.service.MenuService;
@@ -60,5 +63,15 @@ public class MenuController {
 		@RequestBody RequestDto request
 	) {
 		return ResponseEntity.ok(menuService.deleteMenu(storeId, menuId, authMember.getMember(), request));
+	}
+
+	@Secured("ROLE_OWNER")
+	@DeleteMapping("/menus")
+	public ResponseEntity<List<MenuDetailResponse>> getAllMenusByStore(
+		@PathVariable Long storeId,
+		@AuthenticationPrincipal UserDetailsImpl authMember
+	) {
+		List<MenuDetailResponse> menus = menuService.getAllMenusByStore(storeId, authMember.getMember());
+		return ResponseEntity.ok(menus);
 	}
 }
