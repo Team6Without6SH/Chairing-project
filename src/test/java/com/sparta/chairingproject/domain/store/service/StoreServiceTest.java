@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -33,10 +34,10 @@ class StoreServiceTest {
 	@Autowired
 	private StoreService storeService;
 
-	@MockBean
+	@Mock
 	private StoreRepository storeRepository;
 
-	@MockBean
+	@Mock
 	private MemberRepository memberRepository;
 
 	private Member testMember;
