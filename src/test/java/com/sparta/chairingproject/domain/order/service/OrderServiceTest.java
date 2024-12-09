@@ -182,4 +182,25 @@ public class OrderServiceTest {
 		assertEquals(0, response.getTotalPrice()); // 총 금액은 0
 		assertEquals(3, response.getWaitingTeams()); // 앞에 대기 팀 수 3팀
 	}
+
+	@Test
+	@DisplayName("선택된 메뉴 수와, 실제 메뉴 수가 일치하지 않으면 예외가 발생한다.")
+	public void createOrder_ThrowException_When_TheNumberOfMenuSelected_Not_Equal_To_StoreMenus() {
+		// given
+		Long storeId = 1L;
+		Member member = new Member(1L, "Test Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 90); //메뉴 두개 주문
+
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		Menu menu1 = new Menu(1L, 90, "Menu1", store);
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(menuRepository.findAllByStoreIdAndMenuIds(storeId, List.of(1L, 2L))).thenReturn(
+			List.of(menu1)); // 메뉴가 1번밖에 없기때문
+
+		//when then
+		assertThrows(GlobalException.class, () -> orderService.createOrder(storeId, member, orderRequest)); // 예외 발생
+	}
 }
