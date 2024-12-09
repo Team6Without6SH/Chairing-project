@@ -3,6 +3,7 @@ package com.sparta.chairingproject.domain.order.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -265,5 +266,32 @@ public class OrderServiceTest {
 			() -> orderService.requestOrderCancellation(storeId, orderId, anotherMember, null));
 
 		assertEquals(ExceptionCode.ONLY_ORDER_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("해당 가게의 주문이 아닌 경우에 예외가 발생한다.")
+	public void requestOrderCancellation_ThrowsException_When_NOT_ORDER_THIS_STORE() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+
+		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+		Store store2 = new Store(2L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2223",
+			"09:00", "21:30", "Korean", true);
+
+		List<Menu> menus = new ArrayList<>();
+		menus.add(new Menu(1L, 90, "Menu1", store2));
+
+		Order order = new Order(orderId, orderMember, store1, OrderStatus.IN_PROGRESS, 0, menus);
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.requestOrderCancellation(storeId, orderId, orderMember, null));
+
+		assertEquals(ExceptionCode.NOT_ORDER_THIS_STORE, exception.getExceptionCode());
 	}
 }
