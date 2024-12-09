@@ -12,5 +12,5 @@ import com.sparta.chairingproject.domain.store.entity.Store;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 	List<Review> findByStoreId(Long storeId);
 
-	Page<Review> findByStore(Store store, Pageable pageable);
+	Page<Review> findReviewsByStore(Store store, Pageable pageable);
 }

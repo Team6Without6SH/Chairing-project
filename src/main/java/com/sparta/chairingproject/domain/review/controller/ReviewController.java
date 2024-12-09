@@ -38,7 +38,7 @@ public class ReviewController {
 	}
 
 	@GetMapping("/stores/{storeId}/reviews")
-	public ResponseEntity<Page<ReviewWithCommentsResponse>> getReviews(
+	public ResponseEntity<Page<ReviewWithCommentsResponse>> getReviewsByStore(
 		@PathVariable Long storeId,
 		@PageableDefault(page = 1, size = 5, sort = "createdAt,desc") Pageable pageable
 	) {

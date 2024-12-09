@@ -3,6 +3,8 @@ package com.sparta.chairingproject.domain.review.service;
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -62,10 +64,14 @@ public class ReviewService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		return reviewRepository.findByStore(store, pageable)
-			.map(review -> {
-				List<Comment> comments = commentRepository.findByReview(review);
-				return ReviewWithCommentsResponse.from(review, comments);
-			});
+		Page<Review> reviews = reviewRepository.findReviewsByStore(store, pageable);
+		// 조회한 리뷰 목록에 해당하는 댓글들을 한 번의 쿼리로 가져옴
+		List<Comment> comments = commentRepository.findCommentsByReviews(reviews.getContent());
+		// 댓글 목록을 각 리뷰를 기준으로 그룹화하여 Map 으로 변환.
+		Map<Review, List<Comment>> commentsByReview = comments.stream()
+			.collect(Collectors.groupingBy(Comment::getReview));
+
+		return reviews.map(
+			review -> ReviewWithCommentsResponse.from(review, commentsByReview.getOrDefault(review, List.of())));
 	}
 }
