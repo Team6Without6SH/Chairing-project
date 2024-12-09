@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.review.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,7 +41,7 @@ public class ReviewController {
 	@GetMapping("/stores/{storeId}/reviews")
 	public ResponseEntity<Page<ReviewWithCommentsResponse>> getReviewsByStore(
 		@PathVariable Long storeId,
-		@PageableDefault(page = 1, size = 5, sort = "createdAt,desc") Pageable pageable
+		@PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
 		Page<ReviewWithCommentsResponse> response = reviewService.getReviewsByStore(storeId, pageable);
 		return ResponseEntity.ok(response);
