@@ -47,8 +47,4 @@ public class Review extends Timestamped {
 		this.store = store;
 		this.member = member;
 	}
-
-	public int getRating() {
-		return score;
-	}
 }

@@ -40,7 +40,7 @@ public class CommentServiceTest {
 		// Given
 		Long storeId = 1L;
 		Long reviewId = 1L;
-		Member owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
+		Member owner = new Member(1L, "Test Owner", "owner@example.com", "password", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "storeImage", "description", owner);
 		Review review = new Review("Good service", 5, store, owner);
 
@@ -89,8 +89,8 @@ public class CommentServiceTest {
 		// Given
 		Long storeId = 1L;
 		Long reviewId = 1L;
-		Member owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
-		Member differentOwner = new Member("Another Owner", "different@example.com", "password", MemberRole.OWNER);
+		Member owner = new Member(1L, "Test Owner", "owner@example.com", "password", MemberRole.OWNER);
+		Member differentOwner = new Member(2L, "Another Owner", "different@example.com", "password", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "storeImage", "description", owner);
 		Review review = new Review("Good service", 5, store, owner);
 

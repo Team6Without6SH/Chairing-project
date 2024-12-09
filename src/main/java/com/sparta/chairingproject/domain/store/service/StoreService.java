@@ -86,7 +86,7 @@ public class StoreService {
 
 		List<ReviewResponse> reviews = reviewRepository.findByStoreId(storeId)
 			.stream()
-			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getRating()))
+			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getScore()))
 			.toList();
 
 		int waitingCount = store.getReservations().size(); // 가게 예약 리스트 크기 사용
