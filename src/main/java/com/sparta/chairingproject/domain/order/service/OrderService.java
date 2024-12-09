@@ -177,8 +177,9 @@ public class OrderService {
 				throw new GlobalException(TABLE_FULL_CANNOT_SET_IN_PROGRESS);
 			}
 		}
-		if (currentOrderStatus.equals(OrderStatus.WAITING) && !newStatus.equals(OrderStatus.ADMISSION)) {
-			throw new GlobalException(ONLY_ADMISSION_ALLOWED_FROM_WAITING);
+		if (currentOrderStatus.equals(OrderStatus.WAITING) && !(newStatus.equals(OrderStatus.ADMISSION)
+			|| newStatus.equals(OrderStatus.CANCELLED))) {
+			throw new GlobalException(CANCELLED_ADMISSION_ALLOWED_FROM_WAITING);
 		}
 		if (currentOrderStatus.equals(OrderStatus.ADMISSION) && !(newStatus.equals(OrderStatus.IN_PROGRESS)
 			|| newStatus.equals(OrderStatus.CANCELLED))) {

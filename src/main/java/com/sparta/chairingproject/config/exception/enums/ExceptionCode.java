@@ -68,7 +68,7 @@ public enum ExceptionCode {
 	CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER(HttpStatus.FORBIDDEN, "가게 사장님은 취소 요청을 보낼 수 없습니다."),
 	CANNOT_CHANGE_COMPLETED_OR_CANCELLED(HttpStatus.BAD_REQUEST, "완료되거나 이미 취소된 주문은 상태를 변경할 수 없습니다"), //사장님 전용
 	TABLE_FULL_CANNOT_SET_IN_PROGRESS(HttpStatus.CONFLICT, "만석 상태에서는 진행중 상태로 변경할 수 없습니다."),
-	ONLY_ADMISSION_ALLOWED_FROM_WAITING(HttpStatus.BAD_REQUEST, "웨이팅인 사람만 입장으로 변경 시킬 수 있습니다."),
+	CANCELLED_ADMISSION_ALLOWED_FROM_WAITING(HttpStatus.BAD_REQUEST, "웨이팅 중인 사람은 입장 또는 취소 상태로만 변경할 수 있습니다."),
 	ONLY_IN_PROGRESS_OR_CANCELLED_ALLOWED_FROM_ADMISSION(HttpStatus.BAD_REQUEST, "입장 상태에서는 진행중 또는 취소 상태로만 변경가능합니다."),
 	NOT_VALID_STATUS_NAME(HttpStatus.BAD_REQUEST, "상태값이 잘못 입력되었습니다."),
 
