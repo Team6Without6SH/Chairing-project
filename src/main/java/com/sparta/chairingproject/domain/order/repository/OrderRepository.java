@@ -27,6 +27,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 		@Param("endDate") LocalDateTime endDate,
 		Pageable pageable);
 
-	Optional<Order> findByMemberAndStore(Member member, Store store);
+	Optional<Order> findByIdAndMemberAndStore(Long OrderId, Member member, Store store);
 
 }

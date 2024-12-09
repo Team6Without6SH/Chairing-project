@@ -35,7 +35,7 @@ public class ReviewService {
 	private final OrderRepository orderRepository;
 	private final CommentRepository commentRepository;
 
-	public Review createReview(Long storeId, ReviewRequest request, Member member) {
+	public Review createReview(Long storeId, Long orderId, ReviewRequest request, Member member) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
@@ -43,11 +43,15 @@ public class ReviewService {
 			throw new GlobalException(STORE_PENDING_CANNOT_REVIEW);
 		}
 
-		Order order = orderRepository.findByMemberAndStore(member, store)
+		Order order = orderRepository.findByIdAndMemberAndStore(orderId, member, store)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_ORDER));
 
 		if (order.getStatus() != OrderStatus.COMPLETED) {
 			throw new GlobalException(ORDER_NOT_COMPLETED_CANNOT_REVIEW);
+		}
+
+		if (reviewRepository.existsByOrderIdAndMember(orderId, member)) {
+			throw new GlobalException(REVIEW_ALREADY_EXISTS);
 		}
 
 		Review review = Review.builder()
