@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
@@ -226,4 +227,19 @@ public class OrderServiceTest {
 		assertThrows(GlobalException.class, () -> orderService.createOrder(storeId, member, orderRequest));
 	}
 
+	@Test
+	@DisplayName("존재하지 않는 주문 ID 로 요청 시 예외가 발생한다.")
+	public void requestOrderCancellation_ThrowException_When_OrderNotFound() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member member = new Member(1L, "Test Member", "Test@email.com", "password123", MemberRole.USER);
+
+		when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.requestOrderCancellation(storeId, orderId, member, null));
+
+		assertEquals(ExceptionCode.NOT_FOUND_ORDER, exception.getExceptionCode());
+	}
 }
