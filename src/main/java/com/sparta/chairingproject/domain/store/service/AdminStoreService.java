@@ -58,5 +58,17 @@ public class AdminStoreService {
 		storeRepository.save(store);
 		return new StoreAdminResponse(store.getId(), store.getName(), store.getStatus().name());
 	}
+
+	@Transactional
+	public void approveCloseStore(Long storeId) {
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+
+		if (store.getIsDeleted() == null || !store.getIsDeleted()) {
+			throw new GlobalException(STORE_ALREADY_DELETED);
+		}
+
+		storeRepository.softDeleteById(storeId); // 실제 데이터 삭제 (소프트 딜리트 유지 시 삭제 제외 가능)
+	}
 }
 

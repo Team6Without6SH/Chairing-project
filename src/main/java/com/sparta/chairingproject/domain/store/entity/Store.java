@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.domain.store.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,19 +66,20 @@ public class Store extends Timestamped {
 
 	private boolean approved;
 
+	@Column(nullable = true)
+	private Boolean isDeleted = false;
+
+	private LocalDateTime deletedAt;
+
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member owner;
-
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Menu> menus = new ArrayList<>();
-
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Review> reviews = new ArrayList<>();
-
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Reservation> reservations = new ArrayList<>();
-
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Order> orders = new ArrayList<>();
 	@Enumerated(EnumType.STRING)
@@ -118,6 +120,11 @@ public class Store extends Timestamped {
 
 	public void rejectRequest() {
 		this.requestStatus = StoreRequestStatus.REJECTED;
+	}
+
+	public void markAsDeleted() {
+		this.isDeleted = true;
+		this.deletedAt = LocalDateTime.now();
 	}
 
 }
