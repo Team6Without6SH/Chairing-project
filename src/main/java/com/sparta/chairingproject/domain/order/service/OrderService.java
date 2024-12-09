@@ -42,7 +42,7 @@ public class OrderService {
 	private final StoreRepository storeRepository;
 
 	@Transactional
-	public OrderResponse createOrder(Long storeId, UserDetailsImpl authMember,
+	public OrderResponse createOrder(Long storeId, Member authMember,
 		OrderRequest orderRequest) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
@@ -72,13 +72,15 @@ public class OrderService {
 		}
 
 		Order order = Order.createOf(
-			authMember.getMember(),
+			authMember,
 			store,
 			menus,
 			orderStatus,
 			totalPrice
 		);
 		orderRepository.save(order);
+
+		int waitingTeams = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING);
 
 		List<String> menuNames = menus.stream()
 			.map(Menu::getName)
@@ -87,6 +89,7 @@ public class OrderService {
 			.orderId(order.getId())
 			.orderStatus(order.getStatus().name())
 			.menuNames(menuNames)
+			.waitingTeams(waitingTeams)
 			.totalPrice(order.getPrice())
 			.build();
 	}
@@ -206,7 +209,8 @@ public class OrderService {
 		if (endDate == null && startDate != null) {
 			endDate = startDate.plusDays(days); // 조회 기간 days 를 기준으로 앞뒤에 기간을 추가해서 조회
 		}
-		return orderRepository.findByStoreAndCreatedAtBetween(store.getId(), startDate.atStartOfDay(), endDate.atTime(23, 59, 59), pageable)
+		return orderRepository.findByStoreAndCreatedAtBetween(store.getId(), startDate.atStartOfDay(),
+				endDate.atTime(23, 59, 59), pageable)
 			.map(OrderPageResponse::from);
 	}
 }

@@ -5,6 +5,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
@@ -37,6 +38,7 @@ public class StoreService {
 	private final MenuRepository menuRepository;
 	private final ReviewRepository reviewRepository;
 
+	@Transactional
 	public void registerStore(StoreRequest request, UserDetailsImpl authMember) {
 
 		Member owner = memberRepository.findById(authMember.getMember().getId())
@@ -85,7 +87,7 @@ public class StoreService {
 
 		List<ReviewResponse> reviews = reviewRepository.findByStoreId(storeId)
 			.stream()
-			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getRating()))
+			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getScore()))
 			.toList();
 
 		int waitingCount = store.getReservations().size(); // 가게 예약 리스트 크기 사용
@@ -100,6 +102,7 @@ public class StoreService {
 			waitingCount
 		);
 	}
+
 
 	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req, UserDetailsImpl authUser) {
 		Member owner = memberRepository.findById(authUser.getMember().getId())
@@ -135,6 +138,7 @@ public class StoreService {
 		);
 	}
 
+	@Transactional
 	public StoreOwnerResponse getStoreById(Long storeId, Long ownerId) {
 
 		Store store = storeRepository.findByIdAndOwnerId(storeId, ownerId)

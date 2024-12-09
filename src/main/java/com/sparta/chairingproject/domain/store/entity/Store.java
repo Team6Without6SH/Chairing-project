@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.domain.store.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,9 +24,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
@@ -46,7 +47,6 @@ public class Store extends Timestamped {
 	@Column(nullable = true)
 	private String description;
 
-	@NotBlank(message = "가게 주소는 필수 입력 항목입니다.")
 	@Column(nullable = true)
 	private String address;
 
@@ -64,23 +64,27 @@ public class Store extends Timestamped {
 	@Column(nullable = false)
 	private int tableCount;
 
+	@Setter
+	@Column(nullable = false)
 	private boolean approved;
+
+	@Column(nullable = true)
+	private Boolean isInActive = false;
+
+	private LocalDateTime deletedAt;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member owner;
-
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Menu> menus = new ArrayList<>();
-
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Review> reviews = new ArrayList<>();
-
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Reservation> reservations = new ArrayList<>();
-
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Order> orders = new ArrayList<>();
+	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private StoreStatus status = StoreStatus.PENDING;
@@ -101,6 +105,23 @@ public class Store extends Timestamped {
 		this.image = image;
 		this.description = description;
 		this.owner = member;
+	}
+
+	//테스트 용(자리선점)
+	public Store(Long id, String name, String image, String description, Member owner, int tableCount, String address,
+		String phone, String openTime, String closeTime, String category, boolean approved) {
+		this.id = id;
+		this.name = name;
+		this.image = image;
+		this.description = description;
+		this.owner = owner;
+		this.tableCount = tableCount;
+		this.address = address;
+		this.phone = phone;
+		this.openTime = openTime;
+		this.closeTime = closeTime;
+		this.Category = category;
+		this.approved = approved;
 	}
 
 	public void updateStoreStatus(StoreStatus status) {
@@ -130,5 +151,11 @@ public class Store extends Timestamped {
 		this.category = req.getCategory();
 		this.description = req.getDescription();
 		this.image = req.getImage();
+  }
+
+	public void markAsDeleted() {
+		this.isInActive = true;
+		this.deletedAt = LocalDateTime.now();
+
 	}
 }

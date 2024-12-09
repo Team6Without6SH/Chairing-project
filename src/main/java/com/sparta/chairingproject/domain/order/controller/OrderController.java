@@ -39,7 +39,7 @@ public class OrderController {
 		@Valid @RequestBody OrderRequest orderRequest
 	) {
 		return ResponseEntity.status(HttpStatus.CREATED)
-			.body(orderService.createOrder(storeId, authMember, orderRequest));
+			.body(orderService.createOrder(storeId, authMember.getMember(), orderRequest));
 	}
 
 	@Secured("ROLE_USER")
