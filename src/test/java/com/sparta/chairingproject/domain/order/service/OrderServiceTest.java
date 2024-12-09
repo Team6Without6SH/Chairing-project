@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
@@ -82,5 +83,19 @@ public class OrderServiceTest {
 		assertNotNull(response);
 		assertEquals(OrderStatus.WAITING, response.getOrderStatus());
 		assertEquals(0, response.getWaitingTeams());
+	}
+
+	@Test
+	@DisplayName("유효하지 않은 storeId로 주문을 시도하면 예외가 발생한다.")
+	public void createWaiting_ThrowException_When_InvalidStoreId() {
+		// given
+		Long storeId = 999L;
+		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.empty()); // store가 없을 때
+
+		// when & then
+		RequestDto requestDto = new RequestDto();
+		assertThrows(GlobalException.class, () -> orderService.createWaiting(storeId, member, requestDto));
 	}
 }
