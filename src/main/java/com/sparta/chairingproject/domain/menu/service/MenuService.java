@@ -2,15 +2,18 @@ package com.sparta.chairingproject.domain.menu.service;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuRequest;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuUpdateRequest;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuDeleteResponse;
+import com.sparta.chairingproject.domain.menu.dto.response.MenuDetailResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuUpdateResponse;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -18,7 +21,6 @@ import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -79,5 +81,20 @@ public class MenuService {
 		menu.delete();
 
 		return new MenuDeleteResponse(menuId, menu.getName(), menu.isInActive());
+	}
+
+	@Transactional(readOnly = true)
+	public List<MenuDetailResponse> getAllMenusByStore(Long storeId, Member member) {
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+		if (!store.getOwner().getId().equals(member.getId())) {
+			throw new GlobalException(ONLY_OWNER_ALLOWED);
+		}
+
+		List<Menu> menus = menuRepository.findAllByStoreId(storeId);
+
+		return menus.stream()
+			.map(MenuDetailResponse::from)
+			.toList();
 	}
 }
