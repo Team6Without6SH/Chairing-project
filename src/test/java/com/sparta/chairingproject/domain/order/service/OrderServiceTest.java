@@ -23,6 +23,7 @@ import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
+import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
@@ -331,5 +332,30 @@ public class OrderServiceTest {
 			() -> orderService.requestOrderCancellation(storeId, orderId, orderMember, null));
 
 		assertEquals(ExceptionCode.CANCELLED_COMPLETED_NOT_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("정상적으로 주문 취소 요청이 처리된다.")
+	public void requestOrderCancellation_Success() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+
+		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		Order order = new Order(orderId, orderMember, store1, OrderStatus.IN_PROGRESS, 0);
+
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		//when
+		OrderCancelResponse response = orderService.requestOrderCancellation(storeId, orderId, orderMember, null);
+
+		//then
+		assertNotNull(response);
+		assertEquals(OrderStatus.CANCEL_REQUEST, response.getOrderStatus());
+		assertEquals(orderId, response.getOrderId());
 	}
 }
