@@ -87,4 +87,16 @@ public class ReviewService {
 		review.update(request.getContent(), request.getScore());
 		reviewRepository.save(review);
 	}
+
+	@Transactional
+	public void deleteReview(Long reviewId, RequestDto request, Member member) {
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_REVIEW));
+
+		if (!review.getMember().getId().equals(member.getId())) {
+			throw new GlobalException(NOT_AUTHOR_OF_REVIEW);
+		}
+
+		review.softDelete();
+	}
 }
