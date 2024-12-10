@@ -68,8 +68,4 @@ public class Review extends Timestamped {
 	public void softDelete() {
 		this.deletedAt = LocalDateTime.now();
 	}
-
-	public boolean isDeleted() {
-		return this.deletedAt != null;
-	}
 }
