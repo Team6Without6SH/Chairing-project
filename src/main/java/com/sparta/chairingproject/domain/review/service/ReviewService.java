@@ -85,7 +85,6 @@ public class ReviewService {
 		}
 
 		review.update(request.getContent(), request.getScore());
-		reviewRepository.save(review);
 	}
 
 	@Transactional

@@ -56,6 +56,5 @@ public class CommentService {
 		}
 
 		comment.update(request.getContent());
-		commentRepository.save(comment);
 	}
 }
