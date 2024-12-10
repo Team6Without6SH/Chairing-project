@@ -3,6 +3,7 @@ package com.sparta.chairingproject.domain.comment.service;
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.comment.dto.CommentRequest;
@@ -12,6 +13,7 @@ import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -37,6 +39,23 @@ public class CommentService {
 		}
 
 		Comment comment = new Comment(request.getContent(), review);
+		commentRepository.save(comment);
+	}
+
+	@Transactional
+	public void updateComment(Long reviewId, Long commentId, @Valid CommentRequest request, Member owner) {
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_COMMENT));
+
+		if (!comment.getReview().getId().equals(reviewId)) {
+			throw new GlobalException(NOT_MATCHING_COMMENT_AND_REVIEW);
+		}
+
+		if (!comment.getReview().getStore().getOwner().getId().equals(owner.getId())) {
+			throw new GlobalException(NOT_AUTHOR_OF_COMMENT);
+		}
+
+		comment.update(request.getContent());
 		commentRepository.save(comment);
 	}
 }
