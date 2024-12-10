@@ -83,7 +83,7 @@ public class ReviewService {
 			throw new GlobalException(NOT_AUTHOR_OF_REVIEW);
 		}
 
-		if (review.isDeleted()) {
+		if (review.getDeletedAt() != null) {
 			throw new GlobalException(REVIEW_ALREADY_DELETED);
 		}
 
