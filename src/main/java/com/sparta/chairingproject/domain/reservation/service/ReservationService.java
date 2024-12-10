@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
-import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
 import com.sparta.chairingproject.domain.reservation.dto.request.UpdateReservationRequest;
 import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
