@@ -54,4 +54,9 @@ public class Review extends Timestamped {
 		this.member = member;
 		this.order = order;
 	}
+
+	public void update(String content, int score) {
+		this.content = content;
+		this.score = score;
+	}
 }

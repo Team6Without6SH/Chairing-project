@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -48,5 +49,16 @@ public class ReviewController {
 	) {
 		Page<ReviewWithCommentResponse> response = reviewService.getReviewsByStore(storeId, request, pageable);
 		return ResponseEntity.ok(response);
+	}
+
+	@Secured("ROLE_USER")
+	@PatchMapping("/reviews/{reviewId}")
+	public ResponseEntity<Void> updateReview(
+		@PathVariable Long reviewId,
+		@RequestBody @Valid ReviewRequest reviewRequest,
+		@AuthenticationPrincipal UserDetailsImpl authMember
+	) {
+		reviewService.updateReview(reviewId, reviewRequest, authMember.getMember());
+		return ResponseEntity.ok().build();
 	}
 }
