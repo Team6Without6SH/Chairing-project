@@ -119,7 +119,7 @@ public class OrderServiceTest {
 		OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 200); //메뉴 두개 주문하고 가격을 합에 맞춰 설정하기
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean");
+			"09:00", "21:00", "Korean", true);
 
 		Menu menu1 = new Menu(1L, 90, "Menu1", store);
 		Menu menu2 = new Menu(2L, 110, "Menu2", store);
