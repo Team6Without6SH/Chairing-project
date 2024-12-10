@@ -393,4 +393,46 @@ public class OrderServiceTest {
 
 		assertEquals(ExceptionCode.ONLY_OWNER_ALLOWED, exception.getExceptionCode());
 	}
+
+	@Test
+	@DisplayName("주문이 존재하지 않는 경우: NOT_FOUND_ORDER")
+	public void updateOrderStatus_ThrowException_When_OrderNotFound() {
+		Long storeId = 1L;
+		Long orderId = 2L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.NOT_FOUND_ORDER, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("주문이 요청한 가게와 일치하지 않는 경우: NOT_ORDER_THIS_STORE")
+	public void updateOrderStatus_ThrowsException_When_NotOrderThisStore() {
+		Long storeId = 1L;
+		Long orderId = 2L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+		Store differentStore = new Store(2L, "Test Store2", "Test Image", "description", owner, 5, "seoul",
+			"010-1111-2223",
+			"09:00", "21:00", "Korean", true);
+		Order order = Order.createOf(owner, differentStore, Collections.emptyList(), OrderStatus.WAITING, 0);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.NOT_ORDER_THIS_STORE, exception.getExceptionCode());
+	}
 }
