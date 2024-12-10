@@ -150,7 +150,7 @@ public class Store extends Timestamped {
 		this.category = req.getCategory();
 		this.description = req.getDescription();
 		this.image = req.getImage();
-  }
+	}
 
 	public void markAsDeleted() {
 		this.inActive = true;

@@ -3,6 +3,7 @@ package com.sparta.chairingproject.domain.order.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -13,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
@@ -558,4 +561,18 @@ public class OrderServiceTest {
 		assertEquals("IN_PROGRESS", response.getOrderStatus());
 		verify(orderRepository).save(any(Order.class));
 	}
+
+	@Test
+	@DisplayName("가게가 없을때 예외가 발생한다")
+	public void getOrdersByStore_ThrowException_When_StoreNotFound() {
+		Long storeId = 1L;
+		Pageable pageable = PageRequest.of(0, 10);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.getOrdersByStore(storeId, pageable, null, null, 30));
+
+		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
+	}
+
 }
