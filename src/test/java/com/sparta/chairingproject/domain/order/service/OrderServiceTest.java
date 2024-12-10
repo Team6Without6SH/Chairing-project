@@ -456,4 +456,23 @@ public class OrderServiceTest {
 
 		assertEquals(ExceptionCode.CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER, exception.getExceptionCode());
 	}
+
+	@Test
+	@DisplayName("주문 상태가 COMPLETED 또는 CANCELLED 인 경우 변경 시도: CANNOT_CHANGE_COMPLETE_OR_CANCELLED")
+	public void updateOrderStatus_ThrowException_When_CannotChangeCompleteOrCancelled() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+		Order completedOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.COMPLETED, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(completedOrder));
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.CANNOT_CHANGE_COMPLETED_OR_CANCELLED, exception.getExceptionCode());
+	}
 }
