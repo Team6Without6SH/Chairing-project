@@ -475,4 +475,25 @@ public class OrderServiceTest {
 
 		assertEquals(ExceptionCode.CANNOT_CHANGE_COMPLETED_OR_CANCELLED, exception.getExceptionCode());
 	}
+
+	@Test
+	@DisplayName("IN_PROGRESS 상태로 변경 할 때, 테이블이 다 차있는 경우: TABLE_FULL_CANNOT_SET_IN_PROGRESS")
+	public void updateOrderStatus_ThrowException_When_TableFullCanNotSetInProgress() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+		Order waitingOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(waitingOrder));
+		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(5);
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.TABLE_FULL_CANNOT_SET_IN_PROGRESS, exception.getExceptionCode());
+	}
 }
