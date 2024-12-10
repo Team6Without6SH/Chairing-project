@@ -79,7 +79,7 @@ public class OrderServiceTest {
 		Member owner = new Member(1L, "Test owner", "Test@email.com", "password123", MemberRole.OWNER);
 		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean"); // 테이블 수 5으로 설정
+			"09:00", "21:00", "Korean", true); // 테이블 수 5으로 설정
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(
