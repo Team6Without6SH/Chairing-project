@@ -22,6 +22,7 @@ import com.sparta.chairingproject.domain.menu.dto.request.MenuRequest;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuUpdateRequest;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuDeleteResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuDetailResponse;
+import com.sparta.chairingproject.domain.menu.dto.response.MenuDeleteResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuUpdateResponse;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
