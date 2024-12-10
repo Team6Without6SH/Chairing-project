@@ -65,10 +65,9 @@ public class ReviewService {
 	}
 
 	public Page<ReviewWithCommentResponse> getReviewsByStore(Long storeId, RequestDto request, Pageable pageable) {
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+		storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		return reviewRepository.findReviewsByStore(store, pageable)
+		return reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)
 			.map(review -> {
 				Comment comment = commentRepository.findByReview(review).orElse(null);
 				return ReviewWithCommentResponse.from(review, comment);
@@ -84,7 +83,22 @@ public class ReviewService {
 			throw new GlobalException(NOT_AUTHOR_OF_REVIEW);
 		}
 
+		if (review.isDeleted()) {
+			throw new GlobalException(REVIEW_ALREADY_DELETED);
+		}
+
 		review.update(request.getContent(), request.getScore());
-		reviewRepository.save(review);
+	}
+
+	@Transactional
+	public void deleteReview(Long reviewId, RequestDto request, Member member) {
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_REVIEW));
+
+		if (!review.getMember().getId().equals(member.getId())) {
+			throw new GlobalException(NOT_AUTHOR_OF_REVIEW);
+		}
+
+		review.softDelete();
 	}
 }

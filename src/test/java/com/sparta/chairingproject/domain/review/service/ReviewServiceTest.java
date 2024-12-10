@@ -36,6 +36,7 @@ import com.sparta.chairingproject.domain.review.dto.ReviewWithCommentResponse;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
+import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
@@ -72,8 +73,9 @@ public class ReviewServiceTest {
 		orderId = 1L;
 		request = new ReviewRequest("좋은 가게였습니다.", 5);
 		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
-		store = new Store(1L, "Test name", "Test image", "Test description", member);
-		store.updateStoreStatus(StoreStatus.OPEN);
+		store = new Store(1L, "Test name", "Test image", "Test description", member, StoreRequestStatus.APPROVED,
+			StoreStatus.OPEN);
+		store.approveRequest();
 		menus = new ArrayList<>();
 		order = order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
 		pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
@@ -152,7 +154,7 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 작성 실패 - 팬딩 상태 가게")
 	void createReview_fail_storePending() {
 		// Given
-		store = new Store(1L, "Pending Store", "Pending Image", "Pending Description", member);
+		store.updateStoreStatus(StoreStatus.PENDING);
 		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -178,7 +180,7 @@ public class ReviewServiceTest {
 		Page<Review> reviews = new PageImpl<>(List.of(review), pageable, 1);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(reviewRepository.findReviewsByStore(store, pageable)).thenReturn(reviews);
+		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(reviews);
 		when(commentRepository.findByReview(review)).thenReturn(Optional.of(comment));
 
 		// When
@@ -191,7 +193,7 @@ public class ReviewServiceTest {
 		assertEquals("Thank you for your review!", result.getContent().get(0).getComment().getContent());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(reviewRepository, times(1)).findReviewsByStore(store, pageable);
+		verify(reviewRepository, times(1)).findByStoreIdAndDeletedAtIsNull(storeId, pageable);
 		verify(commentRepository, times(1)).findByReview(review);
 	}
 
@@ -204,7 +206,7 @@ public class ReviewServiceTest {
 		Page<Review> reviews = new PageImpl<>(List.of(review), pageable, 1);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(reviewRepository.findReviewsByStore(store, pageable)).thenReturn(reviews);
+		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(reviews);
 		when(commentRepository.findByReview(review)).thenReturn(Optional.empty());
 
 		// When
@@ -217,7 +219,7 @@ public class ReviewServiceTest {
 		assertNull(result.getContent().get(0).getComment());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(reviewRepository, times(1)).findReviewsByStore(store, pageable);
+		verify(reviewRepository, times(1)).findByStoreIdAndDeletedAtIsNull(storeId, pageable);
 		verify(commentRepository, times(1)).findByReview(review);
 	}
 
@@ -234,7 +236,7 @@ public class ReviewServiceTest {
 		assertEquals(NOT_FOUND_STORE.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(reviewRepository, never()).findReviewsByStore(any(), any());
+		verify(reviewRepository, never()).findByStoreIdAndDeletedAtIsNull(any(), any());
 		verify(commentRepository, never()).findByReview(any());
 	}
 }
