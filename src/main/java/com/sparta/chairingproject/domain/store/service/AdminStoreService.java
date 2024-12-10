@@ -48,19 +48,26 @@ public class AdminStoreService {
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		StoreRequestStatus status = StoreRequestStatus.valueOf(request.getStatus());
-		if (status == StoreRequestStatus.APPROVED) {
+		StoreRequestStatus requestStatus;
+		try {
+			requestStatus = StoreRequestStatus.valueOf(request.getStatus());
+		} catch (IllegalArgumentException e) {
+			throw new GlobalException(INVALID_REQUEST_STATUS);
+		}
+
+		//상태 전환 처리
+		if (requestStatus == StoreRequestStatus.APPROVED) {
 			store.approveRequest();
-			store.setApproved(true);
+			store.setRequestStatus(StoreRequestStatus.APPROVED);
 			store.setStatus(StoreStatus.OPEN);
-			System.out.println("Store approved: " + store.getId()
-				+ ", isApproved: " + store.isApproved() + ", status: "
-				+ store.getStatus());
-		} else if (status == StoreRequestStatus.REJECTED) {
+		} else if (requestStatus == StoreRequestStatus.REJECTED) {
 			store.rejectRequest();
+			store.setRequestStatus(StoreRequestStatus.REJECTED);
+			store.setStatus(StoreStatus.PENDING);
 		} else {
 			throw new GlobalException(INVALID_REQUEST_STATUS);
 		}
+
 		storeRepository.save(store);
 		return new StoreAdminResponse(store.getId(), store.getName(), store.getStatus().name());
 	}
@@ -70,7 +77,7 @@ public class AdminStoreService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		if (store.getIsInActive() == null || !store.getIsInActive()) {
+		if (store.getInActive() == null || !store.getInActive()) {
 			throw new GlobalException(STORE_ALREADY_DELETED);
 		}
 

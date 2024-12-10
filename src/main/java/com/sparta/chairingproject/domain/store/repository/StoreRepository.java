@@ -18,14 +18,12 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
 	List<Store> findAllByRequestStatusAndStatus(StoreRequestStatus requestStatus, StoreStatus status);
 
-	boolean existsByOwner(Member owner);
-
 	int countByOwner(Member owner);
 
 	Optional<Store> findByIdAndOwnerId(Long storeId, Long ownerId);
 
 	@Modifying
-	@Query("UPDATE Store s SET s.isInActive = true, s.deletedAt = CURRENT_TIMESTAMP WHERE s.id = :storeId")
+	@Query("UPDATE Store s SET s.inActive = true, s.deletedAt = CURRENT_TIMESTAMP WHERE s.id = :storeId")
 	void softDeleteById(@Param("storeId") Long storeId);
 
 }

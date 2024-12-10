@@ -24,7 +24,7 @@ public class StoreMapper {
 			store.getCloseTime(),
 			null, // 카테고리 정보는 확장 가능
 			store.getDescription(),
-			List.of(store.getImage() != null ? store.getImage() : "default.jpg"),
+			store.getImage(),
 			store.getOwner().getName()
 		);
 	}

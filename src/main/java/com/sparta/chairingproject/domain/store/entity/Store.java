@@ -24,6 +24,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -59,17 +61,13 @@ public class Store extends Timestamped {
 	@Column(nullable = true)
 	private String closeTime;
 
-	private String Category;
+	private String category;
 
 	@Column(nullable = false)
 	private int tableCount;
 
-	@Setter
-	@Column(nullable = false)
-	private boolean approved;
-
 	@Column(nullable = true)
-	private Boolean isInActive = false;
+	private Boolean inActive = false;
 
 	private LocalDateTime deletedAt;
 
@@ -88,11 +86,13 @@ public class Store extends Timestamped {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private StoreStatus status = StoreStatus.PENDING;
+	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
 
-	public Store(String name, String image, String description, Member owner) {
+	public Store(String name, String image, String description, @NotBlank @Size String requestDescription,
+		Member owner) {
 		this.name = name;
 		this.image = image;
 		this.description = description;
@@ -109,7 +109,7 @@ public class Store extends Timestamped {
 
 	//테스트 용(자리선점)
 	public Store(Long id, String name, String image, String description, Member owner, int tableCount, String address,
-		String phone, String openTime, String closeTime, String category, boolean approved) {
+		String phone, String openTime, String closeTime, String category) {
 		this.id = id;
 		this.name = name;
 		this.image = image;
@@ -120,8 +120,7 @@ public class Store extends Timestamped {
 		this.phone = phone;
 		this.openTime = openTime;
 		this.closeTime = closeTime;
-		this.Category = category;
-		this.approved = approved;
+		this.category = category;
 	}
 
 	public void updateStoreStatus(StoreStatus status) {
@@ -154,8 +153,7 @@ public class Store extends Timestamped {
   }
 
 	public void markAsDeleted() {
-		this.isInActive = true;
+		this.inActive = true;
 		this.deletedAt = LocalDateTime.now();
-
 	}
 }

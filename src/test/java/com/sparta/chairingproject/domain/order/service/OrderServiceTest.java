@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
@@ -56,7 +57,7 @@ public class OrderServiceTest {
 		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
 			"09:00",
-			"21:00", "Korean", true);
+			"21:00", "Korean");
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store)); //store 반환시키기
 
@@ -78,7 +79,7 @@ public class OrderServiceTest {
 		Member owner = new Member(1L, "Test owner", "Test@email.com", "password123", MemberRole.OWNER);
 		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true); // 테이블 수 5으로 설정
+			"09:00", "21:00", "Korean"); // 테이블 수 5으로 설정
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(
@@ -118,7 +119,7 @@ public class OrderServiceTest {
 		OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 200); //메뉴 두개 주문하고 가격을 합에 맞춰 설정하기
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Menu menu1 = new Menu(1L, 90, "Menu1", store);
 		Menu menu2 = new Menu(2L, 110, "Menu2", store);
@@ -147,7 +148,7 @@ public class OrderServiceTest {
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		OrderRequest orderRequest = new OrderRequest(Collections.emptyList(), 0);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(5); // 진행 중인 주문 수가 5
@@ -171,7 +172,7 @@ public class OrderServiceTest {
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		OrderRequest orderRequest = new OrderRequest(Collections.emptyList(), 0);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(5);
@@ -197,7 +198,7 @@ public class OrderServiceTest {
 		OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 90); //메뉴 두개 주문
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Menu menu1 = new Menu(1L, 90, "Menu1", store);
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -218,7 +219,7 @@ public class OrderServiceTest {
 		OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 210); // 메뉴 가격을 잘못 입력했을 때
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Menu menu1 = new Menu(1L, 90, "Menu1", store);
 		Menu menu2 = new Menu(2L, 110, "Menu2", store);

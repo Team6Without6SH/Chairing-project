@@ -16,14 +16,8 @@ public class StoreResponse {
 	private String phone;
 	private String openTime;
 	private String closeTime;
-	private List<String> categories;
+	private String category;
 	private String description;
-	private List<String> images;
+	private String image;
 	private String ownerName;
-
-	public StoreResponse(String name, String image, String description) {
-		this.name = name;
-		this.images = List.of(image);
-		this.description = description;
-	}
 }
