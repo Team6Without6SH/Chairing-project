@@ -183,7 +183,7 @@ public class OrderService {
 		}
 		if (currentOrderStatus.equals(OrderStatus.ADMISSION) && !(newStatus.equals(OrderStatus.IN_PROGRESS)
 			|| newStatus.equals(OrderStatus.CANCELLED))) {
-			throw new GlobalException(ONLY_IN_PROGRESS_OR_CANCELLED_ALLOWED_FROM_ADMISSION);
+			throw new GlobalException(IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION);
 		}
 		order.changeStatus(newStatus);
 		orderRepository.save(order);
