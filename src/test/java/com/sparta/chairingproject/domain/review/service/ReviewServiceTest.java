@@ -15,8 +15,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.domain.comment.entity.Comment;
+import com.sparta.chairingproject.domain.comment.repository.CommentRepository;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -24,6 +32,7 @@ import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.review.dto.ReviewRequest;
+import com.sparta.chairingproject.domain.review.dto.ReviewWithCommentResponse;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
@@ -41,6 +50,9 @@ public class ReviewServiceTest {
 	@Mock
 	private OrderRepository orderRepository;
 
+	@Mock
+	private CommentRepository commentRepository;
+
 	@InjectMocks
 	private ReviewService reviewService;
 
@@ -50,6 +62,9 @@ public class ReviewServiceTest {
 	private Member member;
 	private Store store;
 	private List<Menu> menus;
+	private Order order;
+	private Pageable pageable;
+	private RequestDto requestDto;
 
 	@BeforeEach
 	void setUp() {
@@ -57,11 +72,11 @@ public class ReviewServiceTest {
 		orderId = 1L;
 		request = new ReviewRequest("좋은 가게였습니다.", 5);
 		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
-
-		store = new Store("Test name", "Test image", "Test description", member);
+		store = new Store(1L, "Test name", "Test image", "Test description", member);
 		store.updateStoreStatus(StoreStatus.OPEN);
-
 		menus = new ArrayList<>();
+		order = order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
+		pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
 	}
 
 	@Test
@@ -112,7 +127,7 @@ public class ReviewServiceTest {
 		verify(reviewRepository, times(1)).existsByOrderIdAndMemberId(orderId, member.getId());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
-	
+
 	@Test
 	@DisplayName("리뷰 작성 실패 - 가게 OPEN 상태지만 주문 미완료 상태")
 	void createReview_fail_orderNotCompleted() {
@@ -137,7 +152,7 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 작성 실패 - 팬딩 상태 가게")
 	void createReview_fail_storePending() {
 		// Given
-		store = new Store("Pending Store", "Pending Image", "Pending Description", member);
+		store = new Store(1L, "Pending Store", "Pending Image", "Pending Description", member);
 		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -151,5 +166,75 @@ public class ReviewServiceTest {
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(orderRepository, never()).findByIdAndMemberAndStore(any(), any(), any());
 		verify(reviewRepository, never()).save(any(Review.class));
+	}
+
+	@Test
+	@DisplayName("리뷰 조회 성공 - 댓글 존재")
+	void getReviewsByStore_success_withComment() {
+		// Given
+		Review review = new Review("Good service", 5, store, member, order);
+		Comment comment = new Comment("Thank you for your review!", review);
+
+		Page<Review> reviews = new PageImpl<>(List.of(review), pageable, 1);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(reviewRepository.findReviewsByStore(store, pageable)).thenReturn(reviews);
+		when(commentRepository.findByReview(review)).thenReturn(Optional.of(comment));
+
+		// When
+		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, requestDto, pageable);
+
+		// Then
+		assertNotNull(result);
+		assertEquals(1, result.getContent().size());
+		assertEquals("Good service", result.getContent().get(0).getReview().getContent());
+		assertEquals("Thank you for your review!", result.getContent().get(0).getComment().getContent());
+
+		verify(storeRepository, times(1)).findById(storeId);
+		verify(reviewRepository, times(1)).findReviewsByStore(store, pageable);
+		verify(commentRepository, times(1)).findByReview(review);
+	}
+
+	@Test
+	@DisplayName("리뷰 조회 성공 - 댓글 없음")
+	void getReviewsByStore_success_withoutComment() {
+		// Given
+		Review review = new Review("Good service", 5, store, member, order);
+
+		Page<Review> reviews = new PageImpl<>(List.of(review), pageable, 1);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(reviewRepository.findReviewsByStore(store, pageable)).thenReturn(reviews);
+		when(commentRepository.findByReview(review)).thenReturn(Optional.empty());
+
+		// When
+		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, requestDto, pageable);
+
+		// Then
+		assertNotNull(result);
+		assertEquals(1, result.getContent().size());
+		assertEquals("Good service", result.getContent().get(0).getReview().getContent());
+		assertNull(result.getContent().get(0).getComment());
+
+		verify(storeRepository, times(1)).findById(storeId);
+		verify(reviewRepository, times(1)).findReviewsByStore(store, pageable);
+		verify(commentRepository, times(1)).findByReview(review);
+	}
+
+	@Test
+	@DisplayName("리뷰 조회 실패 - 가게 없음")
+	void getReviewsByStore_fail_storeNotFound() {
+		// Given
+		when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.getReviewsByStore(storeId, requestDto, pageable));
+
+		assertEquals(NOT_FOUND_STORE.getMessage(), exception.getMessage());
+
+		verify(storeRepository, times(1)).findById(storeId);
+		verify(reviewRepository, never()).findReviewsByStore(any(), any());
+		verify(commentRepository, never()).findByReview(any());
 	}
 }

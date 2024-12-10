@@ -3,6 +3,7 @@ package com.sparta.chairingproject.domain.comment.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +21,8 @@ import com.sparta.chairingproject.domain.comment.entity.Comment;
 import com.sparta.chairingproject.domain.comment.repository.CommentRepository;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
+import com.sparta.chairingproject.domain.order.entity.Order;
+import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
@@ -49,7 +52,8 @@ public class CommentServiceTest {
 		reviewId = 1L;
 		owner = new Member(1L, "Test Owner", "owner@example.com", "password", MemberRole.OWNER);
 		store = new Store(1L, "Test Store", "storeImage", "description", owner);
-		review = new Review("Good service", 5, store, owner);
+		Order order = Order.createOf(owner, store, List.of(), OrderStatus.COMPLETED, 10000);
+		review = new Review("Good service", 5, store, owner, order);
 		request = new CommentRequest("Thank you for your review!");
 	}
 
@@ -71,18 +75,20 @@ public class CommentServiceTest {
 	}
 
 	@Test
-	@DisplayName("댓글 작성 실패 - 리뷰가 가게와 연결되지 않음")
-	void createComment_fail_notMatchingStoreAndReview() {
+	@DisplayName("댓글 작성 실패 - 리뷰가 해당 가게의 주문과 연결되지 않음")
+	void createComment_fail_notMatchingOrderAndReview() {
 		// Given
-		Store differentStore = new Store(2L, "Another Store", "anotherImage", "anotherDescription", owner);
-		Review differentReview = new Review("Good service", 5, differentStore, owner);
+		Store anotherStore = new Store(2L, "Another Store", "storeImage", "description", owner);
+		Order invalidOrder = Order.createOf(owner, anotherStore, List.of(), OrderStatus.COMPLETED, 10000);
+		Review differentReview = new Review("Good service", 5, anotherStore, owner, invalidOrder); // 잘못된 Order
 
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(differentReview));
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
 			() -> commentService.createComment(storeId, reviewId, request, owner));
-		assertEquals(ExceptionCode.NOT_MATCHING_STORE_AND_REVIEW.getMessage(), exception.getMessage());
+
+		assertEquals(ExceptionCode.NOT_MATCHING_STORE_AND_ORDER.getMessage(), exception.getMessage());
 
 		verify(reviewRepository, times(1)).findById(reviewId);
 		verify(commentRepository, never()).existsByReview(any());
