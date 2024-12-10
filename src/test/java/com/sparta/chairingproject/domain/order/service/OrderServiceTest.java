@@ -3,7 +3,6 @@ package com.sparta.chairingproject.domain.order.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -29,8 +28,8 @@ import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
-import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.request.OrderStatusUpdateRequest;
+import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderPageResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderStatusUpdateResponse;
@@ -645,7 +644,7 @@ public class OrderServiceTest {
 		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order order = new Order(orderId, orderMember, store, OrderStatus.IN_PROGRESS, 0);
 		Page<Order> orderPage = new PageImpl<>(List.of(order), pageable, 1);
 
@@ -673,7 +672,7 @@ public class OrderServiceTest {
 		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order order = new Order(orderId, orderMember, store, OrderStatus.IN_PROGRESS, 0);
 		Page<Order> orderPage = new PageImpl<>(List.of(order), pageable, 1);
 
@@ -687,5 +686,5 @@ public class OrderServiceTest {
 		//then
 		assertEquals(1, result.getTotalElements());
 	}
-
+	
 }
