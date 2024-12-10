@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -603,6 +604,34 @@ public class OrderServiceTest {
 
 		//then
 		assertEquals(1, result.getTotalElements());
+	}
+
+	@Test
+	@DisplayName("startDate 없이 endDate 만 입력하면 days 기준으로 앞 기간을 계산하여 조회한다.")
+	public void getOrdersByStore_StartDateNO_EndDateYES() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		LocalDate endDate = LocalDate.of(2024, 12, 31);
+		Pageable pageable = PageRequest.of(0, 10);
+		int days = 30;
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Order order = new Order(orderId, orderMember, store, OrderStatus.IN_PROGRESS, 0);
+		Page<Order> orderPage = new PageImpl<>(List.of(order), pageable, 1);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findByStoreAndCreatedAtBetween(eq(storeId), any(LocalDateTime.class),
+			eq(endDate.atTime(23, 59, 59)), eq(pageable))).thenReturn(orderPage);
+
+		// when
+		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, null, endDate, days);
+
+		// then
+		assertEquals(1, result.getTotalElements());
+
 	}
 
 }
