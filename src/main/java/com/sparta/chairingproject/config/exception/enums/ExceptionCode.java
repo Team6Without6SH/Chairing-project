@@ -83,6 +83,7 @@ public enum ExceptionCode {
 	STORE_PENDING_CANNOT_REVIEW(HttpStatus.FORBIDDEN, "가게가 등록 대기 상태입니다. 리뷰를 작성할 수 없습니다."),
 	ORDER_NOT_COMPLETED_CANNOT_REVIEW(HttpStatus.FORBIDDEN, "주문이 완료처리되지 않았습니다. 리류를 작성할 수 없습니다."),
 	NOT_AUTHOR_OF_REVIEW(HttpStatus.UNAUTHORIZED, "해당 리뷰의 작성자가 아닙니다."),
+	REVIEW_ALREADY_DELETED(HttpStatus.FORBIDDEN, "이미 삭제된 리뷰입니다."),
 
 	//----------댓글----------
 	NOT_MATCHING_STORE_AND_ORDER(HttpStatus.BAD_REQUEST, "리뷰가 요청한 가게의 주문과 연결되어 있지 않습니다. 댓글을 작성할 수 없습니다."),
