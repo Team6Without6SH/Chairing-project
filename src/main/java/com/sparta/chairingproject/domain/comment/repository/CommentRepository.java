@@ -13,4 +13,6 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
 	// 댓글을 한 번의 쿼리로 가져오는 방식. N+1문제 해결
 	@Query("SELECT c FROM Comment c WHERE c.review IN :reviews")
 	List<Comment> findCommentsByReviews(@Param("reviews") List<Review> reviews);
+
+	boolean existsByReview(Review review);
 }
