@@ -32,6 +32,10 @@ public class CommentService {
 			throw new GlobalException(UNAUTHORIZED_OWNER);
 		}
 
+		if (commentRepository.existsByReview(review)) {
+			throw new GlobalException(COMMENT_ALREADY_EXISTS);
+		}
+
 		Comment comment = new Comment(request.getContent(), review);
 		commentRepository.save(comment);
 	}

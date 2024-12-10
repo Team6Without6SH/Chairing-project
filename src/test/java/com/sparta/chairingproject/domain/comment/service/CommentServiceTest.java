@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,7 @@ import com.sparta.chairingproject.domain.store.entity.Store;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceTest {
+
 	@Mock
 	private ReviewRepository reviewRepository;
 
@@ -34,26 +36,37 @@ public class CommentServiceTest {
 	@InjectMocks
 	private CommentService commentService;
 
+	private Long storeId;
+	private Long reviewId;
+	private Member owner;
+	private Store store;
+	private Review review;
+	private CommentRequest request;
+
+	@BeforeEach
+	void setUp() {
+		storeId = 1L;
+		reviewId = 1L;
+		owner = new Member(1L, "Test Owner", "owner@example.com", "password", MemberRole.OWNER);
+		store = new Store(1L, "Test Store", "storeImage", "description", owner);
+		review = new Review("Good service", 5, store, owner);
+		request = new CommentRequest("Thank you for your review!");
+	}
+
 	@Test
 	@DisplayName("댓글 작성 성공")
 	void createComment_success() {
 		// Given
-		Long storeId = 1L;
-		Long reviewId = 1L;
-		Member owner = new Member(1L, "Test Owner", "owner@example.com", "password", MemberRole.OWNER);
-		Store store = new Store(1L, "Test Store", "storeImage", "description", owner);
-		Review review = new Review("Good service", 5, store, owner);
-
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+		when(commentRepository.existsByReview(review)).thenReturn(false);
 		when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-		CommentRequest request = new CommentRequest("Thank you for your review!");
 
 		// When
 		commentService.createComment(storeId, reviewId, request, owner);
 
 		// Then
 		verify(reviewRepository, times(1)).findById(reviewId);
+		verify(commentRepository, times(1)).existsByReview(review);
 		verify(commentRepository, times(1)).save(any(Comment.class));
 	}
 
@@ -61,18 +74,10 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 리뷰가 가게와 연결되지 않음")
 	void createComment_fail_notMatchingStoreAndReview() {
 		// Given
-		Long storeId = 1L;
-		Long reviewId = 1L;
-		Member owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
-		// Store와 다른 Store를 생성하며 명확하게 ID를 설정
-		Store store = new Store(1L, "Test Store", "storeImage", "description", owner);
 		Store differentStore = new Store(2L, "Another Store", "anotherImage", "anotherDescription", owner);
-		// Review는 다른 Store에 속하도록 설정
-		Review review = new Review("Good service", 5, differentStore, owner);
+		Review differentReview = new Review("Good service", 5, differentStore, owner);
 
-		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
-
-		CommentRequest request = new CommentRequest("Thank you for your review!");
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(differentReview));
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
@@ -80,6 +85,7 @@ public class CommentServiceTest {
 		assertEquals(ExceptionCode.NOT_MATCHING_STORE_AND_REVIEW.getMessage(), exception.getMessage());
 
 		verify(reviewRepository, times(1)).findById(reviewId);
+		verify(commentRepository, never()).existsByReview(any());
 		verify(commentRepository, never()).save(any(Comment.class));
 	}
 
@@ -87,16 +93,9 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 권한 없는 OWNER")
 	void createComment_fail_unauthorizedOwner() {
 		// Given
-		Long storeId = 1L;
-		Long reviewId = 1L;
-		Member owner = new Member(1L, "Test Owner", "owner@example.com", "password", MemberRole.OWNER);
 		Member differentOwner = new Member(2L, "Another Owner", "different@example.com", "password", MemberRole.OWNER);
-		Store store = new Store(1L, "Test Store", "storeImage", "description", owner);
-		Review review = new Review("Good service", 5, store, owner);
 
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
-
-		CommentRequest request = new CommentRequest("Thank you for your review!");
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
@@ -104,6 +103,7 @@ public class CommentServiceTest {
 		assertEquals(ExceptionCode.UNAUTHORIZED_OWNER.getMessage(), exception.getMessage());
 
 		verify(reviewRepository, times(1)).findById(reviewId);
+		verify(commentRepository, never()).existsByReview(any());
 		verify(commentRepository, never()).save(any(Comment.class));
 	}
 
@@ -111,13 +111,7 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 리뷰 없음")
 	void createComment_fail_reviewNotFound() {
 		// Given
-		Long storeId = 1L;
-		Long reviewId = 1L;
-		Member owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
-
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.empty());
-
-		CommentRequest request = new CommentRequest("Thank you for your review!");
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
@@ -125,6 +119,24 @@ public class CommentServiceTest {
 		assertEquals(ExceptionCode.NOT_FOUND_REVIEW.getMessage(), exception.getMessage());
 
 		verify(reviewRepository, times(1)).findById(reviewId);
+		verify(commentRepository, never()).existsByReview(any());
+		verify(commentRepository, never()).save(any(Comment.class));
+	}
+
+	@Test
+	@DisplayName("댓글 작성 실패 - 이미 댓글이 존재함")
+	void createComment_fail_alreadyExists() {
+		// Given
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+		when(commentRepository.existsByReview(review)).thenReturn(true);
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> commentService.createComment(storeId, reviewId, request, owner));
+		assertEquals(ExceptionCode.COMMENT_ALREADY_EXISTS.getMessage(), exception.getMessage());
+
+		verify(reviewRepository, times(1)).findById(reviewId);
+		verify(commentRepository, times(1)).existsByReview(review);
 		verify(commentRepository, never()).save(any(Comment.class));
 	}
 }
