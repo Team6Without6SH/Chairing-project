@@ -84,7 +84,7 @@ public enum ExceptionCode {
 	ORDER_NOT_COMPLETED_CANNOT_REVIEW(HttpStatus.FORBIDDEN, "주문이 완료처리되지 않았습니다. 리류를 작성할 수 없습니다."),
 
 	//----------댓글----------
-	NOT_MATCHING_STORE_AND_REVIEW(HttpStatus.BAD_REQUEST, "리뷰가 요청한 가게와 연결되어 있지 않습니다. 댓글을 작성할 수 없습니다."),
+	NOT_MATCHING_STORE_AND_ORDER(HttpStatus.BAD_REQUEST, "리뷰가 요청한 가게의 주문과 연결되어 있지 않습니다. 댓글을 작성할 수 없습니다."),
 	COMMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 리뷰에 대한 댓글을 작성했습니다."),
 
 	//----------쿠폰----------

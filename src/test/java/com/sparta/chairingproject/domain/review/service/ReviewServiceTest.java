@@ -58,7 +58,7 @@ public class ReviewServiceTest {
 		request = new ReviewRequest("좋은 가게였습니다.", 5);
 		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
 
-		store = new Store("Test name", "Test image", "Test description", member);
+		store = new Store(1L, "Test name", "Test image", "Test description", member);
 		store.updateStoreStatus(StoreStatus.OPEN);
 
 		menus = new ArrayList<>();
@@ -112,7 +112,7 @@ public class ReviewServiceTest {
 		verify(reviewRepository, times(1)).existsByOrderIdAndMemberId(orderId, member.getId());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
-	
+
 	@Test
 	@DisplayName("리뷰 작성 실패 - 가게 OPEN 상태지만 주문 미완료 상태")
 	void createReview_fail_orderNotCompleted() {
@@ -137,7 +137,7 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 작성 실패 - 팬딩 상태 가게")
 	void createReview_fail_storePending() {
 		// Given
-		store = new Store("Pending Store", "Pending Image", "Pending Description", member);
+		store = new Store(1L, "Pending Store", "Pending Image", "Pending Description", member);
 		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));

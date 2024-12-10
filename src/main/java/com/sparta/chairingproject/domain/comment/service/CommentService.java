@@ -24,8 +24,8 @@ public class CommentService {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_REVIEW));
 
-		if (!review.getStore().getId().equals(storeId)) {
-			throw new GlobalException(NOT_MATCHING_STORE_AND_REVIEW);
+		if (!review.getOrder().getStore().getId().equals(storeId)) {
+			throw new GlobalException(NOT_MATCHING_STORE_AND_ORDER);
 		}
 
 		if (!review.getStore().getOwner().getId().equals(owner.getId())) {
