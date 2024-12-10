@@ -79,7 +79,7 @@ public class OrderServiceTest {
 		Member owner = new Member(1L, "Test owner", "Test@email.com", "password123", MemberRole.OWNER);
 		Member member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true); // 테이블 수 5으로 설정
+			"09:00", "21:00", "Korean"); // 테이블 수 5으로 설정
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(
@@ -119,7 +119,7 @@ public class OrderServiceTest {
 		OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 200); //메뉴 두개 주문하고 가격을 합에 맞춰 설정하기
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Menu menu1 = new Menu(1L, 90, "Menu1", store);
 		Menu menu2 = new Menu(2L, 110, "Menu2", store);
@@ -257,7 +257,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store, OrderStatus.IN_PROGRESS, 0);
 
@@ -279,7 +279,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store1, OrderStatus.IN_PROGRESS, 0);
 		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
@@ -300,7 +300,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store1, OrderStatus.CANCELLED, 0);
 
@@ -322,7 +322,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store1, OrderStatus.COMPLETED, 0);
 
@@ -345,7 +345,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store1, OrderStatus.IN_PROGRESS, 0);
 
@@ -359,6 +359,7 @@ public class OrderServiceTest {
 		assertEquals(OrderStatus.CANCEL_REQUEST, response.getOrderStatus());
 		assertEquals(orderId, response.getOrderId());
 	}
+
 	@Test
 	@DisplayName("가게가 존재하지 않을 경우: NOT_FOUND_STORE")
 	public void updateOrderStatus_ThrowException_When_storeNotFound() {
@@ -382,7 +383,7 @@ public class OrderServiceTest {
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Member owner2 = new Member(3L, "Test owner2", "Test3@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 
@@ -401,7 +402,7 @@ public class OrderServiceTest {
 		Long orderId = 2L;
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
@@ -420,10 +421,10 @@ public class OrderServiceTest {
 		Long orderId = 2L;
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Store differentStore = new Store(2L, "Test Store2", "Test Image", "description", owner, 5, "seoul",
 			"010-1111-2223",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order order = Order.createOf(owner, differentStore, Collections.emptyList(), OrderStatus.WAITING, 0);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -443,7 +444,7 @@ public class OrderServiceTest {
 		Long orderId = 1L;
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order order = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.IN_PROGRESS, 0);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -464,7 +465,7 @@ public class OrderServiceTest {
 		Long orderId = 1L;
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order completedOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.COMPLETED, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -483,7 +484,7 @@ public class OrderServiceTest {
 		Long orderId = 1L;
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order waitingOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -504,7 +505,7 @@ public class OrderServiceTest {
 		Long orderId = 1L;
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order waitingOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.WAITING, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -524,7 +525,7 @@ public class OrderServiceTest {
 		Long orderId = 1L;
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order admissionOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
@@ -543,7 +544,7 @@ public class OrderServiceTest {
 		Long orderId = 1L;
 		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 		Order admissionOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
