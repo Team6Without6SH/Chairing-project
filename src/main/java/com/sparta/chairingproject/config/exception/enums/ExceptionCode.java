@@ -107,12 +107,12 @@ public enum ExceptionCode {
 	APPROVAL_PENDING(HttpStatus.CONFLICT, "승인 대기중입니다"),
 	STORE_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 가게입니다.");
 
-	private final HttpStatus httpStatus;
-	private final String message;
+    private final HttpStatus httpStatus;
+    private final String message;
 
-	ExceptionCode(HttpStatus httpStatus, String message) {
-		this.httpStatus = httpStatus;
-		this.message = message;
-	}
+    ExceptionCode(HttpStatus httpStatus, String message) {
+        this.httpStatus = httpStatus;
+        this.message = message;
+    }
 
 }

@@ -103,7 +103,7 @@ public class OrderService {
 		if (!order.getMember().getId().equals(member.getId())) {
 			throw new GlobalException(ONLY_ORDER_ALLOWED);
 		}
-		if (order.getMenus().stream().noneMatch(menu -> menu.getStore().getId().equals(storeId))) {
+		if (!order.getStore().getId().equals(storeId)) {
 			throw new GlobalException(NOT_ORDER_THIS_STORE);
 		}
 
