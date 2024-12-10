@@ -99,7 +99,8 @@ public class Store extends Timestamped {
 		this.owner = owner;
 	}
 
-	public Store(Long id, String name, String image, String description, Member member) {
+	public Store(Long id, String name, String image, String description, Member member, StoreRequestStatus approved,
+		StoreStatus pending) {
 		this.id = id;
 		this.name = name;
 		this.image = image;

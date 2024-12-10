@@ -31,4 +31,10 @@ public class UpdateStoreRequest {
 
 	private String image;
 
+	//테스트 용
+	public UpdateStoreRequest(String updatedName, String updatedAddress, String updatedDescription) {
+		this.name = updatedName;
+		this.address = updatedAddress;
+		this.description = updatedDescription;
+	}
 }
