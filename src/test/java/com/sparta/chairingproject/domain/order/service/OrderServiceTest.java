@@ -3,7 +3,6 @@ package com.sparta.chairingproject.domain.order.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
-import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
@@ -25,7 +23,9 @@ import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
+import com.sparta.chairingproject.domain.order.dto.request.OrderStatusUpdateRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
+import com.sparta.chairingproject.domain.order.dto.response.OrderStatusUpdateResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
@@ -257,7 +257,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store, OrderStatus.IN_PROGRESS, 0);
 
@@ -279,7 +279,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store1, OrderStatus.IN_PROGRESS, 0);
 		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
@@ -300,7 +300,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store1, OrderStatus.CANCELLED, 0);
 
@@ -322,7 +322,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store1, OrderStatus.COMPLETED, 0);
 
@@ -345,7 +345,7 @@ public class OrderServiceTest {
 		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
 
 		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00", "21:00", "Korean", true);
+			"09:00", "21:00", "Korean");
 
 		Order order = new Order(orderId, orderMember, store1, OrderStatus.IN_PROGRESS, 0);
 
@@ -358,5 +358,204 @@ public class OrderServiceTest {
 		assertNotNull(response);
 		assertEquals(OrderStatus.CANCEL_REQUEST, response.getOrderStatus());
 		assertEquals(orderId, response.getOrderId());
+	}
+
+	@Test
+	@DisplayName("가게가 존재하지 않을 경우: NOT_FOUND_STORE")
+	public void updateOrderStatus_ThrowException_When_storeNotFound() {
+		Long storeId = 1L;
+		Long orderId = 2L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("요청자가 가게 소유자가 아닌 경우: ONLY_OWNER_ALLOWED")
+	public void updateOrderStatus_ThrowException_When_RequesterIsNotOwner() {
+		Long storeId = 1L;
+		Long orderId = 2L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Member owner2 = new Member(3L, "Test owner2", "Test3@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"),
+				owner2));
+
+		assertEquals(ExceptionCode.ONLY_OWNER_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("주문이 존재하지 않는 경우: NOT_FOUND_ORDER")
+	public void updateOrderStatus_ThrowException_When_OrderNotFound() {
+		Long storeId = 1L;
+		Long orderId = 2L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.NOT_FOUND_ORDER, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("주문이 요청한 가게와 일치하지 않는 경우: NOT_ORDER_THIS_STORE")
+	public void updateOrderStatus_ThrowsException_When_NotOrderThisStore() {
+		Long storeId = 1L;
+		Long orderId = 2L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Store differentStore = new Store(2L, "Test Store2", "Test Image", "description", owner, 5, "seoul",
+			"010-1111-2223",
+			"09:00", "21:00", "Korean");
+		Order order = Order.createOf(owner, differentStore, Collections.emptyList(), OrderStatus.WAITING, 0);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.NOT_ORDER_THIS_STORE, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("사장님이 CANCEL_REQUEST 상태로 변경하는 경우: CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER")
+	public void updateOrderStatus_ThrowException_When_CancelRequestNotAllowedByOwner() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Order order = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.IN_PROGRESS, 0);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("CANCEL_REQUEST"),
+				owner));
+
+		assertEquals(ExceptionCode.CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("주문 상태가 COMPLETED 또는 CANCELLED 인 경우 변경 시도: CANNOT_CHANGE_COMPLETE_OR_CANCELLED")
+	public void updateOrderStatus_ThrowException_When_CannotChangeCompleteOrCancelled() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Order completedOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.COMPLETED, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(completedOrder));
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.CANNOT_CHANGE_COMPLETED_OR_CANCELLED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("IN_PROGRESS 상태로 변경 할 때, 테이블이 다 차있는 경우: TABLE_FULL_CANNOT_SET_IN_PROGRESS")
+	public void updateOrderStatus_ThrowException_When_TableFullCanNotSetInProgress() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Order waitingOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(waitingOrder));
+		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(5);
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+
+		assertEquals(ExceptionCode.TABLE_FULL_CANNOT_SET_IN_PROGRESS, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("WAITING 상태에서 ADMISSION 과 CANCELLED 이외의 상태로 변경하려는 경우: CANCELLED_ADMISSION_ALLOWED_FROM_WAITING")
+	public void updateOrderStatus_ThrowException_When_CancelledAdmissionAllowedFromWaiting() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Order waitingOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.WAITING, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(waitingOrder));
+
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("COMPLETED"), owner));
+
+		assertEquals(ExceptionCode.CANCELLED_ADMISSION_ALLOWED_FROM_WAITING, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("ADMISSION 상태에서 IN_PROGRESS 와 CANCELLED 이외의 상태로 변경하려는 경우: IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION")
+	public void updateOrderStatus_ThrowException_When_InProgressCancelledAllowedFromAdmission() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Order admissionOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(admissionOrder));
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("COMPLETED"), owner));
+
+		assertEquals(ExceptionCode.IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("정상적으로 상태변경에 성공하는 경우: 200. OK")
+	public void updateOrderStatus_Success() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Order admissionOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(admissionOrder));
+
+		//when
+		OrderStatusUpdateResponse response = orderService.updateOrderStatus(storeId, orderId,
+			new OrderStatusUpdateRequest("IN_PROGRESS"), owner);
+
+		//then
+		assertEquals("IN_PROGRESS", response.getOrderStatus());
+		verify(orderRepository).save(any(Order.class));
 	}
 }
