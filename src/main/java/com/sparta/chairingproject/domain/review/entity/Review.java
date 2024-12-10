@@ -47,7 +47,7 @@ public class Review extends Timestamped {
 	private Order order;
 
 	@Column
-	private boolean isDeleted = false;
+	private boolean Deleted = false;
 
 	@Builder
 	public Review(String content, int score, Store store, Member member, Order order) {
@@ -64,6 +64,6 @@ public class Review extends Timestamped {
 	}
 
 	public void softDelete() {
-		this.isDeleted = true;
+		this.Deleted = true;
 	}
 }
