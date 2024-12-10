@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -14,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -27,6 +30,7 @@ import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.request.OrderStatusUpdateRequest;
+import com.sparta.chairingproject.domain.order.dto.response.OrderPageResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderStatusUpdateResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
@@ -573,6 +577,32 @@ public class OrderServiceTest {
 			() -> orderService.getOrdersByStore(storeId, pageable, null, null, 30));
 
 		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("기간 입력 없이 호출할 경우 전체 주문 목록을 반환한다")
+	public void getOrdersByStore_ReturnAllOrders_When_NoDate() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Pageable pageable = PageRequest.of(0, 10);
+
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean");
+		Order order = new Order(orderId, orderMember, store, OrderStatus.IN_PROGRESS, 0);
+		Page<Order> orderPage = new PageImpl<>(List.of(order), pageable, 1);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findByStoreAndCreatedAtBetween(eq(storeId), any(LocalDateTime.class),
+			any(LocalDateTime.class), eq(pageable))).thenReturn(orderPage);
+
+		//when
+		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, null, null, 30);
+
+		//then
+		assertEquals(1, result.getTotalElements());
 	}
 
 }
