@@ -72,7 +72,7 @@ public class ReviewServiceTest {
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
-		when(reviewRepository.existsByOrderIdAndMember(orderId, member)).thenReturn(false);
+		when(reviewRepository.existsByOrderIdAndMemberId(orderId, member.getId())).thenReturn(false);
 		when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
 		// When
@@ -87,7 +87,7 @@ public class ReviewServiceTest {
 
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(orderRepository, times(1)).findByIdAndMemberAndStore(orderId, member, store);
-		verify(reviewRepository, times(1)).existsByOrderIdAndMember(orderId, member);
+		verify(reviewRepository, times(1)).existsByOrderIdAndMemberId(orderId, member.getId());
 		verify(reviewRepository, times(1)).save(any(Review.class));
 	}
 
@@ -99,7 +99,7 @@ public class ReviewServiceTest {
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
-		when(reviewRepository.existsByOrderIdAndMember(orderId, member)).thenReturn(true);
+		when(reviewRepository.existsByOrderIdAndMemberId(orderId, member.getId())).thenReturn(true);
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
@@ -109,10 +109,10 @@ public class ReviewServiceTest {
 
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(orderRepository, times(1)).findByIdAndMemberAndStore(orderId, member, store);
-		verify(reviewRepository, times(1)).existsByOrderIdAndMember(orderId, member);
+		verify(reviewRepository, times(1)).existsByOrderIdAndMemberId(orderId, member.getId());
 		verify(reviewRepository, never()).save(any(Review.class));
 	}
-
+	
 	@Test
 	@DisplayName("리뷰 작성 실패 - 가게 OPEN 상태지만 주문 미완료 상태")
 	void createReview_fail_orderNotCompleted() {
