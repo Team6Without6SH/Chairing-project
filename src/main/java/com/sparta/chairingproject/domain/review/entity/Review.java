@@ -1,5 +1,7 @@
 package com.sparta.chairingproject.domain.review.entity;
 
+import java.time.LocalDateTime;
+
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.order.entity.Order;
@@ -47,7 +49,7 @@ public class Review extends Timestamped {
 	private Order order;
 
 	@Column
-	private boolean Deleted = false;
+	private LocalDateTime deletedAt = null;
 
 	@Builder
 	public Review(String content, int score, Store store, Member member, Order order) {
@@ -64,6 +66,10 @@ public class Review extends Timestamped {
 	}
 
 	public void softDelete() {
-		this.Deleted = true;
+		this.deletedAt = LocalDateTime.now();
+	}
+
+	public boolean isDeleted() {
+		return this.deletedAt != null;
 	}
 }

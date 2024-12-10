@@ -67,7 +67,7 @@ public class ReviewService {
 	public Page<ReviewWithCommentResponse> getReviewsByStore(Long storeId, RequestDto request, Pageable pageable) {
 		storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		return reviewRepository.findByStoreIdAndDeletedFalse(storeId, pageable)
+		return reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)
 			.map(review -> {
 				Comment comment = commentRepository.findByReview(review).orElse(null);
 				return ReviewWithCommentResponse.from(review, comment);

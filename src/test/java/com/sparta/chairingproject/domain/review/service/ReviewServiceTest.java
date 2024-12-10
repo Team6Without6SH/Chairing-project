@@ -180,7 +180,7 @@ public class ReviewServiceTest {
 		Page<Review> reviews = new PageImpl<>(List.of(review), pageable, 1);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(reviewRepository.findByStoreIdAndDeletedFalse(storeId, pageable)).thenReturn(reviews);
+		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(reviews);
 		when(commentRepository.findByReview(review)).thenReturn(Optional.of(comment));
 
 		// When
@@ -193,7 +193,7 @@ public class ReviewServiceTest {
 		assertEquals("Thank you for your review!", result.getContent().get(0).getComment().getContent());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(reviewRepository, times(1)).findByStoreIdAndDeletedFalse(storeId, pageable);
+		verify(reviewRepository, times(1)).findByStoreIdAndDeletedAtIsNull(storeId, pageable);
 		verify(commentRepository, times(1)).findByReview(review);
 	}
 
@@ -206,7 +206,7 @@ public class ReviewServiceTest {
 		Page<Review> reviews = new PageImpl<>(List.of(review), pageable, 1);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(reviewRepository.findByStoreIdAndDeletedFalse(storeId, pageable)).thenReturn(reviews);
+		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(reviews);
 		when(commentRepository.findByReview(review)).thenReturn(Optional.empty());
 
 		// When
@@ -219,7 +219,7 @@ public class ReviewServiceTest {
 		assertNull(result.getContent().get(0).getComment());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(reviewRepository, times(1)).findByStoreIdAndDeletedFalse(storeId, pageable);
+		verify(reviewRepository, times(1)).findByStoreIdAndDeletedAtIsNull(storeId, pageable);
 		verify(commentRepository, times(1)).findByReview(review);
 	}
 
@@ -236,7 +236,7 @@ public class ReviewServiceTest {
 		assertEquals(NOT_FOUND_STORE.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
-		verify(reviewRepository, never()).findByStoreIdAndDeletedFalse(any(), any());
+		verify(reviewRepository, never()).findByStoreIdAndDeletedAtIsNull(any(), any());
 		verify(commentRepository, never()).findByReview(any());
 	}
 }
