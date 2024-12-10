@@ -87,6 +87,9 @@ public enum ExceptionCode {
 	//----------댓글----------
 	NOT_MATCHING_STORE_AND_ORDER(HttpStatus.BAD_REQUEST, "리뷰가 요청한 가게의 주문과 연결되어 있지 않습니다. 댓글을 작성할 수 없습니다."),
 	COMMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 리뷰에 대한 댓글을 작성했습니다."),
+	NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
+	NOT_MATCHING_COMMENT_AND_REVIEW(HttpStatus.BAD_REQUEST, "댓글이 해당 리뷰에 연결되지 않았습니다."),
+	NOT_AUTHOR_OF_COMMENT(HttpStatus.UNAUTHORIZED, "해당 댓글의 작성자가 아닙니다."),
 
 	//----------쿠폰----------
 	COUPON_OUT_OF_STOCK(HttpStatus.CONFLICT, "쿠폰 수량이 부족합니다."),
