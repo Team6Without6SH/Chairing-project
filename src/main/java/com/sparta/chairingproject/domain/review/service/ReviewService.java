@@ -50,7 +50,8 @@ public class ReviewService {
 			throw new GlobalException(ORDER_NOT_COMPLETED_CANNOT_REVIEW);
 		}
 
-		if (reviewRepository.existsByOrderIdAndMember(orderId, member)) {
+		// 동일 주문 ID에 리뷰가 존재하는지 확인
+		if (reviewRepository.existsByOrderIdAndMemberId(orderId, member.getId())) {
 			throw new GlobalException(REVIEW_ALREADY_EXISTS);
 		}
 
@@ -59,6 +60,7 @@ public class ReviewService {
 			.score(request.getScore())
 			.store(store)
 			.member(member)
+			.order(order)
 			.build();
 
 		return reviewRepository.save(review);
