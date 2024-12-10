@@ -66,8 +66,7 @@ public enum ExceptionCode {
 	PAYED_NOT_EQUAL_BILL(HttpStatus.BAD_REQUEST, "총 가격과 결제 가격이 일치하지 않습니다."),
 	CANCELLED_COMPLETED_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "완료되거나 이미 취소된 주문은 취소 요청할 수 없습니다."),
 	CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER(HttpStatus.FORBIDDEN, "가게 사장님은 취소 요청을 보낼 수 없습니다."),
-	CANNOT_CHANGE_COMPLETED_OR_CANCELLED(HttpStatus.BAD_REQUEST,
-		"완료되거나 이미 취소된 주문은 상태를 변경할 수 없습니다"), //사장님 전용
+	CANNOT_CHANGE_COMPLETED_OR_CANCELLED(HttpStatus.BAD_REQUEST, "완료되거나 이미 취소된 주문은 상태를 변경할 수 없습니다"), //사장님 전용
 	TABLE_FULL_CANNOT_SET_IN_PROGRESS(HttpStatus.CONFLICT, "만석 상태에서는 진행중 상태로 변경할 수 없습니다."),
 	CANCELLED_ADMISSION_ALLOWED_FROM_WAITING(HttpStatus.BAD_REQUEST, "웨이팅인 사람은 입장 또는 취소 상태로만 변경 시킬 수 있습니다."),
 	IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION(HttpStatus.BAD_REQUEST,
@@ -83,8 +82,7 @@ public enum ExceptionCode {
 	ORDER_NOT_COMPLETED_CANNOT_REVIEW(HttpStatus.FORBIDDEN, "주문이 완료처리되지 않았습니다. 리류를 작성할 수 없습니다."),
 
 	//----------댓글----------
-	NOT_MATCHING_STORE_AND_REVIEW(HttpStatus.BAD_REQUEST,
-		"리뷰가 요청한 가게와 연결되어 있지 않습니다. 댓글을 작성할 수 없습니다."),
+	NOT_MATCHING_STORE_AND_REVIEW(HttpStatus.BAD_REQUEST, "리뷰가 요청한 가게와 연결되어 있지 않습니다. 댓글을 작성할 수 없습니다."),
 
 	//----------쿠폰----------
 	COUPON_OUT_OF_STOCK(HttpStatus.CONFLICT, "쿠폰 수량이 부족합니다."),
