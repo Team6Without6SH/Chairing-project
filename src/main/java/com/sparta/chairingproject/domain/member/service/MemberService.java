@@ -1,9 +1,7 @@
 package com.sparta.chairingproject.domain.member.service;
 
 
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.NOT_FOUND_USER;
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.NOT_MATCH_PASSWORD;
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.SAME_BEFORE_PASSWORD;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
@@ -109,6 +107,9 @@ public class MemberService {
     public void deleteMember(UserDetailsImpl authMember, RequestDto request) {
         Member member = memberRepository.findById(authMember.getMember().getId())
             .orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+        if (member.isDeleted()) {
+            throw new GlobalException(DELETE_USER);
+        }
         member.updateDelete(true);
 
     }
