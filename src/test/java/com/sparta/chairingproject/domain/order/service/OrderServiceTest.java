@@ -242,4 +242,24 @@ public class OrderServiceTest {
 
 		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
 	}
+
+	@Test
+	@DisplayName("요청자가 가게 소유자가 아닌 경우: ONLY_OWNER_ALLOWED")
+	public void updateOrderStatus_ThrowException_When_RequesterIsNotOwner() {
+		Long storeId = 1L;
+		Long orderId = 2L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Member owner2 = new Member(3L, "Test owner2", "Test3@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"),
+				owner2));
+
+		assertEquals(ExceptionCode.ONLY_OWNER_ALLOWED, exception.getExceptionCode());
+	}
 }
