@@ -5,6 +5,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.comment.entity.Comment;
@@ -72,5 +73,18 @@ public class ReviewService {
 				Comment comment = commentRepository.findByReview(review).orElse(null);
 				return ReviewWithCommentResponse.from(review, comment);
 			});
+	}
+
+	@Transactional
+	public void updateReview(Long reviewId, ReviewRequest request, Member member) {
+		Review review = reviewRepository.findById(reviewId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_REVIEW));
+
+		if (!review.getMember().getId().equals(member.getId())) {
+			throw new GlobalException(NOT_AUTHOR_OF_REVIEW);
+		}
+
+		review.update(request.getContent(), request.getScore());
+		reviewRepository.save(review);
 	}
 }
