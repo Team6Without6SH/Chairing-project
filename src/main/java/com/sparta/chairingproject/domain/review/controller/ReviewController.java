@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.review.dto.ReviewRequest;
 import com.sparta.chairingproject.domain.review.dto.ReviewWithCommentResponse;
 import com.sparta.chairingproject.domain.review.service.ReviewService;
@@ -42,9 +43,10 @@ public class ReviewController {
 	@GetMapping("/stores/{storeId}/reviews")
 	public ResponseEntity<Page<ReviewWithCommentResponse>> getReviewsByStore(
 		@PathVariable Long storeId,
+		@RequestBody RequestDto request,
 		@PageableDefault(size = 5, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
 	) {
-		Page<ReviewWithCommentResponse> response = reviewService.getReviewsByStore(storeId, pageable);
+		Page<ReviewWithCommentResponse> response = reviewService.getReviewsByStore(storeId, request, pageable);
 		return ResponseEntity.ok(response);
 	}
 }

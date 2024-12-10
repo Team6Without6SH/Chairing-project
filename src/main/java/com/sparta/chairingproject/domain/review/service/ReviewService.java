@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.comment.entity.Comment;
 import com.sparta.chairingproject.domain.comment.repository.CommentRepository;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
@@ -62,7 +63,7 @@ public class ReviewService {
 		return reviewRepository.save(review);
 	}
 
-	public Page<ReviewWithCommentResponse> getReviewsByStore(Long storeId, Pageable pageable) {
+	public Page<ReviewWithCommentResponse> getReviewsByStore(Long storeId, RequestDto request, Pageable pageable) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 

@@ -24,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.comment.entity.Comment;
 import com.sparta.chairingproject.domain.comment.repository.CommentRepository;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -63,6 +64,7 @@ public class ReviewServiceTest {
 	private List<Menu> menus;
 	private Order order;
 	private Pageable pageable;
+	private RequestDto requestDto;
 
 	@BeforeEach
 	void setUp() {
@@ -180,7 +182,7 @@ public class ReviewServiceTest {
 		when(commentRepository.findByReview(review)).thenReturn(Optional.of(comment));
 
 		// When
-		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, pageable);
+		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, requestDto, pageable);
 
 		// Then
 		assertNotNull(result);
@@ -206,7 +208,7 @@ public class ReviewServiceTest {
 		when(commentRepository.findByReview(review)).thenReturn(Optional.empty());
 
 		// When
-		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, pageable);
+		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, requestDto, pageable);
 
 		// Then
 		assertNotNull(result);
@@ -227,7 +229,7 @@ public class ReviewServiceTest {
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> reviewService.getReviewsByStore(storeId, pageable));
+			() -> reviewService.getReviewsByStore(storeId, requestDto, pageable));
 
 		assertEquals(NOT_FOUND_STORE.getMessage(), exception.getMessage());
 
