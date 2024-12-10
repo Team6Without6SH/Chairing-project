@@ -631,7 +631,33 @@ public class OrderServiceTest {
 
 		// then
 		assertEquals(1, result.getTotalElements());
+	}
 
+	@Test
+	@DisplayName("endDate 없이 startDate 만 입력하면 days 기준으로 뒤 기간을 계산하여 조회한다.")
+	public void getOrdersByStore_StartDateYES_EndDateNO() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		LocalDate startDate = LocalDate.of(2024, 12, 31);
+		Pageable pageable = PageRequest.of(0, 10);
+		int days = 30;
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+		Order order = new Order(orderId, orderMember, store, OrderStatus.IN_PROGRESS, 0);
+		Page<Order> orderPage = new PageImpl<>(List.of(order), pageable, 1);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findByStoreAndCreatedAtBetween(eq(storeId), eq(startDate.atStartOfDay()),
+			any(LocalDateTime.class), eq(pageable))).thenReturn(orderPage);
+
+		// when
+		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, startDate, null, days);
+
+		// then
+		assertEquals(1, result.getTotalElements());
 	}
 
 }
