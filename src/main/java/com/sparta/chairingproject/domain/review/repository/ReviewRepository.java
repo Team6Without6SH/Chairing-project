@@ -11,7 +11,7 @@ import com.sparta.chairingproject.domain.review.entity.Review;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 	List<Review> findByStoreId(Long storeId);
 
-	Page<Review> findByStoreIdAndDeletedFalse(Long storeId, Pageable pageable);
+	Page<Review> findByStoreIdAndDeletedAtIsNull(Long storeId, Pageable pageable);
 
 	boolean existsByOrderIdAndMemberId(Long orderId, Long memberId);
 }
