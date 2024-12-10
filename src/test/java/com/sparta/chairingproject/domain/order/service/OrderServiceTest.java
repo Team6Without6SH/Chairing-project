@@ -516,4 +516,23 @@ public class OrderServiceTest {
 
 		assertEquals(ExceptionCode.CANCELLED_ADMISSION_ALLOWED_FROM_WAITING, exception.getExceptionCode());
 	}
+
+	@Test
+	@DisplayName("ADMISSION 상태에서 IN_PROGRESS 와 CANCELLED 이외의 상태로 변경하려는 경우: IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION")
+	public void updateOrderStatus_ThrowException_When_InProgressCancelledAllowedFromAdmission() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+		Order admissionOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(admissionOrder));
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("COMPLETED"), owner));
+
+		assertEquals(ExceptionCode.IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION, exception.getExceptionCode());
+	}
 }
