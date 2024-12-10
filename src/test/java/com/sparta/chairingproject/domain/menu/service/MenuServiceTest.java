@@ -19,6 +19,7 @@ import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuRequest;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuUpdateRequest;
+import com.sparta.chairingproject.domain.menu.dto.response.MenuDetailResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuUpdateResponse;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -48,6 +49,7 @@ class MenuServiceTest {
 	private Store store;
 	private Order order;
 	private Menu menu;
+	private Menu menu2;
 	private List<Menu> menuList;
 
 	@BeforeEach
@@ -60,6 +62,7 @@ class MenuServiceTest {
 			"09:00",
 			"21:00", "Korean");
 		menu = new Menu(1L, "menuTest", 5000, "menuImage", false, store, false);
+		menu2 = new Menu(2L, "menuTest2", 10000, "menuImage", false, store, false);
 		menuList = List.of(menu);
 		order = new Order(1L, member, store, menuList, OrderStatus.WAITING, 5000);
 	}
@@ -194,5 +197,63 @@ class MenuServiceTest {
 		assertEquals("menuTest", response.getName());
 		assertEquals(11000, response.getPrice());
 		assertTrue(response.isSoldOut());
+	}
+
+	@Test
+	@DisplayName("정상적으로 메뉴 목록을 반환한다")
+	void getAllMenusByStore_Success() {
+		// G
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+		when(menuRepository.findAllByStoreId(store.getId())).thenReturn(List.of(menu, menu2));
+
+		// W
+		List<MenuDetailResponse> response = menuService.getAllMenusByStore(store.getId(), owner);
+
+		// T
+		assertEquals(2, response.size());
+		assertEquals("menuTest", response.get(0).getName());
+		assertEquals("menuTest2", response.get(1).getName());
+		verify(storeRepository).findById(store.getId());
+		verify(menuRepository).findAllByStoreId(store.getId());
+	}
+
+	@Test
+	@DisplayName("가게를 찾을수 없을 경우 예외가 발생: NOT_FOUND_STORE")
+	void getAllMenusByStore_ThrowException_When_NOT_FOUND_STORE() {
+		// G
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.empty());
+
+		// W T
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> menuService.getAllMenusByStore(store.getId(), owner));
+		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("요청한 사용자가 가게 주인이 아닌 경우 예외가 발생한다: ONLY_OWNER_ALLOWED")
+	void getAllMenuByStore_ThrowException_When_ONLY_OWNER_ALLOWED() {
+		// G
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+
+		// W T
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> menuService.getAllMenusByStore(store.getId(), owner2));
+		assertEquals(ExceptionCode.ONLY_OWNER_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("가게에 메뉴가 없는 경우 빈 목록을 반환한다")
+	void getAllMenusByStore_ThrowException_When_NO_LIST() {
+		// G
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+		when(menuRepository.findAllByStoreId(store.getId())).thenReturn(List.of());
+
+		// W
+		List<MenuDetailResponse> response = menuService.getAllMenusByStore(store.getId(), owner);
+
+		// T
+		assertEquals(0, response.size());
+		verify(storeRepository).findById(store.getId());
+		verify(menuRepository).findAllByStoreId(store.getId());
 	}
 }
