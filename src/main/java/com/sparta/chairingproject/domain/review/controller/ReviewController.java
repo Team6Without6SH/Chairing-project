@@ -64,7 +64,7 @@ public class ReviewController {
 	}
 
 	@Secured("ROLE_USER")
-	@DeleteMapping("reviews/{reviewId}")
+	@DeleteMapping("/reviews/{reviewId}")
 	public ResponseEntity<Void> deleteReview(
 		@PathVariable Long reviewId,
 		@RequestBody RequestDto request,
