@@ -181,7 +181,7 @@ public class ReviewServiceTest {
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(reviews);
-		when(commentRepository.findByReview(review)).thenReturn(Optional.of(comment));
+		when(commentRepository.findByReviewAndDeletedAtIsNull(review)).thenReturn(Optional.of(comment));
 
 		// When
 		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, requestDto, pageable);
@@ -194,7 +194,7 @@ public class ReviewServiceTest {
 
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(reviewRepository, times(1)).findByStoreIdAndDeletedAtIsNull(storeId, pageable);
-		verify(commentRepository, times(1)).findByReview(review);
+		verify(commentRepository, times(1)).findByReviewAndDeletedAtIsNull(review);
 	}
 
 	@Test
@@ -207,7 +207,7 @@ public class ReviewServiceTest {
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(reviews);
-		when(commentRepository.findByReview(review)).thenReturn(Optional.empty());
+		when(commentRepository.findByReviewAndDeletedAtIsNull(review)).thenReturn(Optional.empty());
 
 		// When
 		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, requestDto, pageable);
@@ -220,7 +220,7 @@ public class ReviewServiceTest {
 
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(reviewRepository, times(1)).findByStoreIdAndDeletedAtIsNull(storeId, pageable);
-		verify(commentRepository, times(1)).findByReview(review);
+		verify(commentRepository, times(1)).findByReviewAndDeletedAtIsNull(review);
 	}
 
 	@Test
@@ -237,6 +237,6 @@ public class ReviewServiceTest {
 
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(reviewRepository, never()).findByStoreIdAndDeletedAtIsNull(any(), any());
-		verify(commentRepository, never()).findByReview(any());
+		verify(commentRepository, never()).findByReviewAndDeletedAtIsNull(any());
 	}
 }

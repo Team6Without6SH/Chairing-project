@@ -1,5 +1,7 @@
 package com.sparta.chairingproject.domain.comment.entity;
 
+import java.time.LocalDateTime;
+
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.review.entity.Review;
 
@@ -30,6 +32,9 @@ public class Comment extends Timestamped {
 	@JoinColumn(name = "review_id", nullable = false)
 	private Review review;
 
+	@Column
+	private LocalDateTime deletedAt = null;
+
 	public Comment(String content, Review review) {
 		this.content = content;
 		this.review = review;
@@ -37,5 +42,9 @@ public class Comment extends Timestamped {
 
 	public void update(String content) {
 		this.content = content;
+	}
+
+	public void softDelete() {
+		this.deletedAt = LocalDateTime.now();
 	}
 }

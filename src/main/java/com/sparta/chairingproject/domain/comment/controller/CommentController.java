@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.comment.dto.CommentRequest;
 import com.sparta.chairingproject.domain.comment.service.CommentService;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +44,18 @@ public class CommentController {
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
 		commentService.updateComment(reviewId, commentId, request, authMember.getMember());
+		return ResponseEntity.ok().build();
+	}
+
+	@Secured("ROLE_OWNER")
+	@DeleteMapping("/reviews/{reviewId}/comments/{commentId}")
+	public ResponseEntity<Void> deleteComment(
+		@PathVariable Long reviewId,
+		@PathVariable Long commentId,
+		@RequestBody RequestDto request,
+		@AuthenticationPrincipal UserDetailsImpl authMember
+	) {
+		commentService.deleteComment(reviewId, commentId, request, authMember.getMember());
 		return ResponseEntity.ok().build();
 	}
 }

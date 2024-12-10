@@ -69,7 +69,7 @@ public class ReviewService {
 
 		return reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)
 			.map(review -> {
-				Comment comment = commentRepository.findByReview(review).orElse(null);
+				Comment comment = commentRepository.findByReviewAndDeletedAtIsNull(review).orElse(null);
 				return ReviewWithCommentResponse.from(review, comment);
 			});
 	}

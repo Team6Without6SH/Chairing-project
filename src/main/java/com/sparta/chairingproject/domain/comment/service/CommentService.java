@@ -9,6 +9,7 @@ import com.sparta.chairingproject.config.exception.customException.GlobalExcepti
 import com.sparta.chairingproject.domain.comment.dto.CommentRequest;
 import com.sparta.chairingproject.domain.comment.entity.Comment;
 import com.sparta.chairingproject.domain.comment.repository.CommentRepository;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
@@ -55,6 +56,26 @@ public class CommentService {
 			throw new GlobalException(NOT_AUTHOR_OF_COMMENT);
 		}
 
+		if (comment.getDeletedAt() != null) {
+			throw new GlobalException(COMMENT_ALREADY_DELETED);
+		}
+
 		comment.update(request.getContent());
+	}
+
+	@Transactional
+	public void deleteComment(Long reviewId, Long commentId, RequestDto request, Member owner) {
+		Comment comment = commentRepository.findById(commentId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_COMMENT));
+
+		if (!comment.getReview().getId().equals(reviewId)) {
+			throw new GlobalException(NOT_MATCHING_COMMENT_AND_REVIEW);
+		}
+
+		if (!comment.getReview().getStore().getOwner().getId().equals(owner.getId())) {
+			throw new GlobalException(NOT_AUTHOR_OF_COMMENT);
+		}
+
+		comment.softDelete();
 	}
 }
