@@ -3,6 +3,7 @@ package com.sparta.chairingproject.domain.order.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -15,14 +16,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
+import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
+import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
@@ -226,4 +230,132 @@ public class OrderServiceTest {
 		assertThrows(GlobalException.class, () -> orderService.createOrder(storeId, member, orderRequest));
 	}
 
+	@Test
+	@DisplayName("존재하지 않는 주문 ID 로 요청 시 예외가 발생한다.")
+	public void requestOrderCancellation_ThrowException_When_OrderNotFound() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member member = new Member(1L, "Test Member", "Test@email.com", "password123", MemberRole.USER);
+
+		when(orderRepository.findById(orderId)).thenReturn(Optional.empty());
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.requestOrderCancellation(storeId, orderId, member, null));
+
+		assertEquals(ExceptionCode.NOT_FOUND_ORDER, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("요청자가 주문자가 아닌 경우 예외가 발생한다.")
+	public void requestOrderCancellation_ThrowException_When_MemberNotOrder() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+		Member anotherMember = new Member(2L, "another Member", "Test2@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		Order order = new Order(orderId, orderMember, store, OrderStatus.IN_PROGRESS, 0);
+
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.requestOrderCancellation(storeId, orderId, anotherMember, null));
+
+		assertEquals(ExceptionCode.ONLY_ORDER_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("해당 가게의 주문이 아닌 경우에 예외가 발생한다.")
+	public void requestOrderCancellation_ThrowsException_When_NOT_ORDER_THIS_STORE() {
+		Long orderId = 1L;
+		Long storeRequestId = 2L;
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+
+		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		Order order = new Order(orderId, orderMember, store1, OrderStatus.IN_PROGRESS, 0);
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		//when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.requestOrderCancellation(storeRequestId, orderId, orderMember, null));
+
+		assertEquals(ExceptionCode.NOT_ORDER_THIS_STORE, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("주문 상태가 CANCELLED 인 경우에 예외가 발생한다.")
+	public void requestOrderCancellation_ThrowsException_When_OrderAlreadyCancelled() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+
+		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		Order order = new Order(orderId, orderMember, store1, OrderStatus.CANCELLED, 0);
+
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.requestOrderCancellation(storeId, orderId, orderMember, null));
+
+		assertEquals(ExceptionCode.CANCELLED_COMPLETED_NOT_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("주문 상태가 COMPLETED 인 경우에 예외가 발생한다.")
+	public void requestOrderCancellation_ThrowsException_When_OrderAlreadyCompleted() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+
+		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		Order order = new Order(orderId, orderMember, store1, OrderStatus.COMPLETED, 0);
+
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.requestOrderCancellation(storeId, orderId, orderMember, null));
+
+		assertEquals(ExceptionCode.CANCELLED_COMPLETED_NOT_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("정상적으로 주문 취소 요청이 처리된다.")
+	public void requestOrderCancellation_Success() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+
+		Member orderMember = new Member(1L, "order Member", "Test@email.com", "password123", MemberRole.USER);
+		Member owner = new Member(3L, "사장 Member", "Test3@email.com", "password123", MemberRole.OWNER);
+
+		Store store1 = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+
+		Order order = new Order(orderId, orderMember, store1, OrderStatus.IN_PROGRESS, 0);
+
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		//when
+		OrderCancelResponse response = orderService.requestOrderCancellation(storeId, orderId, orderMember, null);
+
+		//then
+		assertNotNull(response);
+		assertEquals(OrderStatus.CANCEL_REQUEST, response.getOrderStatus());
+		assertEquals(orderId, response.getOrderId());
+	}
 }
