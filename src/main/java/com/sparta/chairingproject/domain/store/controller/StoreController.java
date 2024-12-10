@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +26,7 @@ import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreOwnerResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
+import com.sparta.chairingproject.domain.store.dto.UpdateStoreRequest;
 import com.sparta.chairingproject.domain.store.service.StoreService;
 
 import jakarta.validation.Valid;
@@ -63,6 +65,16 @@ public class StoreController {
 		@RequestParam(required = false, defaultValue = "2") int days
 	) {
 		return ResponseEntity.ok(orderService.getOrdersByStore(storeId, pageable, startDate, endDate, days));
+	}
+
+	@Secured("ROLE_OWNER")
+	@PutMapping("/owners/stores/{storeId}")
+	public ResponseEntity<StoreDetailsResponse> updateStore(
+		@PathVariable Long storeId,
+		@Valid @RequestBody UpdateStoreRequest req,
+		@AuthenticationPrincipal UserDetailsImpl authUser
+	) {
+		return ResponseEntity.ok(storeService.updateStore(storeId, req, authUser));
 	}
 
 	@Secured("ROLE_USER")
