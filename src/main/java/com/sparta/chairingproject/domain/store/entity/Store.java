@@ -124,6 +124,15 @@ public class Store extends Timestamped {
 		this.category = category;
 	}
 
+	// AdminStoreServiceTest 용
+	public Store(Long id, String name, String image, String description, Member member) {
+		this.id = id;
+		this.name = name;
+		this.image = image;
+		this.description = description;
+		this.owner = member;
+	}
+
 	public void updateStoreStatus(StoreStatus status) {
 		this.status = status;
 	}
@@ -156,5 +165,10 @@ public class Store extends Timestamped {
 	public void markAsDeleted() {
 		this.inActive = true;
 		this.deletedAt = LocalDateTime.now();
+	}
+
+	//test 용 -> 가게 삭제 실패 테스트 - 이미 삭제된 가게
+	public void inActive(boolean b) {
+		this.inActive = b;
 	}
 }
