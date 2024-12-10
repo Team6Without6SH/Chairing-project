@@ -434,4 +434,25 @@ public class OrderServiceTest {
 
 		assertEquals(ExceptionCode.NOT_ORDER_THIS_STORE, exception.getExceptionCode());
 	}
+
+	@Test
+	@DisplayName("사장님이 CANCEL_REQUEST 상태로 변경하는 경우: CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER")
+	public void updateOrderStatus_ThrowException_When_CancelRequestNotAllowedByOwner() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+		Order order = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.IN_PROGRESS, 0);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
+
+		// when then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("CANCEL_REQUEST"),
+				owner));
+
+		assertEquals(ExceptionCode.CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER, exception.getExceptionCode());
+	}
 }
