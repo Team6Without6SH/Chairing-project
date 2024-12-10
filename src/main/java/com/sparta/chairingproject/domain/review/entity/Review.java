@@ -46,6 +46,9 @@ public class Review extends Timestamped {
 	@JoinColumn(name = "order_id", nullable = false, unique = true)
 	private Order order;
 
+	@Column
+	private boolean isDeleted = false;
+
 	@Builder
 	public Review(String content, int score, Store store, Member member, Order order) {
 		this.content = content;
@@ -58,5 +61,9 @@ public class Review extends Timestamped {
 	public void update(String content, int score) {
 		this.content = content;
 		this.score = score;
+	}
+
+	public void softDelete() {
+		this.isDeleted = true;
 	}
 }
