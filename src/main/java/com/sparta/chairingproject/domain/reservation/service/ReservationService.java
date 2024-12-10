@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -94,7 +96,7 @@ public class ReservationService {
 		return reservationRepository.save(reservation).toResponse();
 	}
 
-	public ReservationListResponse getReservationList(Long storeId, int page, int size,
+	public Page<ReservationResponse> getReservationList(Long storeId, int page, int size,
 		UserDetailsImpl authUser) {
 		Store store = storeRepository.findById(storeId).orElseThrow(
 			() -> new GlobalException(NOT_FOUND_STORE)
@@ -107,9 +109,8 @@ public class ReservationService {
 
 		Pageable pageable = PageRequest.of(page, size);
 
-		Page<Reservation> reservationPage = reservationRepository.findByStoreId(storeId, pageable);
-
-		return new ReservationListResponse(reservationPage);
+		return reservationRepository.findByStoreId(storeId, pageable)
+			.map(Reservation::toResponse);
 	}
 
 

@@ -11,6 +11,7 @@ import com.sparta.chairingproject.domain.reservation.service.ReservationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -64,7 +65,7 @@ public class ReservationController {
 
 	@Secured("ROLE_OWNER")
 	@GetMapping("/stores/{storeId}/reservations")
-	public ResponseEntity<ReservationListResponse> getReservationList(
+	public ResponseEntity<Page<ReservationResponse>> getReservationList(
 		@PathVariable Long storeId,
 		@RequestParam(defaultValue = "0") int page, // 페이지 번호
 		@RequestParam(defaultValue = "10") int size, // 페이지 크기
