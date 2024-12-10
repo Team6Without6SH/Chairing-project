@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.review.entity;
 
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.member.entity.Member;
+import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.store.entity.Store;
 
 import jakarta.persistence.Column;
@@ -11,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -40,11 +42,16 @@ public class Review extends Timestamped {
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member member;
 
+	@OneToOne
+	@JoinColumn(name = "order_id", nullable = false, unique = true)
+	private Order order;
+
 	@Builder
-	public Review(String content, int score, Store store, Member member) {
+	public Review(String content, int score, Store store, Member member, Order order) {
 		this.content = content;
 		this.score = score;
 		this.store = store;
 		this.member = member;
+		this.order = order;
 	}
 }

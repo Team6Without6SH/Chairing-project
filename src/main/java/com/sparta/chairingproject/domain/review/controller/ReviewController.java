@@ -28,13 +28,14 @@ public class ReviewController {
 	private final ReviewService reviewService;
 
 	@Secured("ROLE_USER")
-	@PostMapping("/stores/{storeId}/reviews")
+	@PostMapping("/stores/{storeId}/orders/{orderId}/reviews")
 	public ResponseEntity<Void> createReview(
 		@PathVariable Long storeId,
+		@PathVariable Long orderId,
 		@RequestBody @Valid ReviewRequest request,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
-		reviewService.createReview(storeId, request, authMember.getMember());
+		reviewService.createReview(storeId, orderId, request, authMember.getMember());
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
