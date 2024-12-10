@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.domain.member.entity;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,24 +29,25 @@ import lombok.NoArgsConstructor;
 @Table(name = "members")
 public class Member extends Timestamped {
 
-	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-	private final List<Order> orders = new ArrayList<>();
-	@OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-	private final List<Issuance> issuances = new ArrayList<>();
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-	@Column(nullable = false)
-	private String name;
-	@Column(nullable = false, unique = true)
-	private String email;
-	@Column(nullable = false)
-	private String password;
-	@Enumerated(EnumType.STRING)
-	private MemberRole memberRole;
-
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Order> orders = new ArrayList<>();
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Issuance> issuances = new ArrayList<>();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(nullable = false)
+    private String name;
+    @Column(nullable = false, unique = true)
+    private String email;
+    @Column(nullable = false)
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private MemberRole memberRole;
     @Column(nullable = false)
     private boolean deleted;
+    @Column
+    private LocalDateTime deletedAt;
 
     public Member(String name, @NotBlank @Email String email, String password,
         MemberRole memberRole) {
@@ -56,14 +58,14 @@ public class Member extends Timestamped {
     }
 
 
-	public Member(Long id, String name, @NotBlank @Email String email, String password,
-		MemberRole memberRole) {
-		this.id = id;
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.memberRole = memberRole;
-	}
+    public Member(Long id, String name, @NotBlank @Email String email, String password,
+        MemberRole memberRole) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.memberRole = memberRole;
+    }
 
 
     public void updatePassword(String updatePassword) {
@@ -72,6 +74,7 @@ public class Member extends Timestamped {
 
     public void updateDelete(boolean b) {
         this.deleted = b;
+        this.deletedAt = LocalDateTime.now();
     }
 
 
