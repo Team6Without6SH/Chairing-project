@@ -25,6 +25,7 @@ import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderCancelResponse;
 import com.sparta.chairingproject.domain.order.dto.request.OrderStatusUpdateRequest;
 import com.sparta.chairingproject.domain.order.dto.response.OrderResponse;
+import com.sparta.chairingproject.domain.order.dto.response.OrderStatusUpdateResponse;
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
@@ -533,5 +534,27 @@ public class OrderServiceTest {
 			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("COMPLETED"), owner));
 
 		assertEquals(ExceptionCode.IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("정상적으로 상태변경에 성공하는 경우: 200. OK")
+	public void updateOrderStatus_Success() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		Member owner = new Member(2L, "Test owner", "Test2@email.com", "password123", MemberRole.OWNER);
+		Store store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
+			"09:00", "21:00", "Korean", true);
+		Order admissionOrder = Order.createOf(owner, store, Collections.emptyList(), OrderStatus.ADMISSION, 10000);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(admissionOrder));
+
+		//when
+		OrderStatusUpdateResponse response = orderService.updateOrderStatus(storeId, orderId,
+			new OrderStatusUpdateRequest("IN_PROGRESS"), owner);
+
+		//then
+		assertEquals("IN_PROGRESS", response.getOrderStatus());
+		verify(orderRepository).save(any(Order.class));
 	}
 }
