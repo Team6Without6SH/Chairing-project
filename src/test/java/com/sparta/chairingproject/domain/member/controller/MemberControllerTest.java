@@ -226,7 +226,7 @@ public class MemberControllerTest {
 				.content(objectMapper.writeValueAsString(requestDto)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.content").isArray())
-			.andExpect(jsonPath("$.content.length()").value(1)); // 데이터가 없을 경우
+			.andExpect(jsonPath("$.content.length()").value(1)); // 데이터가 한개인 경우
 
 
 	}
