@@ -65,8 +65,9 @@ public class Reservation extends Timestamped {
 		);
 	}
 
-	public void updateStatus(ReservationStatus status) {
-		this.status = status;
+	public void updateStatus(ReservationStatus targetStatus) {
+		status.validateTransition(targetStatus);
+		this.status = targetStatus;
 	}
 
 }

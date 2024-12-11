@@ -38,7 +38,8 @@ public enum ExceptionCode {
 	RESERVATION_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "올바르지 않은 상태값입니다."),
 	CANCELLATION_NOT_ALLOWED(HttpStatus.UNPROCESSABLE_ENTITY, "대기 중인 예약이 아니기 때문에 취소할 수 없습니다."),
 	CANNOT_CANCEL_OTHERS_RESERVATION(HttpStatus.FORBIDDEN, "다른 사람의 예약은 취소할 수 없습니다."),
-	CANNOT_REJECT_RESERVATION(HttpStatus.UNPROCESSABLE_ENTITY, "예약을 취소할 수 없습니다."),
+	CANNOT_REJECT_RESERVATION(HttpStatus.UNPROCESSABLE_ENTITY, "예약을 거절할 수 없습니다."),
+	INVALID_STATUS_TRANSITION(HttpStatus.UNPROCESSABLE_ENTITY, "예약 상태를 변경할 수 없습니다."),
 
 	//----------메뉴----------
 	NOT_FOUND_MENU(HttpStatus.NOT_FOUND, "해당 메뉴가 없습니다"),
