@@ -29,8 +29,6 @@ import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
-import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
-import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceTest {
@@ -59,10 +57,10 @@ public class CommentServiceTest {
 		storeId = 1L;
 		reviewId = 1L;
 		commentId = 1L;
-		owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER); // id
+		owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
 		ReflectionTestUtils.setField(owner, "id", 1L);
-		store = new Store(1L, "Test Store", "storeImage", "description", owner, StoreRequestStatus.APPROVED,
-			StoreStatus.OPEN);
+		store = new Store("Test Store", "storeImage", "description", "Test address", owner);
+		ReflectionTestUtils.setField(store, "id", storeId);
 		store.approveRequest();
 		order = Order.createOf(owner, store, List.of(), OrderStatus.COMPLETED, 10000);
 		review = new Review("Good service", 5, store, owner, order);
@@ -92,8 +90,8 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 리뷰가 해당 가게의 주문과 연결되지 않음")
 	void createComment_fail_notMatchingOrderAndReview() {
 		// Given
-		Store anotherStore = new Store(2L, "Another Store", "storeImage", "description", owner,
-			StoreRequestStatus.APPROVED, StoreStatus.OPEN);
+		Store anotherStore = new Store("Another Store", "storeImage", "description", "Test address", owner);
+		ReflectionTestUtils.setField(anotherStore, "id", 2L);
 		Order invalidOrder = Order.createOf(owner, anotherStore, List.of(), OrderStatus.COMPLETED, 10000);
 		Review differentReview = new Review("Good service", 5, anotherStore, owner, invalidOrder); // 잘못된 Order
 

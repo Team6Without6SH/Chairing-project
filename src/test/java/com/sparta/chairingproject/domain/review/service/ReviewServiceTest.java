@@ -37,7 +37,6 @@ import com.sparta.chairingproject.domain.review.dto.ReviewWithCommentResponse;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
-import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
@@ -76,13 +75,12 @@ public class ReviewServiceTest {
 		orderId = 1L;
 		reviewId = 1L;
 		request = new ReviewRequest("좋은 가게였습니다.", 5);
-		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER); // id
+		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
 		ReflectionTestUtils.setField(member, "id", 1L);
-		store = new Store(1L, "Test name", "Test image", "Test description", member, StoreRequestStatus.APPROVED,
-			StoreStatus.OPEN);
+		store = new Store("Test name", "Test image", "Test description", "Test address", member);
 		store.approveRequest();
 		menus = new ArrayList<>();
-		order = order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
+		order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
 		pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
 		review = new Review("Original content", 4, store, member, order);
 	}
@@ -91,8 +89,6 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 작성 성공 - 가게 OPEN 상태 및 주문 완료 상태")
 	void createReview_success() {
 		// Given
-		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
-
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
 		when(reviewRepository.existsByOrderIdAndMemberId(orderId, member.getId())).thenReturn(false);
@@ -118,8 +114,6 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 작성 실패 - 이미 해당 주문에 리뷰 존재")
 	void createReview_fail_reviewAlreadyExists() {
 		// Given
-		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
-
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
 		when(reviewRepository.existsByOrderIdAndMemberId(orderId, member.getId())).thenReturn(true);
@@ -140,7 +134,7 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 작성 실패 - 가게 OPEN 상태지만 주문 미완료 상태")
 	void createReview_fail_orderNotCompleted() {
 		// Given
-		Order order = Order.createOf(member, store, menus, OrderStatus.WAITING, 10000);
+		ReflectionTestUtils.setField(order, "status", OrderStatus.WAITING);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
@@ -160,8 +154,7 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 작성 실패 - 팬딩 상태 가게")
 	void createReview_fail_storePending() {
 		// Given
-		store.updateStoreStatus(StoreStatus.PENDING);
-		Order order = Order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
+		ReflectionTestUtils.setField(store, "status", StoreStatus.PENDING);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 
