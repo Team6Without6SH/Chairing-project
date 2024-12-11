@@ -10,5 +10,5 @@ import com.sparta.chairingproject.domain.review.entity.Review;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 	boolean existsByReview(Review review);
 
-	Optional<Comment> findByReview(Review review);
+	Optional<Comment> findByReviewAndDeletedAtIsNull(Review review);
 }

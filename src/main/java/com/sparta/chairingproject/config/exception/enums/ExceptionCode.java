@@ -91,6 +91,7 @@ public enum ExceptionCode {
 	NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "존재하지 않는 댓글입니다."),
 	NOT_MATCHING_COMMENT_AND_REVIEW(HttpStatus.BAD_REQUEST, "댓글이 해당 리뷰에 연결되지 않았습니다."),
 	NOT_AUTHOR_OF_COMMENT(HttpStatus.UNAUTHORIZED, "해당 댓글의 작성자가 아닙니다."),
+	COMMENT_ALREADY_DELETED(HttpStatus.FORBIDDEN, "이미 삭제된 댓글입니다."),
 
 	//----------쿠폰----------
 	COUPON_OUT_OF_STOCK(HttpStatus.CONFLICT, "쿠폰 수량이 부족합니다."),
