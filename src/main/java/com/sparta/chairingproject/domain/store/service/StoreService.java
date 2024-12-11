@@ -166,4 +166,22 @@ public class StoreService {
 			true
 		);
 	}
+
+	@Transactional
+	public void requestDeleteStore(Long storeId, UserDetailsImpl authUser) {
+		Member owner = memberRepository.findById(authUser.getMember().getId())
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+
+		Store store = storeRepository.findByIdAndOwnerId(storeId, owner.getId())
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+
+		if (store.getRequestStatus() == StoreRequestStatus.DELETE_REQUESTED) {
+			throw new GlobalException(STORE_ALREADY_DELETED);
+		}
+
+		store.setRequestStatus(StoreRequestStatus.DELETE_REQUESTED);
+		storeRepository.save(store);
+
+		// 알림 정도 추가 가능할듯?
+	}
 }

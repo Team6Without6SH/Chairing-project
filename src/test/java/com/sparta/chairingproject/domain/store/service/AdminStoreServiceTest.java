@@ -147,7 +147,7 @@ class AdminStoreServiceTest {
 	@Test
 	@DisplayName("가게 삭제 실패 테스트 - 이미 삭제된 가게")
 	void approveCloseStore_Fail_AlreadyDeleted() {
-		store.inActive(false);
+		store.isDeleted();
 		when(storeRepository.findById(1L)).thenReturn(java.util.Optional.of(store));
 
 		GlobalException exception = assertThrows(GlobalException.class, () -> adminStoreService.approveCloseStore(1L));

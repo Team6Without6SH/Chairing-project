@@ -24,8 +24,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -66,10 +64,8 @@ public class Store extends Timestamped {
 	@Column(nullable = false)
 	private int tableCount;
 
-	@Column(nullable = true)
-	private Boolean inActive = false;
-
-	private LocalDateTime deletedAt;
+	@Column
+	private LocalDateTime deletedAt = null;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
@@ -91,11 +87,12 @@ public class Store extends Timestamped {
 	@Column(nullable = false)
 	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
 
-	public Store(String name, String image, String description, @NotBlank @Size String requestDescription,
-		Member owner) {
+	// 매개변수 생성자 (서비스)
+	public Store(String name, String image, String description, String address, Member owner) {
 		this.name = name;
 		this.image = image;
 		this.description = description;
+		this.address = address;
 		this.owner = owner;
 	}
 
@@ -124,21 +121,8 @@ public class Store extends Timestamped {
 		this.category = category;
 	}
 
-	// AdminStoreServiceTest 용
-	public Store(Long id, String name, String image, String description, Member member) {
-		this.id = id;
-		this.name = name;
-		this.image = image;
-		this.description = description;
-		this.owner = member;
-	}
-
 	public void updateStoreStatus(StoreStatus status) {
 		this.status = status;
-	}
-
-	public void updateRequestStatus(StoreRequestStatus storeRequestStatus) {
-		this.requestStatus = storeRequestStatus;
 	}
 
 	// 상태 업데이트 메서드
@@ -162,13 +146,17 @@ public class Store extends Timestamped {
 		this.image = req.getImage();
 	}
 
-	public void markAsDeleted() {
-		this.inActive = true;
+	public void approveDelete() {
+		this.status = StoreStatus.CLOSED;
+		this.requestStatus = StoreRequestStatus.APPROVED;
 		this.deletedAt = LocalDateTime.now();
 	}
 
-	//test 용 -> 가게 삭제 실패 테스트 - 이미 삭제된 가게
-	public void inActive(boolean b) {
-		this.inActive = b;
+	public boolean isDeleted() {
+		return this.requestStatus == StoreRequestStatus.DELETED;
+	}
+
+	public void rejectDeleteRequest() {
+		this.requestStatus = StoreRequestStatus.DELETE_REJECTED;
 	}
 }

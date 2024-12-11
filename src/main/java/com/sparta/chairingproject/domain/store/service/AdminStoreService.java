@@ -48,28 +48,23 @@ public class AdminStoreService {
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		StoreRequestStatus requestStatus;
-		try {
-			requestStatus = StoreRequestStatus.valueOf(request.getStatus());
-		} catch (IllegalArgumentException e) {
-			throw new GlobalException(INVALID_REQUEST_STATUS);
-		}
+		StoreRequestStatus requestStatus = StoreRequestStatus.valueOf(request.getStatus());
 
-		//상태 전환 처리
-		if (requestStatus == StoreRequestStatus.APPROVED) {
-			store.approveRequest();
-			store.setRequestStatus(StoreRequestStatus.APPROVED);
-			store.setStatus(StoreStatus.OPEN);
-		} else if (requestStatus == StoreRequestStatus.REJECTED) {
-			store.rejectRequest();
-			store.setRequestStatus(StoreRequestStatus.REJECTED);
-			store.setStatus(StoreStatus.PENDING);
-		} else {
-			throw new GlobalException(INVALID_REQUEST_STATUS);
+		switch (requestStatus) {
+			case APPROVED -> store.approveRequest();
+			case REJECTED -> store.rejectRequest();
+			case DELETE_REQUESTED -> {
+				// DELETE_REQUESTED 는 허용되지 않는 상태
+				throw new GlobalException(INVALID_REQUEST_STATUS);
+			}
+			case DELETED -> store.approveDelete();
+			case DELETE_REJECTED -> store.rejectDeleteRequest();
+			default -> throw new GlobalException(INVALID_REQUEST_STATUS);
 		}
 
 		storeRepository.save(store);
-		return new StoreAdminResponse(store.getId(), store.getName(), store.getStatus().name());
+		return new StoreAdminResponse(store.getId(), store.getName(), store.getStatus().name(),
+			store.getRequestStatus().name());
 	}
 
 	@Transactional
@@ -77,11 +72,12 @@ public class AdminStoreService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		if (store.getInActive() == null || !store.getInActive()) {
-			throw new GlobalException(STORE_ALREADY_DELETED);
+		if (store.getRequestStatus() != StoreRequestStatus.DELETE_REQUESTED) {
+			throw new GlobalException(INVALID_REQUEST_STATUS);
 		}
 
-		storeRepository.softDeleteById(storeId); // 실제 데이터 삭제 (소프트 딜리트 유지 시 삭제 제외 가능)
+		store.approveDelete();
+		storeRepository.save(store);
 	}
 }
 

@@ -30,16 +30,4 @@ public class StoreRequest {
 	private String description;
 
 	private String image;
-
-	// storeRequest TEST 용
-	public StoreRequest(String testStore, String testAddress, String s, String description, String testImage) {
-		this.name = testStore;
-		this.address = testAddress;
-		this.phone = s;
-		this.openTime = s;
-		this.closeTime = s;
-		this.category = s;
-		this.description = description;
-		this.image = testImage;
-	}
 }
