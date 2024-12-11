@@ -46,13 +46,8 @@ public enum ReservationStatus {
 				}
 				break;
 
-			case COMPLETED:
-			case CANCELED:
-			case REJECTED:
+			case COMPLETED, CANCELED, REJECTED:
 				throw new GlobalException(INVALID_STATUS_TRANSITION);
-
-			default:
-				throw new GlobalException(RESERVATION_STATUS_NOT_FOUND);
 		}
 	}
 }
