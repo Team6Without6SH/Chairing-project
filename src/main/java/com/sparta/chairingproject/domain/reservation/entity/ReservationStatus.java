@@ -49,7 +49,7 @@ public enum ReservationStatus {
 			case COMPLETED:
 			case CANCELED:
 			case REJECTED:
-				throw new GlobalException(CANNOT_REJECT_RESERVATION);
+				throw new GlobalException(INVALID_STATUS_TRANSITION);
 
 			default:
 				throw new GlobalException(RESERVATION_STATUS_NOT_FOUND);
