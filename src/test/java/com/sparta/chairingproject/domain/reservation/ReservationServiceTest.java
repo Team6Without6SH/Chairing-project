@@ -21,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
@@ -224,6 +225,80 @@ public class ReservationServiceTest {
 			() -> reservationService.updateReservation(storeId, reservationId, req, authMember));
 
 		assertEquals(ExceptionCode.INVALID_STATUS_TRANSITION, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("예약 취소 / 성공")
+	void cancelReservation_Success() {
+		// given
+		RequestDto req = new RequestDto();
+
+		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+		when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+		ReservationResponse res = reservationService.cancelReservation(reservationId, req, authMember);
+
+		// then
+		assertNotNull(res);
+		assertEquals(4, res.getGuestCount());
+		assertEquals(storeId, res.getStoreId());
+		assertEquals(reservationId, res.getId());
+		assertEquals("CANCELED", res.getStatus().toString());
+
+		// 저장소 호출 확인
+		verify(reservationRepository, times(1)).findById(reservationId);
+	}
+
+	@Test
+	@DisplayName("예약 취소 / 해당 예약을 찾을 수 없는 경우")
+	void cancelReservation_RESERVATION_NOT_FOUND() {
+		// given
+		Long invalidReservationId = 10L;
+
+		RequestDto req = new RequestDto();
+
+		// W T
+		when(reservationRepository.findById(invalidReservationId)).thenReturn(Optional.empty());
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reservationService.cancelReservation(invalidReservationId, req, authMember));
+
+		assertEquals(ExceptionCode.RESERVATION_NOT_FOUND, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("예약 취소 / 내 예약이 아닌 경우")
+	void cancelReservation_CANNOT_CANCEL_OTHERS_RESERVATION() {
+		// given
+		Long invalidMemberId = 10L;
+		ReflectionTestUtils.setField(reservation, "memberId", invalidMemberId);
+
+		RequestDto req = new RequestDto();
+
+		// W T
+		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reservationService.cancelReservation(reservationId, req, authMember));
+
+		assertEquals(ExceptionCode.CANNOT_CANCEL_OTHERS_RESERVATION, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("예약 취소 / 예약이 진행 중이 아닐 경우")
+	void cancelReservation_CANCELLATION_NOT_ALLOWED() {
+		// given
+		ReflectionTestUtils.setField(reservation, "status", ReservationStatus.APPROVED);
+
+		RequestDto req = new RequestDto();
+
+		// W T
+		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reservationService.cancelReservation(reservationId, req, authMember));
+
+		assertEquals(ExceptionCode.CANCELLATION_NOT_ALLOWED, exception.getExceptionCode());
 	}
 
 }
