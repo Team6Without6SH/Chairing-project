@@ -71,7 +71,8 @@ class AuthUtilsTest {
 	@DisplayName("요청 DTO의 memberId로 MemberRepository에서 조회 성공")
 	void findAuthUser_WhenMemberIdExists_ReturnsMemberFromRepository() {
 		// given
-		Member repositoryMember = new Member(2L, "Repository User", "repo@example.com", "password", MemberRole.USER);
+		Member repositoryMember = new Member("Repository User", "repo@example.com", "password", MemberRole.USER);
+		ReflectionTestUtils.setField(testMember, "id", 2L);
 		RequestDto req = new RequestDto(2L);
 
 		when(memberRepository.findById(2L)).thenReturn(Optional.of(repositoryMember));
