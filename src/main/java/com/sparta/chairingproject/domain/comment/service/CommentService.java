@@ -68,6 +68,10 @@ public class CommentService {
 		Comment comment = commentRepository.findById(commentId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_COMMENT));
 
+		if (comment.getDeletedAt() != null) {
+			throw new GlobalException(COMMENT_ALREADY_DELETED);
+		}
+
 		if (!comment.getReview().getId().equals(reviewId)) {
 			throw new GlobalException(NOT_MATCHING_COMMENT_AND_REVIEW);
 		}
