@@ -29,8 +29,6 @@ import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.review.entity.Review;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
-import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
-import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class CommentServiceTest {
@@ -59,9 +57,10 @@ public class CommentServiceTest {
 		storeId = 1L;
 		reviewId = 1L;
 		commentId = 1L;
-		owner = new Member(1L, "Test Owner", "owner@example.com", "password", MemberRole.OWNER);
-		store = new Store(1L, "Test Store", "storeImage", "description", owner, StoreRequestStatus.APPROVED,
-			StoreStatus.OPEN);
+		owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(owner, "id", 1L);
+		store = new Store("Test Store", "storeImage", "description", "Test address", owner);
+		ReflectionTestUtils.setField(store, "id", storeId);
 		store.approveRequest();
 		order = Order.createOf(owner, store, List.of(), OrderStatus.COMPLETED, 10000);
 		review = new Review("Good service", 5, store, owner, order);
@@ -91,8 +90,8 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 리뷰가 해당 가게의 주문과 연결되지 않음")
 	void createComment_fail_notMatchingOrderAndReview() {
 		// Given
-		Store anotherStore = new Store(2L, "Another Store", "storeImage", "description", owner,
-			StoreRequestStatus.APPROVED, StoreStatus.OPEN);
+		Store anotherStore = new Store("Another Store", "storeImage", "description", "Test address", owner);
+		ReflectionTestUtils.setField(anotherStore, "id", 2L);
 		Order invalidOrder = Order.createOf(owner, anotherStore, List.of(), OrderStatus.COMPLETED, 10000);
 		Review differentReview = new Review("Good service", 5, anotherStore, owner, invalidOrder); // 잘못된 Order
 
@@ -113,7 +112,8 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 권한 없는 OWNER")
 	void createComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member(2L, "Another Owner", "different@example.com", "password", MemberRole.OWNER);
+		Member differentOwner = new Member("Another Owner", "different@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
@@ -195,8 +195,8 @@ public class CommentServiceTest {
 	@DisplayName("댓글 수정 실패 - 권한 없는 OWNER")
 	void updateComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member(2L, "Different Owner", "different@example.com", "password",
-			MemberRole.OWNER);
+		Member differentOwner = new Member("Different Owner", "different@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 		Comment comment = new Comment("Original content", review);
 		when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
@@ -280,8 +280,8 @@ public class CommentServiceTest {
 	@DisplayName("댓글 삭제 실패 - 권한 없는 OWNER")
 	void deleteComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member(2L, "Different Owner", "different@example.com", "password",
-			MemberRole.OWNER);
+		Member differentOwner = new Member("Different Owner", "different@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 		Comment comment = new Comment("Content", review);
 		when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
