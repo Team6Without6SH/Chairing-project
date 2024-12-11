@@ -14,9 +14,10 @@ public class StoreAdminResponse {
 	private String status;
 	private String requestStatus;
 
-	public StoreAdminResponse(Long id, String name, String status) {
+	public StoreAdminResponse(Long id, String name, String status, String requestStatus) {
 		this.id = id;
 		this.name = name;
 		this.status = status;
+		this.requestStatus = status;
 	}
 }

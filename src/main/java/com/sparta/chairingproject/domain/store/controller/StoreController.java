@@ -10,6 +10,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.method.P;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -93,5 +94,15 @@ public class StoreController {
 	) {
 		Long ownerId = authMember.getMember().getId(); // 현재 로그인된 가게 사장 ID
 		return ResponseEntity.ok(storeService.getStoreById(storeId, ownerId));
+	}
+
+	@Secured("ROLE_OWNER")
+	@PostMapping("/owners/stores/{storeId}/delete-request")
+	public ResponseEntity<Void> requestDeleteStore(
+		@PathVariable Long storeId,
+		@AuthenticationPrincipal UserDetailsImpl authMember
+	) {
+		storeService.requestDeleteStore(storeId, authMember);
+		return ResponseEntity.ok().build();
 	}
 }

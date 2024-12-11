@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.domain.store.repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
 import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 
 import io.lettuce.core.dynamic.annotation.Param;
+import jakarta.transaction.Transactional;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
@@ -23,7 +25,7 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 	Optional<Store> findByIdAndOwnerId(Long storeId, Long ownerId);
 
 	@Modifying
-	@Query("UPDATE Store s SET s.inActive = true, s.deletedAt = CURRENT_TIMESTAMP WHERE s.id = :storeId")
-	void softDeleteById(@Param("storeId") Long storeId);
-
+	@Transactional
+	@Query("UPDATE Store s SET s.requestStatus = 'DELETED', s.deletedAt = :deletedAt, s.status = 'CLOSED' WHERE s.id = :storeId")
+	void softDeleteById(@Param("storeId") Long storeId, @Param("deletedAt") LocalDateTime deletedAt);
 }
