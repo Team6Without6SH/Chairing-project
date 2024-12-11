@@ -59,6 +59,7 @@ public class ReviewServiceTest {
 
 	private Long storeId;
 	private Long orderId;
+	private Long reviewId;
 	private ReviewRequest request;
 	private Member member;
 	private Store store;
@@ -66,19 +67,22 @@ public class ReviewServiceTest {
 	private Order order;
 	private Pageable pageable;
 	private RequestDto requestDto;
+	private Review review;
 
 	@BeforeEach
 	void setUp() {
 		storeId = 1L;
 		orderId = 1L;
+		reviewId = 1L;
 		request = new ReviewRequest("좋은 가게였습니다.", 5);
-		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
+		member = new Member(1L, "Test user", "test@example.com", "1234", MemberRole.USER);
 		store = new Store(1L, "Test name", "Test image", "Test description", member, StoreRequestStatus.APPROVED,
 			StoreStatus.OPEN);
 		store.approveRequest();
 		menus = new ArrayList<>();
 		order = order.createOf(member, store, menus, OrderStatus.COMPLETED, 10000);
 		pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
+		review = new Review("Original content", 4, store, member, order);
 	}
 
 	@Test
@@ -238,5 +242,107 @@ public class ReviewServiceTest {
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(reviewRepository, never()).findByStoreIdAndDeletedAtIsNull(any(), any());
 		verify(commentRepository, never()).findByReviewAndDeletedAtIsNull(any());
+	}
+
+	@Test
+	@DisplayName("리뷰 수정 성공")
+	void updateReview_success() {
+		// Given
+		when(reviewRepository.findById(orderId)).thenReturn(Optional.of(review));
+
+		ReviewRequest updatedRequest = new ReviewRequest("Updated content", 5);
+
+		// When
+		reviewService.updateReview(orderId, updatedRequest, member);
+
+		// Then
+		assertEquals("Updated content", review.getContent());
+		assertEquals(5, review.getScore());
+
+		verify(reviewRepository, times(1)).findById(orderId);
+	}
+
+	@Test
+	@DisplayName("리뷰 수정 실패 - 작성자가 아닌 경우")
+	void updateReview_fail_notAuthor() {
+		// Given
+		Member anotherMember = new Member("Another user", "another@example.com", "password", MemberRole.USER);
+
+		when(reviewRepository.findById(orderId)).thenReturn(Optional.of(review));
+
+		ReviewRequest updatedRequest = new ReviewRequest("Updated content", 5);
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.updateReview(orderId, updatedRequest, anotherMember));
+
+		assertEquals(NOT_AUTHOR_OF_REVIEW.getMessage(), exception.getMessage());
+		verify(reviewRepository, times(1)).findById(orderId);
+	}
+
+	@Test
+	@DisplayName("리뷰 수정 실패 - 이미 삭제된 리뷰")
+	void updateReview_fail_alreadyDeleted() {
+		// Given
+		review.softDelete();
+
+		when(reviewRepository.findById(orderId)).thenReturn(Optional.of(review));
+
+		ReviewRequest updatedRequest = new ReviewRequest("Updated content", 5);
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.updateReview(orderId, updatedRequest, member));
+
+		assertEquals(REVIEW_ALREADY_DELETED.getMessage(), exception.getMessage());
+		verify(reviewRepository, times(1)).findById(orderId);
+	}
+
+	@Test
+	@DisplayName("리뷰 삭제 성공")
+	void deleteReview_success() {
+		// Given
+		when(reviewRepository.findById(orderId)).thenReturn(Optional.of(review));
+
+		// When
+		reviewService.deleteReview(orderId, requestDto, member);
+
+		// Then
+		assertNotNull(review.getDeletedAt());
+		verify(reviewRepository, times(1)).findById(orderId);
+	}
+
+	@Test
+	@DisplayName("리뷰 삭제 실패 - 작성자가 아닌 경우")
+	void deleteReview_fail_notAuthor() {
+		// Given
+		Member anotherMember = new Member("Another user", "another@example.com", "password", MemberRole.USER);
+
+		when(reviewRepository.findById(orderId)).thenReturn(Optional.of(review));
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.deleteReview(orderId, requestDto, anotherMember));
+
+		assertEquals(NOT_AUTHOR_OF_REVIEW.getMessage(), exception.getMessage());
+		verify(reviewRepository, times(1)).findById(orderId);
+	}
+
+	@Test
+	@DisplayName("리뷰 삭제 실패 - 이미 삭제된 리뷰")
+	void deleteReview_fail_alreadyDeleted() {
+		// Given
+		review.softDelete(); // 리뷰를 삭제 상태로 설정
+
+		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.deleteReview(reviewId, requestDto, member));
+
+		assertEquals(REVIEW_ALREADY_DELETED.getMessage(), exception.getMessage());
+
+		verify(reviewRepository, times(1)).findById(reviewId);
+		verify(reviewRepository, never()).save(any(Review.class));
 	}
 }
