@@ -66,12 +66,15 @@ public class ReservationServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		member = new Member(1L, "Test User", "test@test.com", "encodedPassword", MemberRole.USER);
+		member = new Member("Test User", "test@test.com", "encodedPassword", MemberRole.USER);
+		ReflectionTestUtils.setField(member, "id", memberId);
 		authMember = new UserDetailsImpl(member);
 
-		owner = new Member(2L, "Test Owner", "test2@example.com", "password", MemberRole.OWNER);
+		owner = new Member("Test Owner", "test2@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(owner, "id", ownerId);
 
-		store = new Store(1L, "Test Store", "Image", "설명", owner);
+		store = new Store("Test Store", "Image", "설명", "주소", owner);
+		ReflectionTestUtils.setField(store, "id", storeId);
 
 		storeRepository.save(store);
 
@@ -222,4 +225,5 @@ public class ReservationServiceTest {
 
 		assertEquals(ExceptionCode.INVALID_STATUS_TRANSITION, exception.getExceptionCode());
 	}
+
 }
