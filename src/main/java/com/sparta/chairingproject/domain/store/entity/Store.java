@@ -88,7 +88,7 @@ public class Store extends Timestamped {
 	private StoreRequestStatus requestStatus = StoreRequestStatus.PENDING;
 
 	// 매개변수 생성자 (서비스)
-	public Store(String name, String image, String description, String address, Member owner) {
+	public Store(String name, String address, String image, String description, Member owner) {
 		this.name = name;
 		this.image = image;
 		this.description = description;
