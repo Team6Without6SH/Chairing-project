@@ -18,6 +18,6 @@ public class StoreAdminResponse {
 		this.id = id;
 		this.name = name;
 		this.status = status;
-		this.requestStatus = status;
+		this.requestStatus = requestStatus;
 	}
 }
