@@ -108,22 +108,6 @@ public class Store extends Timestamped {
 		this.owner = member;
 	}
 
-	//테스트 용(자리선점)
-	public Store(Long id, String name, String image, String description, Member owner, int tableCount, String address,
-		String phone, String openTime, String closeTime, String category) {
-		this.id = id;
-		this.name = name;
-		this.image = image;
-		this.description = description;
-		this.owner = owner;
-		this.tableCount = tableCount;
-		this.address = address;
-		this.phone = phone;
-		this.openTime = openTime;
-		this.closeTime = closeTime;
-		this.category = category;
-	}
-
 	// AdminStoreServiceTest 용
 	public Store(Long id, String name, String image, String description, Member member) {
 		this.id = id;
