@@ -49,12 +49,6 @@ public class Coupon extends Timestamped {
 	@Builder.Default
 	private List<Issuance> issuances = new ArrayList<>();
 
-	public Coupon(long l, String testCoupon, int i, int i1) {
-		this.id = l;
-		this.name = testCoupon;
-		this.quantity = i;
-		this.discountPrice = i1;
-	}
 
 	public void validateQuantity() {
 		if (this.quantity <= 0) {

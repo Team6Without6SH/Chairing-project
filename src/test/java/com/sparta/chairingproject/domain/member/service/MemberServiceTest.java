@@ -31,8 +31,6 @@ import com.sparta.chairingproject.domain.reservation.entity.Reservation;
 import com.sparta.chairingproject.domain.reservation.entity.ReservationStatus;
 import com.sparta.chairingproject.domain.reservation.repository.ReservationRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
-import com.sparta.chairingproject.domain.store.entity.StoreRequestStatus;
-import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -48,6 +46,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
 class MemberServiceTest {
 
@@ -82,18 +81,18 @@ class MemberServiceTest {
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
-		member = new Member(1L, "testName", "test@test.com", "encodedPassword", MemberRole.USER);
+		member = new Member("testName", "test@test.com", "encodedPassword", MemberRole.USER);
+		ReflectionTestUtils.setField(member, "id", 1L);
 		authMember = new UserDetailsImpl(member);
-		store = new Store(1L, "storeTest", "testImage", "storeDes", member, StoreRequestStatus.APPROVED,
-			StoreStatus.PENDING);
+		store = new Store("storeTest", "testImage", "storeDes", "asd", member);
+		ReflectionTestUtils.setField(store, "id", 1L);
 		menu = new Menu(1L, "menuTest", 5000, "menuImage", false, store, false);
 		menuList = List.of(menu);
 		order = new Order(1L, member, store, menuList, OrderStatus.WAITING, 5000);
 		reservation = new Reservation(1L, 1L, 5, LocalDate.now(), "12:00",
 			ReservationStatus.PENDING, store);
-		coupon = new Coupon(1L, "testCoupon", 100, 5000);
+		coupon = new Coupon(1L, "testCoupon", 100, 5000, (List<Issuance>) issuance);
 		issuance = new Issuance(1L, member, coupon);
-
 	}
 
 	@Test

@@ -96,19 +96,6 @@ public class Store extends Timestamped {
 		this.owner = owner;
 	}
 
-	public Store(Long id, String name, String image, String description, Member member, StoreRequestStatus approved,
-		StoreStatus pending) {
-		this.id = id;
-		this.name = name;
-		this.image = image;
-		this.description = description;
-		this.owner = member;
-	}
-
-	public void updateStoreStatus(StoreStatus status) {
-		this.status = status;
-	}
-
 	// 상태 업데이트 메서드
 	public void approveRequest() {
 		this.requestStatus = StoreRequestStatus.APPROVED;
