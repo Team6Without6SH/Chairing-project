@@ -59,7 +59,8 @@ public class CommentServiceTest {
 		storeId = 1L;
 		reviewId = 1L;
 		commentId = 1L;
-		owner = new Member(1L, "Test Owner", "owner@example.com", "password", MemberRole.OWNER);
+		owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER); // id
+		ReflectionTestUtils.setField(owner, "id", 1L);
 		store = new Store(1L, "Test Store", "storeImage", "description", owner, StoreRequestStatus.APPROVED,
 			StoreStatus.OPEN);
 		store.approveRequest();
@@ -113,7 +114,8 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 권한 없는 OWNER")
 	void createComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member(2L, "Another Owner", "different@example.com", "password", MemberRole.OWNER);
+		Member differentOwner = new Member("Another Owner", "different@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 
@@ -195,8 +197,8 @@ public class CommentServiceTest {
 	@DisplayName("댓글 수정 실패 - 권한 없는 OWNER")
 	void updateComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member(2L, "Different Owner", "different@example.com", "password",
-			MemberRole.OWNER);
+		Member differentOwner = new Member("Different Owner", "different@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 		Comment comment = new Comment("Original content", review);
 		when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
@@ -280,8 +282,8 @@ public class CommentServiceTest {
 	@DisplayName("댓글 삭제 실패 - 권한 없는 OWNER")
 	void deleteComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member(2L, "Different Owner", "different@example.com", "password",
-			MemberRole.OWNER);
+		Member differentOwner = new Member("Different Owner", "different@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 		Comment comment = new Comment("Content", review);
 		when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 

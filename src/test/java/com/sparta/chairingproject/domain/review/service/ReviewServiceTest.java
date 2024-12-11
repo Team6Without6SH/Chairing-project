@@ -20,6 +20,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.comment.entity.Comment;
@@ -75,7 +76,8 @@ public class ReviewServiceTest {
 		orderId = 1L;
 		reviewId = 1L;
 		request = new ReviewRequest("좋은 가게였습니다.", 5);
-		member = new Member(1L, "Test user", "test@example.com", "1234", MemberRole.USER);
+		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER); // id
+		ReflectionTestUtils.setField(member, "id", 1L);
 		store = new Store(1L, "Test name", "Test image", "Test description", member, StoreRequestStatus.APPROVED,
 			StoreStatus.OPEN);
 		store.approveRequest();
