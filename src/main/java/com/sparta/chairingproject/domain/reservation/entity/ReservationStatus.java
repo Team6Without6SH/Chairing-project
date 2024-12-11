@@ -27,26 +27,36 @@ public enum ReservationStatus {
 	}
 
 	public void validateTransition(ReservationStatus targetStatus) {
-		switch (this) {
-			case PENDING:
-				if (targetStatus != APPROVED && targetStatus != REJECTED && targetStatus != CANCELED) {
+		switch (targetStatus) {
+			case APPROVED:
+				if (this != ReservationStatus.PENDING) {
 					throw new GlobalException(INVALID_STATUS_TRANSITION);
 				}
-				break;
+			case REJECTED:
+				if (this != ReservationStatus.PENDING && this != ReservationStatus.APPROVED) {
+					throw new GlobalException(CANNOT_REJECT_RESERVATION);
+				}
 
-			case APPROVED:
-				if (targetStatus != IN_PROGRESS && targetStatus != CANCELED) {
-					throw new GlobalException(INVALID_STATUS_TRANSITION);
+			case CANCELED:
+				if (this != ReservationStatus.PENDING) {
+					throw new GlobalException(CANCELLATION_NOT_ALLOWED);
 				}
 				break;
 
 			case IN_PROGRESS:
-				if (targetStatus != COMPLETED) {
+				if (this != ReservationStatus.APPROVED) {
 					throw new GlobalException(INVALID_STATUS_TRANSITION);
 				}
 				break;
 
-			case COMPLETED, CANCELED, REJECTED:
+			case COMPLETED:
+				if (this != ReservationStatus.IN_PROGRESS) {
+					throw new GlobalException(INVALID_STATUS_TRANSITION);
+				}
+				break;
+
+			case PENDING:
+			default:
 				throw new GlobalException(INVALID_STATUS_TRANSITION);
 		}
 	}
