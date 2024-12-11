@@ -97,7 +97,7 @@ public class MemberControllerTest {
 			.andExpect(jsonPath("$.email").value(testMember.getEmail()))
 			.andExpect(jsonPath("$.name").value(testMember.getName()));
 
-		SecurityContextHolder.clearContext();
+
 	}
 
 	@Test
@@ -118,7 +118,64 @@ public class MemberControllerTest {
 
 		Member updatedMember = memberRepository.findById(testMember.getId()).orElseThrow();
 		assertThat(passwordEncoder.matches("newPassword", updatedMember.getPassword())).isTrue();
-		SecurityContextHolder.clearContext();
+
+	}
+
+	@Test
+	@DisplayName("현재 비밀번호가 일치하지 않을 때")
+	void updatePassword_Fail_NotMatchOldPassword() throws Exception {
+
+		setAuthentication(testMember);
+
+		MemberPasswordRequest passwordRequest = new MemberPasswordRequest("wrongPassword",
+			"newPassword",
+			"newPassword");
+
+		mockMvc.perform(patch("/members")
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(passwordRequest)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("NOT_MATCH_PASSWORD"));
+
+	}
+
+	@Test
+	@DisplayName("현재 비밀번호와 변경 비밀번호가 같을 때")
+	void updatePassword_Fail_SameOldAndNew() throws Exception {
+
+		setAuthentication(testMember);
+
+		MemberPasswordRequest passwordRequest = new MemberPasswordRequest("encodedPassword",
+			"encodedPassword",
+			"encodedPassword");
+
+		mockMvc.perform(patch("/members")
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(passwordRequest)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("SAME_BEFORE_PASSWORD"));
+
+	}
+
+	@Test
+	@DisplayName("변경 비밀번호와 확인 비밀번호가 다를 때")
+	void updatePassword_Fail_NotMatchNewAndConfirm() throws Exception {
+
+		setAuthentication(testMember);
+
+		MemberPasswordRequest passwordRequest = new MemberPasswordRequest("encodedPassword",
+			"newPassword",
+			"encodedPassword");
+
+		mockMvc.perform(patch("/members")
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(passwordRequest)))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("NOT_MATCH_PASSWORD"));
+
 	}
 
 	@Test
@@ -135,7 +192,7 @@ public class MemberControllerTest {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.content").isArray());
 
-		SecurityContextHolder.clearContext();
+
 	}
 
 	@Test
@@ -153,7 +210,7 @@ public class MemberControllerTest {
 			.andExpect(jsonPath("$.content").isArray())
 			.andExpect(jsonPath("$.content.length()").value(0)); // 데이터가 없을 경우
 
-		SecurityContextHolder.clearContext();
+
 	}
 
 	@Test
@@ -171,7 +228,7 @@ public class MemberControllerTest {
 			.andExpect(jsonPath("$.content").isArray())
 			.andExpect(jsonPath("$.content.length()").value(1)); // 데이터가 없을 경우
 
-		SecurityContextHolder.clearContext();
+
 	}
 
 	@Test
@@ -190,7 +247,7 @@ public class MemberControllerTest {
 		Member deletedMember = memberRepository.findById(testMember.getId()).orElseThrow();
 		assertThat(deletedMember.isDeleted()).isTrue();
 
-		SecurityContextHolder.clearContext();
+
 	}
 
 	private void setAuthentication(Member member) {
