@@ -29,7 +29,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.CO
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class Coupon extends Timestamped {
 
 	@Id

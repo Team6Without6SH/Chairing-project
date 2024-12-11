@@ -27,57 +27,57 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/members")
 public class MemberController {
 
-    private final MemberService memberService;
+	private final MemberService memberService;
 
-    @GetMapping
-    public ResponseEntity<MemberResponse> getMember(
-        @AuthenticationPrincipal UserDetailsImpl authMember) {
-        return ResponseEntity.ok(memberService.getMember(authMember));
-    }
+	@GetMapping
+	public ResponseEntity<MemberResponse> getMemberDetails(
+		@AuthenticationPrincipal UserDetailsImpl authMember) {
+		return ResponseEntity.ok(memberService.getMemberDetails(authMember));
+	}
 
-    @PatchMapping
-    public void updatePassword(
-        @Valid @RequestBody MemberPasswordRequest request,
-        @AuthenticationPrincipal UserDetailsImpl authMember) {
-        memberService.updatePassword(authMember, request);
-    }
+	@PatchMapping
+	public void updatePassword(
+		@Valid @RequestBody MemberPasswordRequest request,
+		@AuthenticationPrincipal UserDetailsImpl authMember) {
+		memberService.updatePassword(authMember, request);
+	}
 
-    @GetMapping("/orders")
-    public ResponseEntity<Page<MemberOrderResponse>> getOrdersByMember(
-        @AuthenticationPrincipal UserDetailsImpl authMember,
-        @RequestBody RequestDto request,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "5") int size
-    ) {
-        return ResponseEntity.ok(memberService.getOrdersByMember(authMember, request, page, size));
-    }
+	@GetMapping("/orders")
+	public ResponseEntity<Page<MemberOrderResponse>> getOrdersByMember(
+		@AuthenticationPrincipal UserDetailsImpl authMember,
+		@RequestBody RequestDto request,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "5") int size
+	) {
+		return ResponseEntity.ok(memberService.getOrdersByMember(authMember, request, page, size));
+	}
 
-    @GetMapping("/reservations")
-    public ResponseEntity<Page<MemberReservationResponse>> getReservationsByMember(
-        @AuthenticationPrincipal UserDetailsImpl authMember,
-        @RequestBody RequestDto request,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "5") int size
-    ) {
-        return ResponseEntity.ok(
-            memberService.getReservationsByMember(authMember, request, page, size));
-    }
+	@GetMapping("/reservations")
+	public ResponseEntity<Page<MemberReservationResponse>> getReservationsByMember(
+		@AuthenticationPrincipal UserDetailsImpl authMember,
+		@RequestBody RequestDto request,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "5") int size
+	) {
+		return ResponseEntity.ok(
+			memberService.getReservationsByMember(authMember, request, page, size));
+	}
 
-    @GetMapping("/coupons")
-    public ResponseEntity<Page<MemberIssuanceResponse>> getIssuanceByMember(
-        @AuthenticationPrincipal UserDetailsImpl authMember,
-        @RequestBody RequestDto request,
-        @RequestParam(defaultValue = "1") int page,
-        @RequestParam(defaultValue = "5") int size) {
-        return ResponseEntity.ok(
-            memberService.getIssuanceByMember(authMember, request, page, size));
-    }
+	@GetMapping("/coupons")
+	public ResponseEntity<Page<MemberIssuanceResponse>> getIssuanceByMember(
+		@AuthenticationPrincipal UserDetailsImpl authMember,
+		@RequestBody RequestDto request,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "5") int size) {
+		return ResponseEntity.ok(
+			memberService.getIssuanceByMember(authMember, request, page, size));
+	}
 
-    @DeleteMapping("/delete")
-    public void deletedMember(
-        @RequestBody RequestDto request,
-        @AuthenticationPrincipal UserDetailsImpl authMember) {
-        memberService.deleteMember(authMember, request);
-    }
+	@DeleteMapping("/delete")
+	public void deletedMember(
+		@RequestBody RequestDto request,
+		@AuthenticationPrincipal UserDetailsImpl authMember) {
+		memberService.deleteMember(authMember, request);
+	}
 
 }
