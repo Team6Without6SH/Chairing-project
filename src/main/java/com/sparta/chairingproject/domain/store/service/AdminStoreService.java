@@ -48,8 +48,13 @@ public class AdminStoreService {
 		Store store = storeRepository.findById(request.getStoreId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		StoreRequestStatus requestStatus = StoreRequestStatus.valueOf(request.getStatus());
-
+		StoreRequestStatus requestStatus;
+		try {
+			requestStatus = StoreRequestStatus.valueOf(request.getStatus());
+		} catch (IllegalArgumentException e) {
+			throw new GlobalException(INVALID_REQUEST_STATUS);
+		}
+		
 		switch (requestStatus) {
 			case APPROVED -> store.approveRequest();
 			case REJECTED -> store.rejectRequest();
