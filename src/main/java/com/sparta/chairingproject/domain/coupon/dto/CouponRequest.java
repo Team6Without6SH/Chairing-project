@@ -4,7 +4,7 @@ import com.sparta.chairingproject.domain.common.dto.RequestDto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CouponRequest extends RequestDto {
 
-	@NotNull(message = "쿠폰 이름이 비었습니다.")
+	@NotBlank(message = "쿠폰 이름이 비었습니다.")
 	private String name;
 
 	@Min(value = 1, message = "수량은 1 이상이어야 합니다.")

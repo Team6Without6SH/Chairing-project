@@ -15,7 +15,6 @@ import com.sparta.chairingproject.domain.coupon.dto.CouponResponse;
 import com.sparta.chairingproject.domain.coupon.entity.Coupon;
 import com.sparta.chairingproject.domain.coupon.repository.CouponRepository;
 import com.sparta.chairingproject.domain.member.entity.Member;
-import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,7 +23,6 @@ import lombok.RequiredArgsConstructor;
 public class CouponService {
 	private final CouponRepository couponRepository;
 	private final IssuanceRepository issuanceRepository;
-	private final MemberRepository memberRepository;
 
 	public CouponResponse createCoupon(CouponRequest request) {
 		if (couponRepository.existsByName(request.getName())) {
