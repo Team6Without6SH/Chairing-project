@@ -10,9 +10,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class OrderRequest {
-	@NotNull
 	private List<Long> menuIds;
 	@NotNull
-	@Min(value = 10)
+	@Min(value = 0)
 	private int totalPrice;
 }
