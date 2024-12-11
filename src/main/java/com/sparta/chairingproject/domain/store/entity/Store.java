@@ -124,15 +124,6 @@ public class Store extends Timestamped {
 		this.category = category;
 	}
 
-	// AdminStoreServiceTest 용
-	public Store(Long id, String name, String image, String description, Member member) {
-		this.id = id;
-		this.name = name;
-		this.image = image;
-		this.description = description;
-		this.owner = member;
-	}
-
 	public void updateStoreStatus(StoreStatus status) {
 		this.status = status;
 	}
