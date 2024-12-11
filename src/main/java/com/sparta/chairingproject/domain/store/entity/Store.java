@@ -119,7 +119,7 @@ public class Store extends Timestamped {
 
 	public void approveDelete() {
 		this.status = StoreStatus.CLOSED;
-		this.requestStatus = StoreRequestStatus.APPROVED;
+		this.requestStatus = StoreRequestStatus.DELETED;
 		this.deletedAt = LocalDateTime.now();
 	}
 
