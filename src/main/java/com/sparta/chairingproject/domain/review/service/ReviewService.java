@@ -37,6 +37,10 @@ public class ReviewService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
+		if (store.getDeletedAt() != null) {
+			throw new GlobalException(STORE_ALREADY_DELETED);
+		}
+
 		if (store.getStatus().equals(StoreStatus.PENDING)) {
 			throw new GlobalException(STORE_PENDING_CANNOT_REVIEW);
 		}

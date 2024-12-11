@@ -4,6 +4,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -163,6 +164,24 @@ public class ReviewServiceTest {
 			() -> reviewService.createReview(storeId, orderId, request, member));
 
 		assertEquals(STORE_PENDING_CANNOT_REVIEW.getMessage(), exception.getMessage());
+
+		verify(storeRepository, times(1)).findById(storeId);
+		verify(orderRepository, never()).findByIdAndMemberAndStore(any(), any(), any());
+		verify(reviewRepository, never()).save(any(Review.class));
+	}
+
+	@Test
+	@DisplayName("리뷰 작성 실패 - 이미 삭제된 가게")
+	void createReview_fail_storeDeleted() {
+		// Given
+		ReflectionTestUtils.setField(store, "deletedAt", LocalDateTime.now());
+		when(storeRepository.findById((storeId))).thenReturn(Optional.of(store));
+
+		// When & Then
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reviewService.createReview(storeId, orderId, request, member));
+
+		assertEquals(STORE_ALREADY_DELETED.getMessage(), exception.getMessage());
 
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(orderRepository, never()).findByIdAndMemberAndStore(any(), any(), any());
