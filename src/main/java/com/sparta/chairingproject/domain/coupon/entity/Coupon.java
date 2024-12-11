@@ -32,37 +32,31 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.CO
 @Builder
 public class Coupon extends Timestamped {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(nullable = false)
-	private String name;
+    @Column(nullable = false)
+    private String name;
 
-	@Column(nullable = false)
-	private int quantity;
+    @Column(nullable = false)
+    private int quantity;
 
-	@Column(nullable = false)
-	private int discountPrice;
+    @Column(nullable = false)
+    private int discountPrice;
 
-	@OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
-	@Builder.Default
-	private List<Issuance> issuances = new ArrayList<>();
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Issuance> issuances = new ArrayList<>();
 
-	public Coupon(long l, String testCoupon, int i, int i1) {
-		this.id = l;
-		this.name = testCoupon;
-		this.quantity = i;
-		this.discountPrice = i1;
-	}
 
-	public void validateQuantity() {
-		if (this.quantity <= 0) {
-			throw new GlobalException(COUPON_OUT_OF_STOCK);
-		}
-	}
+    public void validateQuantity() {
+        if (this.quantity <= 0) {
+            throw new GlobalException(COUPON_OUT_OF_STOCK);
+        }
+    }
 
-	public void decreaseQuantity() {
-		this.quantity -= 1;
-	}
+    public void decreaseQuantity() {
+        this.quantity -= 1;
+    }
 }
