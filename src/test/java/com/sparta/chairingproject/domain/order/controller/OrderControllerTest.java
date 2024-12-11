@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.domain.order.controller;
 
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -97,7 +98,10 @@ class OrderControllerTest {
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isCreated())
 			.andExpect(jsonPath("$.orderStatus").value("ADMISSION"))
-			.andExpect(jsonPath("$.totalPrice").value(30000));
+			.andExpect(jsonPath("$.totalPrice").value(30000))
+			.andExpect(jsonPath("$.menuNames", hasSize(2)))
+			.andExpect(jsonPath("$.menuNames[0]").value("menu1"))
+			.andExpect(jsonPath("$.menuNames[1]").value("menu2"));
 	}
 
 	@Test
