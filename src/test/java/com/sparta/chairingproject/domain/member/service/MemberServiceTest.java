@@ -81,18 +81,22 @@ class MemberServiceTest {
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
+
 		member = new Member("testName", "test@test.com", "encodedPassword", MemberRole.USER);
 		ReflectionTestUtils.setField(member, "id", 1L);
 		authMember = new UserDetailsImpl(member);
 		store = new Store("storeTest", "testImage", "storeDes", "asd", member);
 		ReflectionTestUtils.setField(store, "id", 1L);
-		menu = new Menu(1L, "menuTest", 5000, "menuImage", false, store, false);
+		menu = Menu.createOf("menuTest", 5000, "menuImage", store);
+		ReflectionTestUtils.setField(menu, "id", 1L);
 		menuList = List.of(menu);
-		order = new Order(1L, member, store, menuList, OrderStatus.WAITING, 5000);
-		reservation = new Reservation(1L, 1L, 5, LocalDate.now(), "12:00",
-			ReservationStatus.PENDING, store);
-		coupon = new Coupon(1L, "testCoupon", 100, 5000, (List<Issuance>) issuance);
-		issuance = new Issuance(1L, member, coupon);
+		order = new Order().toBuilder().id(1L).member(member).menus(menuList).build();
+		reservation = new Reservation().toBuilder().id(1L).memberId(1L).date(LocalDate.now())
+			.time("10:00").store(store).build();
+		coupon = new Coupon().toBuilder().id(1L).build();
+		issuance = new Issuance().toBuilder().id(1L).member(member).coupon(coupon).build();
+
+
 	}
 
 	@Test
@@ -102,7 +106,7 @@ class MemberServiceTest {
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
 		// when
-		MemberResponse response = memberService.getMember(authMember);
+		MemberResponse response = memberService.getMemberDetails(authMember);
 
 		// then
 		assertNotNull(response);
