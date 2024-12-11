@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
@@ -35,7 +36,8 @@ class AuthUtilsTest {
 
 	@BeforeEach
 	void setUp() {
-		testMember = new Member(1L, "Test User", "test@example.com", "encodedPassword", MemberRole.USER);
+		testMember = new Member("Test User", "test@example.com", "encodedPassword", MemberRole.USER);
+		ReflectionTestUtils.setField(testMember, "id", 1L);
 		authUser = new UserDetailsImpl(testMember);
 	}
 
