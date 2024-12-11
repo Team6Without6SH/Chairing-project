@@ -100,7 +100,7 @@ public class ReservationServiceTest {
 		CreateReservationRequest req = new CreateReservationRequest(2, "2024-12-04", "12:00");
 
 		// W T
-		doReturn(member).when(authUtils).findAuthUser(req, authMember);
+		when(storeRepository.findById(invalidStoreId)).thenReturn(Optional.empty());
 
 		GlobalException exception = assertThrows(GlobalException.class,
 			() -> reservationService.createReservation(invalidStoreId, req, authMember));
