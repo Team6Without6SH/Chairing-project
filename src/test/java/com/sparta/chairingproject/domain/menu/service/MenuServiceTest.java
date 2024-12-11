@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
@@ -57,16 +58,21 @@ class MenuServiceTest {
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
-		owner = new Member(1L, "Test owner", "Test@email.com", "password123", MemberRole.OWNER);
-		owner2 = new Member(3L, "Test owner3", "Test@email3.com", "password123", MemberRole.OWNER);
-		member = new Member(2L, "Test member", "Test@email2.com", "password123", MemberRole.USER);
-		store = new Store(1L, "Test Store", "Test Image", "description", owner, 5, "seoul", "010-1111-2222",
-			"09:00",
-			"21:00", "Korean");
-		menu = new Menu(1L, "menuTest", 5000, "menuImage", false, store, false);
-		menu2 = new Menu(2L, "menuTest2", 10000, "menuImage", false, store, false);
+		owner = new Member("Test owner", "Test@email.com", "password123", MemberRole.OWNER);
+		ReflectionTestUtils.setField(owner, "id", 1L);
+		owner2 = new Member("Test owner3", "Test@email3.com", "password123", MemberRole.OWNER);
+		ReflectionTestUtils.setField(owner2, "id", 3L);
+		member = new Member("Test member", "Test@email2.com", "password123", MemberRole.USER);
+		ReflectionTestUtils.setField(member, "id", 2L);
+		store = new Store("Test Store", "Test Image", "description", "seoul", owner);
+		ReflectionTestUtils.setField(store, "id", 1L);
+		menu = Menu.createOf("menuTest", 5000, "menuImage", store);
+		ReflectionTestUtils.setField(menu, "id", 1L);
+		menu2 = Menu.createOf("menuTest2", 10000, "menuImage", store);
+		ReflectionTestUtils.setField(menu2, "id", 2L);
 		menuList = List.of(menu);
-		order = new Order(1L, member, store, menuList, OrderStatus.WAITING, 5000);
+		order = Order.createOf(member, store, menuList, OrderStatus.WAITING, 5000);
+		ReflectionTestUtils.setField(order, "id", 1L);
 	}
 
 	@Test

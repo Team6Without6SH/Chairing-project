@@ -69,15 +69,6 @@ public class Order extends Timestamped {
 		this.price = price;
 	}
 
-	// 주문 취소 테스트용
-	public Order(Long id, Member member, Store store, OrderStatus status, int price) {
-		this.id = id;
-		this.member = member;
-		this.store = store;
-		this.status = status;
-		this.price = price;
-	}
-
 	public static Order createOf(Member member, Store store, List<Menu> menus, OrderStatus status,
 		int price) {
 		return new Order(member, store, menus, status, price);
