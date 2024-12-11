@@ -15,10 +15,12 @@ import org.mockito.MockitoAnnotations;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuRequest;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuUpdateRequest;
+import com.sparta.chairingproject.domain.menu.dto.response.MenuDeleteResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuUpdateResponse;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -194,5 +196,61 @@ class MenuServiceTest {
 		assertEquals("menuTest", response.getName());
 		assertEquals(11000, response.getPrice());
 		assertTrue(response.isSoldOut());
+	}
+
+	@Test
+	@DisplayName("정상적으로 메뉴 삭제")
+	void deleteMenu_Success() {
+		// G
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+		when(menuRepository.findByIdAndStoreIdAndInActiveFalse(menu.getId(), store.getId()))
+			.thenReturn(Optional.of(menu));
+
+		// W
+		MenuDeleteResponse response = menuService.deleteMenu(store.getId(), menu.getId(), owner, new RequestDto());
+
+		// T
+		assertEquals(menu.getId(), response.getMenuId());
+		assertEquals(menu.getName(), response.getName());
+		assertTrue(response.isInActive());
+		verify(menuRepository).findByIdAndStoreIdAndInActiveFalse(menu.getId(), store.getId());
+	}
+
+	@Test
+	@DisplayName("가게를 찾을 수 없는 경우 예외 발생: NOT_FOUND_STORE")
+	void deleteMenu_ThrowException_When_NOT_FOUND_STORE() {
+		// G
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.empty());
+
+		// W T
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> menuService.deleteMenu(store.getId(), menu.getId(), owner, new RequestDto()));
+		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("사용자가 가게 주인이 아닌 경우 예외 발생: ONLY_OWNER_ALLOWED")
+	void deleteMenu_ThrowException_When_ONLY_OWNER_ALLOWED() {
+		// G
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+
+		// W T
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> menuService.deleteMenu(store.getId(), menu.getId(), owner2, new RequestDto()));
+		assertEquals(ExceptionCode.ONLY_OWNER_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("메뉴를 찾을 수 없는 경우 예외 발생: NOT_FOUND_MENU")
+	void deleteMenu_ThrowException_When_NOT_FOUND_MENU() {
+		// G
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+		when(menuRepository.findByIdAndStoreIdAndInActiveFalse(menu.getId(), store.getId()))
+			.thenReturn(Optional.empty());
+
+		// W T
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> menuService.deleteMenu(store.getId(), menu.getId(), owner, new RequestDto()));
+		assertEquals(ExceptionCode.NOT_FOUND_MENU, exception.getExceptionCode());
 	}
 }
