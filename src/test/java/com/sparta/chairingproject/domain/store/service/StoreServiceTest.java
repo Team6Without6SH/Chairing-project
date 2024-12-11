@@ -74,28 +74,6 @@ class StoreServiceTest {
 		ReflectionTestUtils.setField(storeRequest, "image", "testImage.jpg");
 	}
 
-	// @Test
-	// @DisplayName("ReflectionTestUtils -> StoreRequest 설정 테스트")
-	// void testStoreRequestWithReflectionTestUtils() {
-	// 	ReflectionTestUtils.setField(storeRequest, "name", "Test Store");
-	// 	ReflectionTestUtils.setField(storeRequest, "address", "Test Address");
-	// 	ReflectionTestUtils.setField(storeRequest, "phone", "010-1234-5678");
-	// 	ReflectionTestUtils.setField(storeRequest, "openTime", "09:00");
-	// 	ReflectionTestUtils.setField(storeRequest, "closeTime", "18:00");
-	// 	ReflectionTestUtils.setField(storeRequest, "category", "Test Category");
-	// 	ReflectionTestUtils.setField(storeRequest, "description", "This is a test description for the store.");
-	// 	ReflectionTestUtils.setField(storeRequest, "image", "testImage.jpg");
-	//
-	// 	assertEquals("Test Store", storeRequest.getName());
-	// 	assertEquals("Test Address", storeRequest.getAddress());
-	// 	assertEquals("010-1234-5678", storeRequest.getPhone());
-	// 	assertEquals("09:00", storeRequest.getOpenTime());
-	// 	assertEquals("18:00", storeRequest.getCloseTime());
-	// 	assertEquals("Test Category", storeRequest.getCategory());
-	// 	assertEquals("This is a test description for the store.", storeRequest.getDescription());
-	// 	assertEquals("testImage.jpg", storeRequest.getImage());
-	// }
-
 	@Test
 	@DisplayName("가게 등록 신청 성공 테스트")
 	void registerStore_Success() {
