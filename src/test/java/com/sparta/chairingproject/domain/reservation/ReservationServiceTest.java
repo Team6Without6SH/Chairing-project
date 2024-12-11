@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -58,6 +63,7 @@ public class ReservationServiceTest {
 	private UserDetailsImpl authMember;
 	private Member owner;
 	private Long ownerId = 1L;
+	private UserDetailsImpl authOwner;
 
 	private Store store;
 	private Long storeId = 1L;
@@ -73,6 +79,7 @@ public class ReservationServiceTest {
 
 		owner = new Member("Test Owner", "test2@example.com", "password", MemberRole.OWNER);
 		ReflectionTestUtils.setField(owner, "id", ownerId);
+		authOwner = new UserDetailsImpl(owner);
 
 		store = new Store("Test Store", "Image", "설명", "주소", owner);
 		ReflectionTestUtils.setField(store, "id", storeId);
@@ -299,6 +306,66 @@ public class ReservationServiceTest {
 			() -> reservationService.cancelReservation(reservationId, req, authMember));
 
 		assertEquals(ExceptionCode.CANCELLATION_NOT_ALLOWED, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("예약 다건 조회 / 성공")
+	void getReservationList_Success() {
+		// given
+		Pageable pageable = PageRequest.of(0, 10);
+
+		Page<Reservation> reservationPage = new PageImpl<>(
+			List.of(reservation), pageable, 1
+		);
+
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(reservationRepository.findByStoreId(storeId, pageable)).thenReturn(reservationPage);
+
+		Page<ReservationResponse> res = reservationService.getReservationList(storeId, 0, 10, authOwner);
+
+		// then
+		assertNotNull(res);
+		assertEquals(4, res.getContent().get(0).getGuestCount());
+		assertEquals(storeId, res.getContent().get(0).getStoreId());
+		assertEquals(reservationId, res.getContent().get(0).getId());
+		assertEquals("PENDING", res.getContent().get(0).getStatus().toString());
+
+		// 저장소 호출 확인
+		verify(storeRepository, times(1)).findById(storeId);
+		verify(reservationRepository, times(1)).findByStoreId(storeId, pageable);
+	}
+
+	@Test
+	@DisplayName("예약 상태 변경 / 해당 가게를 찾을 수 없는 경우")
+	void getReservationList_When_NOT_FOUND_STORE() {
+		// given
+		Long invalidStoreId = 10L;
+
+		// W T
+		when(storeRepository.findById(invalidStoreId)).thenReturn(Optional.empty());
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reservationService.getReservationList(invalidStoreId, 0, 10, authOwner));
+
+		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("예약 상태 변경 / 내 가게가 아닌 경우")
+	void getReservationList_When_UNAUTHORIZED_STORE_ACCESS() {
+		// given
+		Member owner2 = new Member("Test Owner2", "test3@example.com", "password", MemberRole.OWNER);
+		ReflectionTestUtils.setField(owner2, "id", 10L);
+
+		ReflectionTestUtils.setField(store, "owner", owner2);
+
+		// W T
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> reservationService.getReservationList(storeId, 0, 10, authOwner));
+
+		assertEquals(ExceptionCode.UNAUTHORIZED_STORE_ACCESS, exception.getExceptionCode());
 	}
 
 }
