@@ -1,31 +1,27 @@
 package com.sparta.chairingproject.domain.reservation.service;
 
-import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.security.UserDetailsImpl;
-import com.sparta.chairingproject.domain.common.dto.RequestDto;
-import com.sparta.chairingproject.domain.member.entity.Member;
-import com.sparta.chairingproject.domain.member.repository.MemberRepository;
-import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
-import com.sparta.chairingproject.domain.reservation.dto.request.UpdateReservationRequest;
-import com.sparta.chairingproject.domain.reservation.dto.response.ReservationListResponse;
-import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
-import com.sparta.chairingproject.domain.reservation.entity.Reservation;
-import com.sparta.chairingproject.domain.reservation.entity.ReservationStatus;
-import com.sparta.chairingproject.domain.reservation.repository.ReservationRepository;
-import com.sparta.chairingproject.domain.store.entity.Store;
-import com.sparta.chairingproject.domain.store.repository.StoreRepository;
-
-import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
+import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
+import com.sparta.chairingproject.domain.reservation.dto.request.UpdateReservationRequest;
+import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
+import com.sparta.chairingproject.domain.reservation.entity.Reservation;
+import com.sparta.chairingproject.domain.reservation.entity.ReservationStatus;
+import com.sparta.chairingproject.domain.reservation.repository.ReservationRepository;
+import com.sparta.chairingproject.domain.store.entity.Store;
+import com.sparta.chairingproject.domain.store.repository.StoreRepository;
+import com.sparta.chairingproject.util.AuthUtils;
 
-import java.util.List;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -33,12 +29,13 @@ public class ReservationService {
 
 	private final ReservationRepository reservationRepository;
 	private final StoreRepository storeRepository;
-	private final MemberRepository memberRepository;
+
+	private final AuthUtils authUtils;
 
 	/* 일반 사용자 */
 
 	public ReservationResponse createReservation(Long storeId, CreateReservationRequest req, UserDetailsImpl authUser) {
-		Long memberId = findAuthUser(req, authUser).getId();
+		Long memberId = authUtils.findAuthUser(req, authUser).getId();
 
 		Store store = storeRepository.findById(storeId).orElseThrow(
 			() -> new GlobalException(NOT_FOUND_STORE)
@@ -50,7 +47,7 @@ public class ReservationService {
 	}
 
 	public ReservationResponse cancelReservation(Long reservationId, RequestDto req, UserDetailsImpl authUser) {
-		Long memberId = findAuthUser(req, authUser).getId();
+		Long memberId = authUtils.findAuthUser(req, authUser).getId();
 
 		Reservation reservation = reservationRepository.findById(reservationId).orElseThrow(
 			() -> new GlobalException(RESERVATION_NOT_FOUND)
@@ -74,7 +71,8 @@ public class ReservationService {
 
 	public ReservationResponse updateReservation(Long storeId, Long reservationId, @Valid UpdateReservationRequest req,
 		UserDetailsImpl authUser) {
-		findAuthUser(req, authUser);
+
+		authUtils.findAuthUser(req, authUser);
 
 		Store store = storeRepository.findById(storeId).orElseThrow(
 			() -> new GlobalException(NOT_FOUND_STORE)
@@ -113,16 +111,4 @@ public class ReservationService {
 			.map(Reservation::toResponse);
 	}
 
-
-	/* 공통 */
-
-	private Member findAuthUser(RequestDto req, UserDetailsImpl authUser) {
-		if (req.getMemberId() == null || req.getMemberId() == 0) {
-			return authUser.getMember();
-		} else {
-			return memberRepository.findById(req.getMemberId()).orElseThrow(
-				() -> new GlobalException(NOT_FOUND_USER)
-			);
-		}
-	}
 }
