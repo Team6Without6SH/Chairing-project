@@ -79,7 +79,7 @@ public enum ExceptionCode {
 	//----------리뷰----------
 	NOT_FOUND_REVIEW(HttpStatus.NOT_FOUND, "해당 리뷰가 없습니다"),
 	SCORE_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "점수는 1 에서 5 사이 숫자에서 골라주세요"),
-	REVIEW_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "동일한 주문에 대해 이미 리뷰가 작성되었습니다"),
+	REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "동일한 주문에 대해 이미 리뷰가 작성되었습니다"),
 	NOT_ORDER_STATUS_COMPLETED(HttpStatus.FORBIDDEN, "주문이 배달 완료 상태가 아닙니다."),
 	STORE_PENDING_CANNOT_REVIEW(HttpStatus.FORBIDDEN, "가게가 등록 대기 상태입니다. 리뷰를 작성할 수 없습니다."),
 	ORDER_NOT_COMPLETED_CANNOT_REVIEW(HttpStatus.FORBIDDEN, "주문이 완료처리되지 않았습니다. 리류를 작성할 수 없습니다."),
@@ -116,7 +116,7 @@ public enum ExceptionCode {
 	NOT_SUPPORT_TOKEN(HttpStatus.UNAUTHORIZED, "Is not support token"),
 	INVALID_REQUEST_STATUS(HttpStatus.BAD_REQUEST, "유효하지 않은 요청 상태입니다"),
 	APPROVAL_PENDING(HttpStatus.CONFLICT, "승인 대기중입니다"),
-	STORE_ALREADY_DELETED(HttpStatus.BAD_REQUEST, "이미 삭제된 가게입니다.");
+	STORE_ALREADY_DELETED(HttpStatus.FORBIDDEN, "이미 삭제된 가게입니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;
