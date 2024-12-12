@@ -26,6 +26,7 @@ import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 import com.sparta.chairingproject.domain.store.mapper.StoreMapper;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
+import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -38,7 +39,7 @@ public class StoreService {
 	private final ReviewRepository reviewRepository;
 
 	@Transactional
-	public void registerStore(StoreRequest request, UserDetailsImpl authMember) {
+	public StoreResponse registerStore(StoreRequest request, UserDetailsImpl authMember) {
 
 		Member owner = memberRepository.findById(authMember.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
@@ -53,23 +54,20 @@ public class StoreService {
 		}
 
 		// 이미지 업로드 로직 추가 필요 (예: S3)
-		String imageUrl = request.getImage().isEmpty() ? null : request.getImage();
+		String imageUrl = request.getImage() == null || request.getImage().isEmpty() ? null : request.getImage();
 
-		Store store = new Store(
-			request.getName(),
-			request.getAddress(),
-			imageUrl,
-			request.getDescription(),
-			authMember.getMember()
-		);
+		Store store = new Store( // request 에 맞게 생성자 추가하고 -> pending 값을 여기다 담아두고 ->save  하기 ->
+			request.getName(), request.getAddress(), imageUrl, request.getDescription(), owner);
+		store.setTableCount(request.getTableCount());
 		storeRepository.save(store);
+
+		return StoreMapper.toStoreResponse(store);
 	}
 
 	public List<StoreResponse> getAllOpenedStores() {
 
-		List<Store> stores = storeRepository.findAllByRequestStatusAndStatus(
-			StoreRequestStatus.APPROVED, StoreStatus.OPEN
-		);
+		List<Store> stores = storeRepository.findAllByRequestStatusAndStatus(StoreRequestStatus.APPROVED,
+			StoreStatus.OPEN);
 
 		if (stores.isEmpty()) {
 			throw new GlobalException(NOT_FOUND_STORE);
@@ -80,8 +78,7 @@ public class StoreService {
 
 	public StoreDetailsResponse getStoreDetails(Long storeId) {
 
-		Store store = storeRepository.findById(storeId)
-			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
 		List<MenuSummaryResponse> menus = menuRepository.findByStoreId(storeId)
 			.stream()
@@ -93,26 +90,17 @@ public class StoreService {
 			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getScore()))
 			.toList();
 
-		int waitingCount = store.getReservations().size(); // 가게 예약 리스트 크기 사용
+		int waitingCount = store.getReservations() == null ? 0 : store.getReservations().size(); // 가게 예약 리스트 크기 사용
 
-		return new StoreDetailsResponse(
-			store.getName(),
-			store.getImage(),
-			store.getDescription(),
-			store.getAddress(),
-			menus,
-			reviews,
-			waitingCount
-		);
+		return new StoreDetailsResponse(store.getName(), store.getImage(), store.getDescription(), store.getAddress(),
+			menus, reviews, waitingCount);
 	}
 
 	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req, UserDetailsImpl authUser) {
 		Member owner = memberRepository.findById(authUser.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
-		Store store = storeRepository.findById(storeId).orElseThrow(
-			() -> new GlobalException(NOT_FOUND_STORE)
-		);
+		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
 		store.updateStore(req);
 		storeRepository.save(store);
@@ -127,17 +115,10 @@ public class StoreService {
 			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getScore()))
 			.toList();
 
-		int waitingCount = store.getReservations().size(); // 가게 예약 리스트 크기 사용
+		int waitingCount = store.getReservations() == null ? 0 : store.getReservations().size();// 가게 예약 리스트 크기 사용
 
-		return new StoreDetailsResponse(
-			store.getName(),
-			store.getImage(),
-			store.getDescription(),
-			store.getAddress(),
-			menus,
-			reviews,
-			waitingCount
-		);
+		return new StoreDetailsResponse(store.getName(), store.getImage(), store.getDescription(), store.getAddress(),
+			menus, reviews, waitingCount);
 	}
 
 	@Transactional
@@ -162,7 +143,8 @@ public class StoreService {
 			store.getCategory(),
 			store.getDescription(),
 			store.getImage(),
-			true
+			store.getTableCount(),
+			store.getOwner().getId()
 		);
 	}
 

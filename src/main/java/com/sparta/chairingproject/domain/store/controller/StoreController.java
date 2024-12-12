@@ -10,7 +10,6 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.access.method.P;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,12 +41,12 @@ public class StoreController {
 
 	@Secured("ROLE_OWNER")
 	@PostMapping("/owners/stores/register")
-	public ResponseEntity<Void> registerStore(
+	public ResponseEntity<StoreResponse> registerStore(
 		@Valid @RequestBody StoreRequest storeRequest,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
-		storeService.registerStore(storeRequest, authMember);
-		return ResponseEntity.ok().build();
+		StoreResponse response = storeService.registerStore(storeRequest, authMember);
+		return ResponseEntity.ok(response);
 	}
 
 	@GetMapping("/members/stores")

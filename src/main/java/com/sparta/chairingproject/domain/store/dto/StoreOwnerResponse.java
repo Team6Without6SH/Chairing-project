@@ -1,7 +1,5 @@
 package com.sparta.chairingproject.domain.store.dto;
 
-import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +16,7 @@ public class StoreOwnerResponse {
 	private String category;
 	private String description;
 	private String image;
-	private boolean approved;
+	private int tableCount;
+	private Long ownerId;
 
 }
