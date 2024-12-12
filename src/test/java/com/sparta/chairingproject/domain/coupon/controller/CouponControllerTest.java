@@ -22,8 +22,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
+import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.coupon.dto.CouponRequest;
 import com.sparta.chairingproject.domain.coupon.entity.Coupon;
@@ -50,21 +53,27 @@ public class CouponControllerTest {
 	private CouponRepository couponRepository;
 
 	@Autowired
+	private IssuanceRepository issuanceRepository;
+
+	@Autowired
 	private WebApplicationContext context;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 
 	private Member testMember;
+	private String requestJsonMemberId;
 
 	@BeforeEach
-	void setUp() {
+	void setUp() throws JsonProcessingException {
 		mockMvc = MockMvcBuilders.webAppContextSetup(context).build();
 		objectMapper = new ObjectMapper();
 
 		testMember = new Member("testName", "test@test.com",
 			passwordEncoder.encode("encodedPassword"), MemberRole.USER);
 		ReflectionTestUtils.setField(testMember, "deleted", false);
+
+		requestJsonMemberId = objectMapper.writeValueAsString(new RequestDto(testMember.getId()));
 
 		memberRepository.save(testMember);
 	}
@@ -119,12 +128,12 @@ public class CouponControllerTest {
 
 		// 동일한 이름으로 생성 요청
 		CouponRequest request = new CouponRequest("Duplicate Coupon", 10, 500);
-		String requestJson = objectMapper.writeValueAsString(request);
+		String requestBody = objectMapper.writeValueAsString(request);
 
 		// When & Then
 		mockMvc.perform(post("/coupons")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(requestJson))
+				.content(requestBody))
 			.andExpect(status().isConflict())
 			.andExpect(jsonPath("$.message").value(COUPON_NAME_ALREADY_EXISTS.getMessage()))
 			.andDo(print());
@@ -152,12 +161,10 @@ public class CouponControllerTest {
 		couponRepository.save(coupon1);
 		couponRepository.save(coupon2);
 
-		String requestBody = objectMapper.writeValueAsString(new RequestDto(testMember.getId()));
-
 		// When & Then
 		mockMvc.perform(get("/coupons")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(requestBody)
+				.content(requestJsonMemberId)
 				.param("page", "1")
 				.param("size", "10"))
 			.andExpect(status().isOk())
@@ -166,4 +173,96 @@ public class CouponControllerTest {
 			.andDo(print());
 	}
 
+	@Test
+	@DisplayName("쿠폰 발급 성공")
+	void issueCoupon_success() throws Exception {
+		// Given
+		setAuthentication(testMember);
+
+		Coupon coupon = Coupon.builder()
+			.name("Test coupon")
+			.quantity(10)
+			.discountPrice(500)
+			.build();
+
+		couponRepository.save(coupon);
+
+		// When & Then
+		mockMvc.perform(post("/coupons/" + coupon.getId())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestJsonMemberId))
+			.andExpect(status().isOk())
+			.andDo(print());
+
+		Coupon updatedCoupon = couponRepository.findById(coupon.getId()).orElseThrow();
+		assertThat(updatedCoupon.getQuantity()).isEqualTo(9);
+		assertThat(issuanceRepository.findByMemberIdAndCouponId(testMember.getId(), coupon.getId())).isPresent();
+	}
+
+	@Test
+	@DisplayName("쿠폰 발급 실패 - 쿠폰 없음")
+	void issueCoupon_fail_couponNotFound() throws Exception {
+		// Given
+		ReflectionTestUtils.setField(testMember, "memberRole", MemberRole.USER);
+		setAuthentication(testMember);
+
+		// When & Then
+		mockMvc.perform(post("/coupons/999")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestJsonMemberId))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.message").value(COUPON_NOT_FOUND.getMessage()))
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("쿠폰 발급 실패 - 이미 발급받은 쿠폰")
+	void issueCoupon_fail_alreadyIssued() throws Exception {
+		// Given
+		ReflectionTestUtils.setField(testMember, "memberRole", MemberRole.USER);
+		setAuthentication(testMember);
+
+		Coupon coupon = Coupon.builder()
+			.name("Special Discount")
+			.quantity(10)
+			.discountPrice(500)
+			.build();
+		couponRepository.save(coupon);
+
+		issuanceRepository.save(Issuance.builder()
+			.member(testMember)
+			.coupon(coupon)
+			.build());
+
+		// When & Then
+		mockMvc.perform(post("/coupons/" + coupon.getId())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestJsonMemberId))
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.message").value(COUPON_ALREADY_ISSUED.getMessage()))
+			.andDo(print());
+	}
+
+	@Test
+	@DisplayName("쿠폰 발급 실패 - 재고 부족")
+	void issueCoupon_fail_outOfStock() throws Exception {
+		// Given
+		ReflectionTestUtils.setField(testMember, "memberRole", MemberRole.USER);
+		setAuthentication(testMember);
+
+		Coupon coupon = Coupon.builder()
+			.name("Special Discount")
+			.quantity(0)
+			.discountPrice(500)
+			.build();
+		couponRepository.save(coupon);
+
+		// When & Then
+		mockMvc.perform(post("/coupons/" + coupon.getId())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestJsonMemberId))
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.message").value(COUPON_OUT_OF_STOCK.getMessage()))
+			.andDo(print());
+	}
 }
