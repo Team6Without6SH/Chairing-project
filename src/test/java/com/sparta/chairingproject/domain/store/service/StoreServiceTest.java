@@ -274,7 +274,6 @@ class StoreServiceTest {
 		assertEquals("Test Address", response.getAddress());
 		assertEquals("Test Description", response.getDescription());
 		assertEquals("Test Image", response.getImage());
-		assertTrue(response.isApproved());
 	}
 
 	@Test

@@ -16,6 +16,7 @@ public class StoreOwnerResponse {
 	private String category;
 	private String description;
 	private String image;
-	private boolean approved;
+	private int tableCount;
+	private Long ownerId;
 
 }

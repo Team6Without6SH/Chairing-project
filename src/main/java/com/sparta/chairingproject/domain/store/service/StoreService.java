@@ -137,8 +137,18 @@ public class StoreService {
 			throw new GlobalException(STORE_OUT_OF_BUSINESS);
 		}
 
-		return new StoreOwnerResponse(store.getName(), store.getAddress(), store.getPhone(), store.getOpenTime(),
-			store.getCloseTime(), store.getCategory(), store.getDescription(), store.getImage(), true);
+		return new StoreOwnerResponse(
+			store.getName(),
+			store.getAddress(),
+			store.getPhone(),
+			store.getOpenTime(),
+			store.getCloseTime(),
+			store.getCategory(),
+			store.getDescription(),
+			store.getImage(),
+			store.getTableCount(),
+			store.getOwner().getId()
+		);
 	}
 
 	@Transactional
