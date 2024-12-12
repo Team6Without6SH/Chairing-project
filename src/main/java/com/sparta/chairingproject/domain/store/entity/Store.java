@@ -98,8 +98,6 @@ public class Store extends Timestamped {
 		this.description = description;
 		this.address = address;
 		this.owner = owner;
-		this.status = StoreStatus.PENDING;
-		this.requestStatus = StoreRequestStatus.PENDING;
 	}
 
 	// 상태 업데이트 메서드

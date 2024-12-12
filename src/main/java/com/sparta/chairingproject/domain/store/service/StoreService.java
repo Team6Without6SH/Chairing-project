@@ -59,9 +59,6 @@ public class StoreService {
 		Store store = new Store( // request 에 맞게 생성자 추가하고 -> pending 값을 여기다 담아두고 ->save  하기 ->
 			request.getName(), request.getAddress(), imageUrl, request.getDescription(), owner);
 		store.setTableCount(request.getTableCount());
-		store.setStatus(StoreStatus.PENDING);
-		store.setRequestStatus(StoreRequestStatus.PENDING);
-
 		storeRepository.save(store);
 
 		return StoreMapper.toStoreResponse(store);

@@ -42,7 +42,6 @@ public class StoreController {
 	@Secured("ROLE_OWNER")
 	@PostMapping("/owners/stores/register")
 	public ResponseEntity<StoreResponse> registerStore(
-		// 이 리스폰스에는 신청한 리퀘스트에 있는 정보 + storeRequestStatus에 있는 pending 상태를 반환한다./
 		@Valid @RequestBody StoreRequest storeRequest,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
