@@ -23,6 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
+import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
@@ -180,6 +181,53 @@ class OrderControllerTest {
 			.andExpect(jsonPath("$.orderStatus").value("WAITING"))
 			.andExpect(jsonPath("$.totalPrice").value(30000));
 
+	}
+
+	@Test
+	@DisplayName("테이블에 여유가 있을 경우 orderStatus 는 ADMISSION")
+	void createWaiting_success_ADMISSION() throws Exception {
+		setAuthentication(testMember);
+
+		mockMvc.perform(post("/stores/" + store.getId() + "/orders/waiting")
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new RequestDto(null))))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.orderStatus").value("ADMISSION"))
+			.andExpect(jsonPath("$.waitingTeams").value(0));
+	}
+
+	@Test
+	@DisplayName("테이블에 여유가 없는 경우 orderStatus는 WAITING")
+	void createWaiting_success_WAITING() throws Exception {
+		setAuthentication(testMember);
+
+		for (int i = 0; i < store.getTableCount(); i++) {
+			Order order = Order.createOf(testMember, store, List.of(), OrderStatus.IN_PROGRESS, 0);
+			orderRepository.save(order);
+		}
+
+		mockMvc.perform(post("/stores/" + store.getId() + "/orders/waiting")
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new RequestDto(null))))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.orderStatus").value("WAITING"))
+			.andExpect(jsonPath("$.waitingTeams").value(1));
+	}
+
+	@Test
+	@DisplayName("잘못된 storeId 로 요청할 경우 404 NOT_FOUND_STORE")
+	void createWaiting_failed_NOT_FOUND_STORE() throws Exception {
+		setAuthentication(testMember);
+		Long invalidStoreId = 9999L;
+
+		mockMvc.perform(post("/stores/" + invalidStoreId + "/orders/waiting")
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new RequestDto(null))))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("NOT_FOUND_STORE"));
 	}
 
 	private void setAuthentication(Member member) {
