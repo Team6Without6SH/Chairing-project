@@ -11,19 +11,20 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Issuance extends Timestamped {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "coupon_id", nullable = false)
-    private Coupon coupon;
+	@ManyToOne
+	@JoinColumn(name = "member_id", nullable = false)
+	private Member member;
+
+	@ManyToOne
+	@JoinColumn(name = "coupon_id", nullable = false)
+	private Coupon coupon;
 }
