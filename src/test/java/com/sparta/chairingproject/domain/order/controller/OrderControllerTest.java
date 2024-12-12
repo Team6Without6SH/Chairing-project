@@ -268,7 +268,7 @@ class OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("테이블에 여유가 있을 경우 orderStatus 는 ADMISSION")
+	@DisplayName("자리선점 요청 테이블에 여유가 있을 경우 orderStatus 는 ADMISSION")
 	void createWaiting_success_ADMISSION() throws Exception {
 		setAuthentication(testMember);
 
@@ -282,7 +282,7 @@ class OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("테이블에 여유가 없는 경우 orderStatus는 WAITING")
+	@DisplayName("자리선점 요청 테이블에 여유가 없는 경우 orderStatus는 WAITING")
 	void createWaiting_success_WAITING() throws Exception {
 		setAuthentication(testMember);
 
@@ -301,7 +301,7 @@ class OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("잘못된 storeId 로 요청할 경우 404 NOT_FOUND_STORE")
+	@DisplayName("자리선점 요청 잘못된 storeId 로 요청할 경우 404 NOT_FOUND_STORE")
 	void createWaiting_failed_NOT_FOUND_STORE() throws Exception {
 		setAuthentication(testMember);
 		Long invalidStoreId = 9999L;
@@ -315,7 +315,7 @@ class OrderControllerTest {
 	}
 
 	private void setAuthentication(Member member) {
-		UserDetailsImpl authMember = new UserDetailsImpl(member);
+		UserDetailsImpl authMember = new UserDetailsImpl(testMember);
 		SecurityContextHolder.getContext().setAuthentication(
 			new UsernamePasswordAuthenticationToken(authMember, null, authMember.getAuthorities())
 		);
