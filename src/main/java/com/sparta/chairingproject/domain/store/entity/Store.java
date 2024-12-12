@@ -138,5 +138,6 @@ public class Store extends Timestamped {
 	}
 
 	public void setTableCount(int tableCount) {
+		this.tableCount = tableCount;
 	}
 }
