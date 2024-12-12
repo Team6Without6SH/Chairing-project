@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
@@ -28,6 +29,7 @@ import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
+import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
@@ -60,10 +62,15 @@ class OrderControllerTest {
 	private OrderRepository orderRepository;
 
 	private Member testMember;
+	private Member anotherMember;
 	private Member testOwner;
 	private Store store;
+	private Store anotherStore;
 	private Menu menu1;
 	private Menu menu2;
+	private Order order;
+	private Order cancelledOrder;
+	private List<Menu> menuList;
 
 	@BeforeEach
 	void setUp() {
@@ -71,21 +78,31 @@ class OrderControllerTest {
 		objectMapper = new ObjectMapper();
 
 		testMember = new Member("T member", "test@email.com", "password1234", MemberRole.USER);
+		anotherMember = new Member("T member2", "test2@email.com", "password1234", MemberRole.USER);
 		testOwner = new Member("T Owner", "testOwner@email.com", "password1234", MemberRole.OWNER);
 		store = new Store("T Store", "testImage.jpg", "Test store death", "seoul", testOwner);
+		anotherStore = new Store("T Store2", "testImage2.jpg", "Test store death2", "seoul", testOwner);
 		ReflectionTestUtils.setField(store, "tableCount", 5);
+		ReflectionTestUtils.setField(anotherStore, "tableCount", 5);
 		menu1 = Menu.createOf("menu1", 10000, "menuImage.jpg", store);
 		menu2 = Menu.createOf("menu2", 20000, "menuImage2.jpg", store);
+		menuList = List.of(menu1);
+		order = Order.createOf(testMember, store, menuList, OrderStatus.ADMISSION, 10000);
+		cancelledOrder = Order.createOf(testMember, store, menuList, OrderStatus.CANCELLED, 10000);
 
 		memberRepository.save(testMember);
+		memberRepository.save(anotherMember);
 		memberRepository.save(testOwner);
 		storeRepository.save(store);
+		storeRepository.save(anotherStore);
 		menuRepository.save(menu1);
 		menuRepository.save(menu2);
+		orderRepository.save(order);
+		orderRepository.save(cancelledOrder);
 	}
 
 	@Test
-	@DisplayName("정상 주문 생성 - 여유 테이블 있을 때")
+	@DisplayName("주문 생성로직: 정상 주문 생성 - 여유 테이블 있을 때")
 	void createOrder_success() throws Exception {
 
 		OrderRequest orderRequest = new OrderRequest(List.of(menu1.getId(), menu2.getId()), 30000);
@@ -105,7 +122,7 @@ class OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("정상 주문 생성 - 메뉴 없이 요청")
+	@DisplayName("주문 생성로직: 정상 주문 생성 - 메뉴 없이 요청")
 	void createOrder_NoMenus() throws Exception {
 
 		OrderRequest orderRequest = new OrderRequest(List.of(), 0);
@@ -122,7 +139,7 @@ class OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("존재하지 않는 가게로 주문 요청")
+	@DisplayName("주문 생성로직: 존재하지 않는 가게로 주문 요청")
 	void createOrder_NotFoundStore() throws Exception {
 		OrderRequest orderRequest = new OrderRequest(List.of(menu1.getId()), 10000);
 		setAuthentication(testMember);
@@ -136,7 +153,7 @@ class OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("잘못된 메뉴 포함된 주문 요청")
+	@DisplayName("주문 생성로직: 잘못된 메뉴 포함된 주문 요청")
 	void createOrder_NotFoundMenu() throws Exception {
 		OrderRequest orderRequest = new OrderRequest(List.of(menu1.getId(), 999L), 3000);
 		setAuthentication(testMember);
@@ -150,7 +167,7 @@ class OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("결제 금액 불일치")
+	@DisplayName("주문 생성로직: 결제 금액 불일치")
 	void createOrder_PaymentNotMatched() throws Exception {
 		OrderRequest orderRequest = new OrderRequest(List.of(menu1.getId(), menu2.getId()), 4000);
 		setAuthentication(testMember);
@@ -164,7 +181,7 @@ class OrderControllerTest {
 	}
 
 	@Test
-	@DisplayName("여유 테이블이 없는 경우는 WAITING 상태로 생성")
+	@DisplayName("주문 생성로직: 여유 테이블이 없는 경우는 WAITING 상태로 생성")
 	void createOrder_Waiting() throws Exception {
 		for (int i = 0; i < 5; i++) {
 			orderRepository.save(Order.createOf(testMember, store, List.of(), OrderStatus.IN_PROGRESS, 0));
@@ -182,8 +199,75 @@ class OrderControllerTest {
 
 	}
 
+	@Test
+	@DisplayName("주문 취소 요청 로직 성공: CANCEL_REQUEST")
+	void requestCancellationOrder_success() throws Exception {
+		OrderCancelRequest request = new OrderCancelRequest(testMember.getId());
+		setAuthentication(testMember);
+
+		mockMvc.perform(put("/stores/" + store.getId() + "/orders/" + order.getId())
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.orderStatus").value("CANCEL_REQUEST"))
+			.andExpect(jsonPath("$.orderId").value(order.getId()));
+	}
+
+	@Test
+	@DisplayName("주문 취소 요청 로직 실패 주문자 불일치: ONLY_ORDER_ALLOWED")
+	void requestCancellationOrder_ONLY_ORDER_ALLOWED() throws Exception {
+		setAuthentication(anotherMember);
+
+		mockMvc.perform(put("/stores/" + store.getId() + "/orders/" + order.getId())
+				.principal(() -> anotherMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new OrderCancelRequest(null))))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("ONLY_ORDER_ALLOWED"));
+	}
+
+	@Test
+	@DisplayName("주문 취소 요청 로직 실패 가게 불일치: NOT_ORDER_THIS_STORE")
+	void requestCancellationOrder_NOT_ORDER_THIS_STORE() throws Exception {
+		setAuthentication(testMember);
+
+		mockMvc.perform(put("/stores/" + anotherStore.getId() + "/orders/" + order.getId())
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new OrderCancelRequest(null))))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("NOT_ORDER_THIS_STORE"));
+	}
+
+	@Test
+	@DisplayName("주문 취소 요청 로직 실패 주문 상태 오류: CANCELLED_COMPLETED_NOT_ALLOWED")
+	void requestCancellationOrder_CANCELLED_COMPLETED_NOT_ALLOWED() throws Exception {
+		setAuthentication(testMember);
+
+		mockMvc.perform(put("/stores/" + store.getId() + "/orders/" + cancelledOrder.getId())
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new OrderCancelRequest(null))))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value("CANCELLED_COMPLETED_NOT_ALLOWED"));
+	}
+
+	@Test
+	@DisplayName("주문 취소 요청 로직 실패 주문 ID 없을때: NOT_FOUND_ORDER")
+	void requestCancellationOrder_NOT_FOUND_ORDER() throws Exception {
+		setAuthentication(testMember);
+
+		mockMvc.perform(put("/stores/" + store.getId() + "/orders/99999")
+				.principal(() -> testMember.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(new OrderCancelRequest(null))))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("NOT_FOUND_ORDER"));
+	}
+
 	private void setAuthentication(Member member) {
-		UserDetailsImpl authMember = new UserDetailsImpl(testMember);
+		UserDetailsImpl authMember = new UserDetailsImpl(member);
 		SecurityContextHolder.getContext().setAuthentication(
 			new UsernamePasswordAuthenticationToken(authMember, null, authMember.getAuthorities())
 		);
