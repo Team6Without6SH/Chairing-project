@@ -263,9 +263,6 @@ public class CouponControllerTest {
 			.andDo(print());
 	}
 
-	/*
-	validation 테스트
-	 */
 	@Test
 	@DisplayName("쿠폰 생성 실패 - validation 예외")
 	void createCoupon_fail_emptyName() throws Exception {
