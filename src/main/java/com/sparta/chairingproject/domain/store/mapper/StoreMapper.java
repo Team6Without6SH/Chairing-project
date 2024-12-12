@@ -22,10 +22,13 @@ public class StoreMapper {
 			store.getPhone(),
 			store.getOpenTime(),
 			store.getCloseTime(),
-			null, // 카테고리 정보는 확장 가능
+			store.getCategory(),
 			store.getDescription(),
 			store.getImage(),
-			store.getOwner().getName()
+			store.getOwner().getName(),
+			store.getTableCount(),
+			store.getStatus().name(),
+			store.getRequestStatus().name()
 		);
 	}
 

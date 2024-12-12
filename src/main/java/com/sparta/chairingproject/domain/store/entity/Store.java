@@ -24,12 +24,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "stores")
 public class Store extends Timestamped {
@@ -94,6 +98,8 @@ public class Store extends Timestamped {
 		this.description = description;
 		this.address = address;
 		this.owner = owner;
+		this.status = StoreStatus.PENDING;
+		this.requestStatus = StoreRequestStatus.PENDING;
 	}
 
 	// 상태 업데이트 메서드
@@ -129,5 +135,8 @@ public class Store extends Timestamped {
 
 	public void rejectDeleteRequest() {
 		this.requestStatus = StoreRequestStatus.DELETE_REJECTED;
+	}
+
+	public void setTableCount(int tableCount) {
 	}
 }

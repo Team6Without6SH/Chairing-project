@@ -30,4 +30,6 @@ public class StoreRequest {
 	private String description;
 
 	private String image;
+
+	private int tableCount;
 }

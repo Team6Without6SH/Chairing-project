@@ -38,7 +38,7 @@ public class StoreService {
 	private final ReviewRepository reviewRepository;
 
 	@Transactional
-	public void registerStore(StoreRequest request, UserDetailsImpl authMember) {
+	public StoreResponse registerStore(StoreRequest request, UserDetailsImpl authMember) {
 
 		Member owner = memberRepository.findById(authMember.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
@@ -53,16 +53,24 @@ public class StoreService {
 		}
 
 		// 이미지 업로드 로직 추가 필요 (예: S3)
-		String imageUrl = request.getImage().isEmpty() ? null : request.getImage();
+		String imageUrl = request.getImage() == null || request.getImage().isEmpty()
+			? null
+			: request.getImage();
 
-		Store store = new Store(
+		Store store = new Store( // request 에 맞게 생성자 추가하고 -> pending 값을 여기다 담아두고 ->save  하기 ->
 			request.getName(),
 			request.getAddress(),
 			imageUrl,
 			request.getDescription(),
-			authMember.getMember()
+			owner
 		);
+		store.setTableCount(request.getTableCount());
+		store.setStatus(StoreStatus.PENDING);
+		store.setRequestStatus(StoreRequestStatus.PENDING);
+
 		storeRepository.save(store);
+
+		return StoreMapper.toStoreResponse(store);
 	}
 
 	public List<StoreResponse> getAllOpenedStores() {

@@ -18,4 +18,7 @@ public class StoreResponse {
 	private String description;
 	private String image;
 	private String ownerName;
+	private int tableCount;
+	private String status;
+	private String requestStatus;
 }
