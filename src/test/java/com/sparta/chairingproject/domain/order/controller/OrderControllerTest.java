@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
@@ -32,6 +32,7 @@ import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
 import com.sparta.chairingproject.domain.order.dto.request.OrderRequest;
+import com.sparta.chairingproject.domain.order.dto.request.OrderStatusUpdateRequest;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
@@ -87,7 +88,8 @@ class OrderControllerTest {
 		ReflectionTestUtils.setField(anotherStore, "tableCount", 5);
 		menu1 = Menu.createOf("menu1", 10000, "menuImage.jpg", store);
 		menu2 = Menu.createOf("menu2", 20000, "menuImage2.jpg", store);
-		menuList = List.of(menu1);
+		menuList = new ArrayList<>();
+		menuList.add(menu1);
 		order = Order.createOf(testMember, store, menuList, OrderStatus.ADMISSION, 10000);
 		cancelledOrder = Order.createOf(testMember, store, menuList, OrderStatus.CANCELLED, 10000);
 
@@ -314,8 +316,22 @@ class OrderControllerTest {
 			.andExpect(jsonPath("$.code").value("NOT_FOUND_STORE"));
 	}
 
+	@Test
+	@DisplayName("주문 상태 변경 성공 : 주문 상태를 ADMISSION -> IN_PROGRESS 로 변경한다.")
+	void updateOrderStatus_success_IN_PROGRESS() throws Exception {
+		setAuthentication(testOwner);
+		OrderStatusUpdateRequest request = new OrderStatusUpdateRequest("IN_PROGRESS");
+
+		mockMvc.perform(patch("/stores/" + store.getId() + "/orders/" + order.getId() + "/status")
+				.principal(() -> testOwner.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.orderStatus").value("IN_PROGRESS"));
+	}
+
 	private void setAuthentication(Member member) {
-		UserDetailsImpl authMember = new UserDetailsImpl(testMember);
+		UserDetailsImpl authMember = new UserDetailsImpl(member);
 		SecurityContextHolder.getContext().setAuthentication(
 			new UsernamePasswordAuthenticationToken(authMember, null, authMember.getAuthorities())
 		);

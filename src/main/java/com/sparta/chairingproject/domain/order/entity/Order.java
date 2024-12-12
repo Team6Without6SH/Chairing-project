@@ -73,7 +73,7 @@ public class Order extends Timestamped {
 
 	public static Order createOf(Member member, Store store, List<Menu> menus, OrderStatus status,
 		int price) {
-		return new Order(member, store, menus, status, price);
+		return new Order(member, store, new ArrayList<>(menus), status, price);
 	}
 
 	public void changeStatus(OrderStatus status) {
