@@ -4,8 +4,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDate;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,17 +15,13 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
-import com.sparta.chairingproject.domain.reservation.entity.Reservation;
-import com.sparta.chairingproject.domain.reservation.entity.ReservationStatus;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.dto.UpdateStoreRequest;
 import com.sparta.chairingproject.domain.store.entity.Store;
@@ -193,6 +187,28 @@ class StoreControllerTest {
 
 		Store deletedStore = storeRepository.findById(testStore.getId()).orElseThrow();
 		assertThat(deletedStore.getRequestStatus()).isEqualTo(StoreRequestStatus.DELETE_REQUESTED);
+	}
+
+	@Test
+	@DisplayName("가게 주문 목록 조회 성공")
+	void getOrdersByStore() throws Exception {
+
+		mockMvc.perform(get("/owners/stores/" + testStore.getId() + "/orders")
+				.param("days", "7")
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.content").isArray())
+			.andExpect(jsonPath("$.content.length()").value(0));
+	}
+
+	@Test
+	@DisplayName("사장이 가게 상세 조회 성공")
+	void getStore() throws Exception {
+		mockMvc.perform(get("/owners/stores/" + testStore.getId())
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.name").value("Test Store"))
+			.andExpect(jsonPath("$.ownerId").value(testOwner.getId()));
 	}
 
 	private void setAuthentication(Member member, MemberRole role) {
