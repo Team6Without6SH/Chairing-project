@@ -203,7 +203,6 @@ public class CouponControllerTest {
 	@DisplayName("쿠폰 발급 실패 - 쿠폰 없음")
 	void issueCoupon_fail_couponNotFound() throws Exception {
 		// Given
-		ReflectionTestUtils.setField(testMember, "memberRole", MemberRole.USER);
 		setAuthentication(testMember);
 
 		// When & Then
@@ -219,7 +218,6 @@ public class CouponControllerTest {
 	@DisplayName("쿠폰 발급 실패 - 이미 발급받은 쿠폰")
 	void issueCoupon_fail_alreadyIssued() throws Exception {
 		// Given
-		ReflectionTestUtils.setField(testMember, "memberRole", MemberRole.USER);
 		setAuthentication(testMember);
 
 		Coupon coupon = Coupon.builder()
@@ -247,7 +245,6 @@ public class CouponControllerTest {
 	@DisplayName("쿠폰 발급 실패 - 재고 부족")
 	void issueCoupon_fail_outOfStock() throws Exception {
 		// Given
-		ReflectionTestUtils.setField(testMember, "memberRole", MemberRole.USER);
 		setAuthentication(testMember);
 
 		Coupon coupon = Coupon.builder()
@@ -265,4 +262,26 @@ public class CouponControllerTest {
 			.andExpect(jsonPath("$.message").value(COUPON_OUT_OF_STOCK.getMessage()))
 			.andDo(print());
 	}
+
+	/*
+	validation 테스트
+	 */
+	@Test
+	@DisplayName("쿠폰 생성 실패 - validation 예외")
+	void createCoupon_fail_emptyName() throws Exception {
+		// Given
+		CouponRequest request = new CouponRequest("", 999999, 999999);
+		String requestJson = objectMapper.writeValueAsString(request);
+
+		// When & Then
+		mockMvc.perform(post("/coupons")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(requestJson))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.name").value("쿠폰 이름이 비었습니다."))
+			.andExpect(jsonPath("$.quantity").value("수량은 최대 1000개까지 가능합니다."))
+			.andExpect(jsonPath("$.discountPrice").value("할인 금액은 최대 100,000원 까지 가능합니다."))
+			.andDo(print());
+	}
+
 }
