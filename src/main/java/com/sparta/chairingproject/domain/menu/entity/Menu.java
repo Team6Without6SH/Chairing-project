@@ -2,7 +2,10 @@ package com.sparta.chairingproject.domain.menu.entity;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+
+import org.hibernate.engine.spi.Status;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
@@ -13,6 +16,8 @@ import com.sparta.chairingproject.domain.store.entity.Store;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -43,15 +48,13 @@ public class Menu extends Timestamped {
 	@Column(nullable = true)
 	private String image;
 
-	@Column(nullable = false)
-	private boolean inActive = false;
-
 	@ManyToOne
 	@JoinColumn(name = "store_id", nullable = false)
 	private Store store;
 
+	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private boolean soldOut = false;
+	private MenuStatus status = MenuStatus.ACTIVE;
 
 	private Menu(String name, int price, String image, Store store) {
 		this.name = name;
@@ -78,12 +81,18 @@ public class Menu extends Timestamped {
 		}
 	}
 
-	public void updateSoldOut(boolean soldOut) {
-		this.soldOut = soldOut;
+	public void updateStatus(MenuStatus status) {
+		if (status != null) {
+			this.status = status;
+		} else {
+			throw new GlobalException(INVALID_INPUT);
+		}
 	}
 
 	public void delete() {
-		this.inActive = true;
+		if (this.status != MenuStatus.DELETED) {
+			throw new GlobalException(INVALID_INPUT);
+		}
+		this.deletedAt = LocalDateTime.now();
 	}
-
 }

@@ -55,7 +55,7 @@ public class MenuController {
 		return ResponseEntity.ok(menuService.updateMenu(storeId, menuId, request, authMember.getMember()));
 	}
 
-	@Secured("ROLE_OWNER")
+	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/menus/{menuId}")
 	public ResponseEntity<MenuDeleteResponse> deleteMenu(
 		@PathVariable Long storeId,

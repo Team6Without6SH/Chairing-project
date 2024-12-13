@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.menu.entity.MenuStatus;
 import com.sparta.chairingproject.domain.store.entity.Store;
 
 import jakarta.validation.constraints.NotEmpty;
@@ -20,9 +21,9 @@ public interface MenuRepository extends JpaRepository<Menu, Long> {
 
 	Optional<Menu> findByIdAndStore(Long menuId, Store store);
 
-	Optional<Menu> findByIdAndStoreIdAndInActiveFalse(Long menuId, Long storeId);
-
 	List<Menu> findByStoreId(Long storeId);
 
 	List<Menu> findAllByStoreId(Long storeId);
+
+	Optional<Menu> findByIdAndStatus(Long menuId, MenuStatus menuStatus);
 }
