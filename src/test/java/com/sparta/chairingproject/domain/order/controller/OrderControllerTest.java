@@ -66,12 +66,14 @@ class OrderControllerTest {
 	private Member testMember;
 	private Member anotherMember;
 	private Member testOwner;
+	private Member anotherOwner;
 	private Store store;
 	private Store anotherStore;
 	private Menu menu1;
 	private Menu menu2;
 	private Order order;
 	private Order cancelledOrder;
+	private Order anotherOrder;
 	private List<Menu> menuList;
 
 	@BeforeEach
@@ -82,26 +84,31 @@ class OrderControllerTest {
 		testMember = new Member("T member", "test@email.com", "password1234", MemberRole.USER);
 		anotherMember = new Member("T member2", "test2@email.com", "password1234", MemberRole.USER);
 		testOwner = new Member("T Owner", "testOwner@email.com", "password1234", MemberRole.OWNER);
+		anotherOwner = new Member("T Owner2", "testOwner2@email.com", "password1234", MemberRole.OWNER);
 		store = new Store("T Store", "testImage.jpg", "Test store death", "seoul", testOwner);
 		anotherStore = new Store("T Store2", "testImage2.jpg", "Test store death2", "seoul", testOwner);
 		ReflectionTestUtils.setField(store, "tableCount", 5);
 		ReflectionTestUtils.setField(anotherStore, "tableCount", 5);
 		menu1 = Menu.createOf("menu1", 10000, "menuImage.jpg", store);
 		menu2 = Menu.createOf("menu2", 20000, "menuImage2.jpg", store);
+
 		menuList = new ArrayList<>();
 		menuList.add(menu1);
 		order = Order.createOf(testMember, store, menuList, OrderStatus.ADMISSION, 10000);
 		cancelledOrder = Order.createOf(testMember, store, menuList, OrderStatus.CANCELLED, 10000);
+		anotherOrder = Order.createOf(testMember, anotherStore, menuList, OrderStatus.WAITING, 10000);
 
 		memberRepository.save(testMember);
 		memberRepository.save(anotherMember);
 		memberRepository.save(testOwner);
+		memberRepository.save(anotherOwner);
 		storeRepository.save(store);
 		storeRepository.save(anotherStore);
 		menuRepository.save(menu1);
 		menuRepository.save(menu2);
 		orderRepository.save(order);
 		orderRepository.save(cancelledOrder);
+		orderRepository.save(anotherOrder);
 	}
 
 	@Test
@@ -328,6 +335,64 @@ class OrderControllerTest {
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.orderStatus").value("IN_PROGRESS"));
+	}
+
+	@Test
+	@DisplayName("주문 상태 변경 성공 : 주문 상태를 WAITING -> ADMISSION 으로 변경한다.")
+	void updateOrderStatus_success_WAITING() throws Exception {
+		setAuthentication(testOwner);
+		order.changeStatus(OrderStatus.WAITING);
+		orderRepository.save(order);
+		OrderStatusUpdateRequest request = new OrderStatusUpdateRequest("ADMISSION");
+
+		mockMvc.perform(patch("/stores/" + store.getId() + "/orders/" + order.getId() + "/status")
+				.principal(() -> testOwner.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.orderStatus").value("ADMISSION"));
+	}
+
+	@Test
+	@DisplayName("주문 상태 변경 실패 : 존재하지 않는 가게 NOT_FOUND_STORE")
+	void updateOrderStatus_failed_NOT_FOUND_STORE() throws Exception {
+		setAuthentication(testOwner);
+		OrderStatusUpdateRequest request = new OrderStatusUpdateRequest("IN_PROGRESS");
+
+		mockMvc.perform(patch("/stores/9999/orders/" + order.getId() + "/status")
+				.principal(() -> testOwner.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("NOT_FOUND_STORE"));
+	}
+
+	@Test
+	@DisplayName("주문 상태 변경 실패 : 존재하지 않는 주문 NOT_FOUND_ORDER")
+	void updateOrderStatus_failed_NOT_FOUND_ORDER() throws Exception {
+		setAuthentication(testOwner);
+		OrderStatusUpdateRequest request = new OrderStatusUpdateRequest("IN_PROGRESS");
+
+		mockMvc.perform(patch("/stores/" + store.getId() + "/orders/9999/status")
+				.principal(() -> testOwner.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value("NOT_FOUND_ORDER"));
+	}
+
+	@Test
+	@DisplayName("주문 상태 변경 실패 : 가게 주인이 아닌 사용자가 요청 ONLY_OWNER_ALLOWED")
+	void updateOrderStatus_failed_ONLY_OWNER_ALLOWED() throws Exception {
+		setAuthentication(anotherOwner);
+		OrderStatusUpdateRequest request = new OrderStatusUpdateRequest("IN_PROGRESS");
+
+		mockMvc.perform(patch("/stores/" + store.getId() + "/orders/" + order.getId() + "/status")
+				.principal(() -> anotherOwner.getEmail())
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request)))
+			.andExpect(status().isForbidden())
+			.andExpect(jsonPath("$.code").value("ONLY_OWNER_ALLOWED"));
 	}
 
 	private void setAuthentication(Member member) {
