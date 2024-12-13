@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.order.dto.request.OrderCancelRequest;
@@ -71,7 +72,7 @@ public class OrderController {
 		@PathVariable Long orderId,
 		@AuthenticationPrincipal UserDetailsImpl authMember,
 		@RequestBody OrderStatusUpdateRequest newStatus
-	) {
+	) throws JsonProcessingException {
 		return ResponseEntity.ok(
 			orderService.updateOrderStatus(storeId, orderId, newStatus, authMember.getMember()));
 	}
