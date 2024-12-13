@@ -56,7 +56,6 @@ public enum ReservationStatus {
 				break;
 
 			case PENDING:
-			default:
 				throw new GlobalException(INVALID_STATUS_TRANSITION);
 		}
 	}
