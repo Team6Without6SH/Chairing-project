@@ -57,10 +57,6 @@ public class ReservationService {
 			throw new GlobalException(CANNOT_CANCEL_OTHERS_RESERVATION);
 		}
 
-		if (reservation.getStatus() != ReservationStatus.PENDING) {
-			throw new GlobalException(CANCELLATION_NOT_ALLOWED);
-		}
-
 		reservation.updateStatus(ReservationStatus.CANCELED);
 
 		return reservationRepository.save(reservation).toResponse();
