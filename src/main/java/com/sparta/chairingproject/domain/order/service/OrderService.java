@@ -1,7 +1,8 @@
 package com.sparta.chairingproject.domain.order.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -16,6 +17,8 @@ import com.sparta.chairingproject.domain.order.dto.response.OrderStatusUpdateRes
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
+import com.sparta.chairingproject.domain.order.message.OrderStatusMessage;
+import com.sparta.chairingproject.domain.order.publisher.OrderStatusPublisher;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
@@ -40,6 +43,7 @@ public class OrderService {
 	private final OrderRepository orderRepository;
 	private final MenuRepository menuRepository;
 	private final StoreRepository storeRepository;
+	private final OrderStatusPublisher orderStatusPublisher;
 
 	@Transactional
 	public OrderResponse createOrder(Long storeId, Member authMember,
@@ -151,7 +155,7 @@ public class OrderService {
 
 	@Transactional
 	public OrderStatusUpdateResponse updateOrderStatus(Long storeId, Long orderId, OrderStatusUpdateRequest request,
-		Member member) {
+		Member member) throws JsonProcessingException {
 		Store store = storeRepository.findById(storeId) //가게 검증
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 		if (!store.getOwner().getId().equals(member.getId())) {
@@ -187,6 +191,11 @@ public class OrderService {
 		}
 		order.changeStatus(newStatus);
 		orderRepository.save(order);
+
+		// Redis로 메시지 발행
+		OrderStatusMessage message = new OrderStatusMessage(orderId, newStatus.toString());
+		String jsonMessage = new ObjectMapper().writeValueAsString(message); // Jackson 사용
+		orderStatusPublisher.publishOrderStatus("order-status", jsonMessage);
 
 		return OrderStatusUpdateResponse.builder()
 			.orderId(order.getId())

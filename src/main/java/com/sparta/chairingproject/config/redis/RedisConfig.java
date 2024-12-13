@@ -8,7 +8,13 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import com.sparta.chairingproject.domain.order.subscriber.OrderStatusSubscriber;
 
 @Configuration
 @EnableRedisRepositories
@@ -26,12 +32,40 @@ public class RedisConfig {
 	}
 
 	@Bean
-	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-		RedisTemplate<String, Object> template = new RedisTemplate<>();
-		template.setConnectionFactory(redisConnectionFactory);
+	public LettuceConnectionFactory redisConnectionFactory2() {
+		return new LettuceConnectionFactory();
+	}
 
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 		return template;
+	}
+
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate2(LettuceConnectionFactory connectionFactory) {
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setValueSerializer(new StringRedisSerializer());
+		return template;
+	}
+
+	@Bean
+	public MessageListenerAdapter messageListenerAdapter(OrderStatusSubscriber subscriber) {
+		return new MessageListenerAdapter(subscriber, "handleMessage");
+	}
+
+	@Bean
+	public RedisMessageListenerContainer redisContainer(
+		LettuceConnectionFactory connectionFactory,
+		MessageListenerAdapter messageListenerAdapter) {
+		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+		container.setConnectionFactory(connectionFactory);
+		container.addMessageListener(messageListenerAdapter, new ChannelTopic("order-status"));
+		return container;
 	}
 }
