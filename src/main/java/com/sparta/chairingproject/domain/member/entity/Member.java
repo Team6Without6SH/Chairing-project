@@ -1,6 +1,5 @@
 package com.sparta.chairingproject.domain.member.entity;
 
-import java.net.SocketOption;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,10 +48,6 @@ public class Member extends Timestamped {
 	private String password;
 	@Enumerated(EnumType.STRING)
 	private MemberRole memberRole;
-	@Column(nullable = false)
-	private boolean deleted;
-	@Column
-	private LocalDateTime deletedAt;
 
 	public Member(String name, @NotBlank @Email String email, String password,
 		MemberRole memberRole) {
@@ -66,9 +61,7 @@ public class Member extends Timestamped {
 		this.password = updatePassword;
 	}
 
-	public void updateDelete(boolean b) {
-		this.deleted = b;
-		this.deletedAt = LocalDateTime.now();
+	public void delete() {
+		deletedAt = LocalDateTime.now();
 	}
-
 }

@@ -1,6 +1,6 @@
 package com.sparta.chairingproject.config.filter;
 
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.DELETE_USER;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.DELETED_USER;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.member.entity.Member;
@@ -49,8 +49,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             Member member = memberRepository.findByEmail(requestDto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 유저 이메일입니다."));
 
-            if (member.isDeleted()) {
-                throw new GlobalException(DELETE_USER);
+            if (member.getDeletedAt() != null) {
+                throw new GlobalException(DELETED_USER);
             }
             return getAuthenticationManager().authenticate(
                 new UsernamePasswordAuthenticationToken(

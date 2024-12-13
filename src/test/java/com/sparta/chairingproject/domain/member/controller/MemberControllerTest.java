@@ -245,7 +245,7 @@ public class MemberControllerTest {
 			.andExpect(status().isOk());
 
 		Member deletedMember = memberRepository.findById(testMember.getId()).orElseThrow();
-		assertThat(deletedMember.isDeleted()).isTrue();
+		assertThat(deletedMember.getDeletedAt()).isNotNull();
 
 
 	}

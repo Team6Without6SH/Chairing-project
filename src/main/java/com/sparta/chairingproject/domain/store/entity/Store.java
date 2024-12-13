@@ -65,27 +65,31 @@ public class Store extends Timestamped {
 
 	private String category;
 
+	@Setter
 	@Column(nullable = false)
 	private int tableCount;
-
-	@Column
-	private LocalDateTime deletedAt = null;
 
 	@ManyToOne
 	@JoinColumn(name = "member_id", nullable = false)
 	private Member owner;
+
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Menu> menus = new ArrayList<>();
+
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Review> reviews = new ArrayList<>();
+
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Reservation> reservations = new ArrayList<>();
+
 	@OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Order> orders = new ArrayList<>();
+
 	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private StoreStatus status = StoreStatus.PENDING;
+
 	@Setter
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -133,9 +137,5 @@ public class Store extends Timestamped {
 
 	public void rejectDeleteRequest() {
 		this.requestStatus = StoreRequestStatus.DELETE_REJECTED;
-	}
-
-	public void setTableCount(int tableCount) {
-		this.tableCount = tableCount;
 	}
 }

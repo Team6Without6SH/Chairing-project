@@ -25,10 +25,8 @@ import com.sparta.chairingproject.domain.member.entity.MemberRole;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.order.entity.Order;
-import com.sparta.chairingproject.domain.order.entity.OrderStatus;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
-import com.sparta.chairingproject.domain.reservation.entity.ReservationStatus;
 import com.sparta.chairingproject.domain.reservation.repository.ReservationRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
 
@@ -95,7 +93,6 @@ class MemberServiceTest {
 			.time("10:00").store(store).build();
 		coupon = new Coupon().toBuilder().id(1L).build();
 		issuance = new Issuance().toBuilder().id(1L).member(member).coupon(coupon).build();
-
 
 	}
 
@@ -261,7 +258,7 @@ class MemberServiceTest {
 		memberService.deleteMember(authMember, new RequestDto());
 
 		// then
-		assertEquals(true, member.isDeleted());
+		assertNotNull(member.getDeletedAt());
 		verify(memberRepository).findById(1L);
 	}
 
@@ -269,7 +266,7 @@ class MemberServiceTest {
 	@DisplayName("회원 삭제 실패 테스트 - 이미 삭제된 회원")
 	void deleteMember_Fail_AlreadyDeleted() {
 		// given
-		member.updateDelete(true);
+		member.delete();
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
 		// when, then
