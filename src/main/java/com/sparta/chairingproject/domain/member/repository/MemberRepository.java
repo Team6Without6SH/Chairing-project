@@ -14,7 +14,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     boolean existsByEmail(String email);
 
-    @Query("SELECT m FROM Member m WHERE m.deleted = true AND m.modifiedAt <= :cutoffDate")
+    @Query("SELECT m FROM Member m WHERE m.deletedAt != null AND m.modifiedAt <= :cutoffDate")
     List<Member> findMembersToDelete(@Param("cutoffDate") LocalDateTime cutoffDate);
 
 }

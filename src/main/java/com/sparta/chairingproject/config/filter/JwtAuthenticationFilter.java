@@ -49,8 +49,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             Member member = memberRepository.findByEmail(requestDto.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 유저 이메일입니다."));
 
-            if (member.isDeleted()) {
-                throw new GlobalException(DELETE_USER);
+            if (member.getDeletedAt() != null) {
+                throw new GlobalException(DELETED_USER);
             }
             return getAuthenticationManager().authenticate(
                 new UsernamePasswordAuthenticationToken(

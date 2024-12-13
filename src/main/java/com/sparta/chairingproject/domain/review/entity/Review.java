@@ -48,9 +48,6 @@ public class Review extends Timestamped {
 	@JoinColumn(name = "order_id", nullable = false, unique = true)
 	private Order order;
 
-	@Column
-	private LocalDateTime deletedAt = null;
-
 	@Builder
 	public Review(String content, int score, Store store, Member member, Order order) {
 		this.content = content;

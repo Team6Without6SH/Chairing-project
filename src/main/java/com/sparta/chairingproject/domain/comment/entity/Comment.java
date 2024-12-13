@@ -32,9 +32,6 @@ public class Comment extends Timestamped {
 	@JoinColumn(name = "review_id", nullable = false)
 	private Review review;
 
-	@Column
-	private LocalDateTime deletedAt = null;
-
 	public Comment(String content, Review review) {
 		this.content = content;
 		this.review = review;
