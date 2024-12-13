@@ -65,7 +65,7 @@ public class Review extends Timestamped {
 		this.score = score;
 	}
 
-	public void softDelete() {
+	public void delete() {
 		this.deletedAt = LocalDateTime.now();
 	}
 }

@@ -269,7 +269,7 @@ class MemberServiceTest {
 	@DisplayName("회원 삭제 실패 테스트 - 이미 삭제된 회원")
 	void deleteMember_Fail_AlreadyDeleted() {
 		// given
-		member.updateDelete(true);
+		member.delete();
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
 		// when, then

@@ -180,7 +180,7 @@ public class CommentServiceTest {
 	void updateComment_fail_alreadyDeleted() {
 		// Given
 		Comment comment = new Comment("Original content", review);
-		comment.softDelete();
+		comment.delete();
 		when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
 		// When & Then
@@ -265,7 +265,7 @@ public class CommentServiceTest {
 	void deleteComment_fail_alreadyDeleted() {
 		// Given
 		Comment comment = new Comment("Content", review);
-		comment.softDelete();
+		comment.delete();
 		when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
 
 		// When & Then

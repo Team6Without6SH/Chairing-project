@@ -218,8 +218,6 @@ class StoreControllerTest {
 			.email(member.getEmail())
 			.password(member.getPassword())
 			.memberRole(role) // 새로운 역할 설정
-			.deleted(member.isDeleted())
-			.deletedAt(member.getDeletedAt())
 			.build();
 
 		UserDetailsImpl userDetails = new UserDetailsImpl(member);

@@ -80,6 +80,6 @@ public class CommentService {
 			throw new GlobalException(NOT_AUTHOR_OF_COMMENT);
 		}
 
-		comment.softDelete();
+		comment.delete();
 	}
 }

@@ -1,6 +1,6 @@
 package com.sparta.chairingproject.config.filter;
 
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.DELETE_USER;
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.DELETED_USER;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.member.entity.Member;

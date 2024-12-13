@@ -134,8 +134,4 @@ public class Store extends Timestamped {
 	public void rejectDeleteRequest() {
 		this.requestStatus = StoreRequestStatus.DELETE_REJECTED;
 	}
-
-	public void setTableCount(int tableCount) {
-		this.tableCount = tableCount;
-	}
 }

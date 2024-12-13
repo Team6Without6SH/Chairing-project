@@ -108,6 +108,6 @@ public class ReviewService {
 			throw new GlobalException(NOT_AUTHOR_OF_REVIEW);
 		}
 
-		review.softDelete();
+		review.delete();
 	}
 }

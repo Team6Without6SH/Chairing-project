@@ -298,7 +298,7 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 수정 실패 - 이미 삭제된 리뷰")
 	void updateReview_fail_alreadyDeleted() {
 		// Given
-		review.softDelete();
+		review.delete();
 
 		when(reviewRepository.findById(orderId)).thenReturn(Optional.of(review));
 
@@ -346,7 +346,7 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 삭제 실패 - 이미 삭제된 리뷰")
 	void deleteReview_fail_alreadyDeleted() {
 		// Given
-		review.softDelete(); // 리뷰를 삭제 상태로 설정
+		review.delete(); // 리뷰를 삭제 상태로 설정
 
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 

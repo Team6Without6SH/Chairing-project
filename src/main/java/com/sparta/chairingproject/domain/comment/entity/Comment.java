@@ -44,7 +44,7 @@ public class Comment extends Timestamped {
 		this.content = content;
 	}
 
-	public void softDelete() {
+	public void delete() {
 		this.deletedAt = LocalDateTime.now();
 	}
 }
