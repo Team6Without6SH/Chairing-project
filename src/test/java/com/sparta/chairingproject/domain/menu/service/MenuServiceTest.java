@@ -26,6 +26,7 @@ import com.sparta.chairingproject.domain.menu.dto.response.MenuDetailResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuUpdateResponse;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.menu.entity.MenuStatus;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
@@ -136,7 +137,7 @@ class MenuServiceTest {
 	@DisplayName("정상적으로 메뉴가 수정된다")
 	void updateMenu_Success() {
 		// G
-		MenuUpdateRequest request = new MenuUpdateRequest("수정된 메뉴", 11000, true);
+		MenuUpdateRequest request = new MenuUpdateRequest("수정된 메뉴", 11000, MenuStatus.ACTIVE);
 		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
 		when(menuRepository.findByIdAndStore(menu.getId(), store)).thenReturn(Optional.of(menu));
 
@@ -146,7 +147,7 @@ class MenuServiceTest {
 		// T
 		assertEquals("수정된 메뉴", response.getName());
 		assertEquals(11000, response.getPrice());
-		assertTrue(response.isSoldOut());
+		assertEquals(response.getStatus(), MenuStatus.ACTIVE);
 		verify(menuRepository).findByIdAndStore(menu.getId(), store);
 	}
 
@@ -154,7 +155,7 @@ class MenuServiceTest {
 	@DisplayName("가게를 찾을 수 없을 경우 예외 발생: NOT_FOUND_STORE")
 	void updateMenu_ThrowException_When_NOT_FOUND_STORE() {
 		// G
-		MenuUpdateRequest request = new MenuUpdateRequest("수정된 메뉴", 11000, true);
+		MenuUpdateRequest request = new MenuUpdateRequest("수정된 메뉴", 11000, MenuStatus.ACTIVE);
 		when(storeRepository.findById(store.getId())).thenReturn(Optional.empty());
 
 		// W T
@@ -167,7 +168,7 @@ class MenuServiceTest {
 	@DisplayName("요청한 사용자가 가게의 주인이 아닌 경우 예외 발생: ONLY_OWNER_ALLOWED")
 	void updateMenu_ThrowException_When_ONLY_OWNER_ALLOWED() {
 		// G
-		MenuUpdateRequest request = new MenuUpdateRequest("수정된 메뉴", 11000, true);
+		MenuUpdateRequest request = new MenuUpdateRequest("수정된 메뉴", 11000, MenuStatus.ACTIVE);
 		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
 
 		// W T
@@ -180,7 +181,7 @@ class MenuServiceTest {
 	@DisplayName("메뉴를 찾을 수 없을 경우 예외 발생: NOT_FOUND_MENU")
 	void updateMenu_ThrowException_When_NOT_FOUND_MENU() {
 		// G
-		MenuUpdateRequest request = new MenuUpdateRequest("수정된 메뉴", 11000, true);
+		MenuUpdateRequest request = new MenuUpdateRequest("수정된 메뉴", 11000, MenuStatus.ACTIVE);
 		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
 		when(menuRepository.findByIdAndStore(menu.getId(), store)).thenReturn(Optional.empty());
 
@@ -194,7 +195,7 @@ class MenuServiceTest {
 	@DisplayName("메뉴 정보가 부분적으로 업데이트 되는 경우: 일부만 제공 헀을 때, 그 부분만 업데이트 된다.")
 	void updateMenu_Partial_Update() {
 		// G
-		MenuUpdateRequest request = new MenuUpdateRequest(null, 11000, true);
+		MenuUpdateRequest request = new MenuUpdateRequest(null, 11000, MenuStatus.ACTIVE);
 		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
 		when(menuRepository.findByIdAndStore(menu.getId(), store)).thenReturn(Optional.of(menu));
 
@@ -204,25 +205,7 @@ class MenuServiceTest {
 		// T
 		assertEquals("menuTest", response.getName());
 		assertEquals(11000, response.getPrice());
-		assertTrue(response.isSoldOut());
-	}
-
-	@Test
-	@DisplayName("정상적으로 메뉴 삭제")
-	void deleteMenu_Success() {
-		// G
-		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
-		when(menuRepository.findByIdAndStoreIdAndInActiveFalse(menu.getId(), store.getId()))
-			.thenReturn(Optional.of(menu));
-
-		// W
-		MenuDeleteResponse response = menuService.deleteMenu(store.getId(), menu.getId(), owner, new RequestDto());
-
-		// T
-		assertEquals(menu.getId(), response.getMenuId());
-		assertEquals(menu.getName(), response.getName());
-		assertTrue(response.isInActive());
-		verify(menuRepository).findByIdAndStoreIdAndInActiveFalse(menu.getId(), store.getId());
+		assertEquals(response.getStatus(), MenuStatus.ACTIVE);
 	}
 
 	@Test
@@ -247,20 +230,6 @@ class MenuServiceTest {
 		GlobalException exception = assertThrows(GlobalException.class,
 			() -> menuService.deleteMenu(store.getId(), menu.getId(), owner2, new RequestDto()));
 		assertEquals(ExceptionCode.ONLY_OWNER_ALLOWED, exception.getExceptionCode());
-	}
-
-	@Test
-	@DisplayName("메뉴를 찾을 수 없는 경우 예외 발생: NOT_FOUND_MENU")
-	void deleteMenu_ThrowException_When_NOT_FOUND_MENU() {
-		// G
-		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
-		when(menuRepository.findByIdAndStoreIdAndInActiveFalse(menu.getId(), store.getId()))
-			.thenReturn(Optional.empty());
-
-		// W T
-		GlobalException exception = assertThrows(GlobalException.class,
-			() -> menuService.deleteMenu(store.getId(), menu.getId(), owner, new RequestDto()));
-		assertEquals(ExceptionCode.NOT_FOUND_MENU, exception.getExceptionCode());
 	}
 
 	@Test
