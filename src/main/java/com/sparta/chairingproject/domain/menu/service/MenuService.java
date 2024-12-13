@@ -17,6 +17,7 @@ import com.sparta.chairingproject.domain.menu.dto.response.MenuDetailResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuResponse;
 import com.sparta.chairingproject.domain.menu.dto.response.MenuUpdateResponse;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.menu.entity.MenuStatus;
 import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
@@ -63,8 +64,8 @@ public class MenuService {
 		if (request.getPrice() != null) {
 			menu.updatePrice(request.getPrice());
 		}
-		if (request.getSoldOut() != null) {
-			menu.updateSoldOut(request.getSoldOut());
+		if (request.getStatus() != null) {
+			menu.updateStatus(request.getStatus());
 		}
 		return MenuUpdateResponse.from(menu);
 	}
@@ -76,11 +77,11 @@ public class MenuService {
 		if (!store.getOwner().getId().equals(member.getId())) {
 			throw new GlobalException(ONLY_OWNER_ALLOWED);
 		}
-		Menu menu = menuRepository.findByIdAndStoreIdAndInActiveFalse(menuId, storeId)
-			.orElseThrow(() -> new GlobalException(NOT_FOUND_MENU));
+		Menu menu = menuRepository.findByIdAndStatus(menuId, MenuStatus.DELETED)
+			.orElseThrow(() -> new GlobalException(ONLY_DELETED_MENU_CAN_BE_REMOVED));
 		menu.delete();
 
-		return new MenuDeleteResponse(menuId, menu.getName(), menu.isInActive());
+		return MenuDeleteResponse.from(menu);
 	}
 
 	@Transactional(readOnly = true)

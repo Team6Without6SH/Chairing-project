@@ -1,6 +1,7 @@
 package com.sparta.chairingproject.domain.menu.dto.response;
 
 import com.sparta.chairingproject.domain.menu.entity.Menu;
+import com.sparta.chairingproject.domain.menu.entity.MenuStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,7 @@ public class MenuDetailResponse {
 	private String name;
 	private int price;
 	private String image;
-	private boolean inActive;
+	private MenuStatus status;
 
 	public static MenuDetailResponse from(Menu menu) {
 		return MenuDetailResponse.builder()
@@ -22,7 +23,7 @@ public class MenuDetailResponse {
 			.name(menu.getName())
 			.price(menu.getPrice())
 			.image(menu.getImage())
-			.inActive(menu.isInActive())
+			.status(menu.getStatus())
 			.build();
 	}
 }

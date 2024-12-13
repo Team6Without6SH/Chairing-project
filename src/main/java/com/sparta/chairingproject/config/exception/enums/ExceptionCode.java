@@ -49,6 +49,7 @@ public enum ExceptionCode {
 	OPTION_NOT_BELONG_TO_MENU(HttpStatus.NOT_FOUND, "해당 옵션은 선택한 메뉴에 포함되어 있지 않습니다"),
 	DUPLICATED_MENU(HttpStatus.CONFLICT, "이미 존재하는 메뉴입니다."),
 	INVALID_INPUT(HttpStatus.BAD_REQUEST, "가격은 최소 100원 이상입니다."),
+	ONLY_DELETED_MENU_CAN_BE_REMOVED(HttpStatus.FORBIDDEN, "삭제된 메뉴만 관리자 권한으로 최종삭제할 수 있습니다."),
 
 	//----------주문----------
 	STORE_CLOSED(HttpStatus.GONE, "영업 시간이 아닙니다"),
