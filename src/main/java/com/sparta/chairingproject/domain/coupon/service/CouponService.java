@@ -5,6 +5,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
@@ -23,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 public class CouponService {
 	private final CouponRepository couponRepository;
 	private final IssuanceRepository issuanceRepository;
+
+	private final Object lock = new Object();
 
 	public CouponResponse createCoupon(CouponRequest request) {
 		if (couponRepository.existsByName(request.getName())) {
@@ -46,8 +49,10 @@ public class CouponService {
 			.build();
 	}
 
+	@Transactional
 	public void issueCoupon(Long couponId, RequestDto request, Member member) {
-		Coupon coupon = couponRepository.findById(couponId)
+		// 디비 단에서 비관적락 적용
+		Coupon coupon = couponRepository.findByIdWithPessimisticLock(couponId)
 			.orElseThrow(() -> new GlobalException(COUPON_NOT_FOUND));
 
 		if (issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId).isPresent()) {
