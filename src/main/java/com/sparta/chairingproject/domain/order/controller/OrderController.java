@@ -33,6 +33,7 @@ import lombok.RequiredArgsConstructor;
 public class OrderController {
 	private final OrderService orderService;
 
+	@Secured("ROLE_USER")
 	@PostMapping("/{storeId}/orders")
 	public ResponseEntity<OrderResponse> createOrder(
 		@PathVariable Long storeId,
