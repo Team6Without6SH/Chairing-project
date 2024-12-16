@@ -4,6 +4,8 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,7 +78,9 @@ public class StoreService {
 		return StoreMapper.toStoreResponseList(stores);
 	}
 
+	@Cacheable(value = "storeDetails", key = "'store:' + #storeId + ':details'")
 	public StoreDetailsResponse getStoreDetails(Long storeId) {
+		System.out.println("DB 조회 실행: storeId = " + storeId);
 
 		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
@@ -96,6 +100,8 @@ public class StoreService {
 			menus, reviews, waitingCount);
 	}
 
+	@Transactional
+	@CacheEvict(value = "storeDetails", key = "'store:' + #storeId + ':details'")
 	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req, UserDetailsImpl authUser) {
 		Member owner = memberRepository.findById(authUser.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
