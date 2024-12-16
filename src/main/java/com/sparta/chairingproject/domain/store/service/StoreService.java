@@ -80,6 +80,7 @@ public class StoreService {
 
 	@Cacheable(value = "storeDetails", key = "'store:' + #storeId + ':details'")
 	public StoreDetailsResponse getStoreDetails(Long storeId) {
+		System.out.println("DB 조회 실행: storeId = " + storeId);
 
 		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
