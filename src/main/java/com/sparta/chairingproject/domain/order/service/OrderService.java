@@ -1,8 +1,19 @@
 package com.sparta.chairingproject.domain.order.service;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.websocket.WebSocketHandler;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -17,25 +28,15 @@ import com.sparta.chairingproject.domain.order.dto.response.OrderStatusUpdateRes
 import com.sparta.chairingproject.domain.order.dto.response.OrderWaitingResponse;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.entity.OrderStatus;
-import com.sparta.chairingproject.domain.order.message.OrderStatusMessage;
 import com.sparta.chairingproject.domain.order.publisher.OrderStatusPublisher;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
-
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -44,6 +45,7 @@ public class OrderService {
 	private final MenuRepository menuRepository;
 	private final StoreRepository storeRepository;
 	private final OrderStatusPublisher orderStatusPublisher;
+	private final WebSocketHandler webSocketHandler;
 
 	@Transactional
 	public OrderResponse createOrder(Long storeId, Member authMember,
@@ -83,6 +85,14 @@ public class OrderService {
 			totalPrice
 		);
 		orderRepository.save(order);
+
+		// WebSocketHandler 에 사용자 등록 및 Redis 채널 구독
+		String channel = "order-status:member:" + authMember.getId();
+		webSocketHandler.subscribeUserToChannel(authMember.getId(), channel);
+
+		// Redis 채널 메시지 발행
+		String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
+		orderStatusPublisher.publishOrderStatus(authMember.getId(), order.getId(), message);
 
 		int waitingTeams = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING);
 
@@ -144,6 +154,14 @@ public class OrderService {
 		);
 		orderRepository.save(order);
 
+		// WebSocketHandler 에 사용자 등록 및 Redis 채널 구독
+		String channel = "order-status:member:" + member.getId();
+		webSocketHandler.subscribeUserToChannel(member.getId(), channel);
+
+		// Redis 채널 메시지 발행
+		String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
+		orderStatusPublisher.publishOrderStatus(member.getId(), order.getId(), message);
+
 		int waitingTeams = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING);
 
 		return OrderWaitingResponse.builder()
@@ -193,9 +211,8 @@ public class OrderService {
 		orderRepository.save(order);
 
 		// Redis로 메시지 발행
-		OrderStatusMessage message = new OrderStatusMessage(orderId, newStatus.toString());
-		String jsonMessage = new ObjectMapper().writeValueAsString(message); // Jackson 사용
-		orderStatusPublisher.publishOrderStatus("order-status", jsonMessage);
+		String message = "주문 상태가 업데이트되었습니다: " + newStatus.name();
+		orderStatusPublisher.publishOrderStatus(order.getMember().getId(), order.getId(), message);
 
 		return OrderStatusUpdateResponse.builder()
 			.orderId(order.getId())
