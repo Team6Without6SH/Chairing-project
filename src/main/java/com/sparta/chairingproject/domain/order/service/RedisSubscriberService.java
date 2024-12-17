@@ -1,5 +1,7 @@
 package com.sparta.chairingproject.domain.order.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -10,11 +12,17 @@ import com.sparta.chairingproject.config.websocket.WebSocketHandler;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 public class RedisSubscriberService {
 
 	private final RedisMessageListenerContainer listenerContainer;
 	private final WebSocketHandler webSocketHandler;
+
+	public RedisSubscriberService(
+		@Qualifier("redisMessageListenerContainer") RedisMessageListenerContainer listenerContainer,
+		WebSocketHandler webSocketHandler) {
+		this.listenerContainer = listenerContainer;
+		this.webSocketHandler = webSocketHandler;
+	}
 
 	public void subscribeToChannel(Long memberId) {
 		String channel = "order-status:member:" + memberId;
