@@ -80,8 +80,7 @@ class MemberServiceTest {
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
 
-		member = new Member("testName", "test@test.com", "encodedPassword", "image",
-			MemberRole.USER);
+		member = new Member("testName", "test@test.com", "encodedPassword", MemberRole.USER);
 		ReflectionTestUtils.setField(member, "id", 1L);
 		authMember = new UserDetailsImpl(member);
 		store = new Store("storeTest", "testImage", "storeDes", "asd", member);
