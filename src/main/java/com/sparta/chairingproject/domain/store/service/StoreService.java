@@ -3,13 +3,16 @@ package com.sparta.chairingproject.domain.store.service;
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.redis.CacheEvictionPublisher;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
@@ -39,6 +42,8 @@ public class StoreService {
 	private final MemberRepository memberRepository;
 	private final MenuRepository menuRepository;
 	private final ReviewRepository reviewRepository;
+	private final RedisTemplate<String, Object> redisTemplate;
+	private final CacheEvictionPublisher cacheEvictionPublisher;
 
 	@Transactional
 	public StoreResponse registerStore(StoreRequest request, UserDetailsImpl authMember) {
@@ -101,7 +106,7 @@ public class StoreService {
 	}
 
 	@Transactional
-	@CacheEvict(value = "storeDetails", key = "'store:' + #storeId + ':details'")
+	@CacheEvict(value = "storeDetails", key = "'store:' + #storeId + ':details'", beforeInvocation = false)
 	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req, UserDetailsImpl authUser) {
 		Member owner = memberRepository.findById(authUser.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
@@ -110,6 +115,10 @@ public class StoreService {
 
 		store.updateStore(req);
 		storeRepository.save(store);
+
+		// 캐시 무효화 메세지 발행
+		String cacheKey = "store:" + storeId + ":details";
+		cacheEvictionPublisher.publish(cacheKey);
 
 		List<MenuSummaryResponse> menus = menuRepository.findByStoreId(storeId)
 			.stream()
