@@ -4,6 +4,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.sparta.chairingproject.domain.common.service.S3Uploader;
 import java.io.IOException;
 import java.util.List;
 
@@ -37,9 +38,7 @@ public class MenuService {
 
 	private final MenuRepository menuRepository;
 	private final StoreRepository storeRepository;
-	private final AmazonS3Client amazonS3Client;
-	@Value("${cloud.aws.s3.bucket}")
-	private String bucket;
+	private final S3Uploader s3Uploader;
 
 	@Transactional
 	public MenuResponse createMenu(Long storeId, @Valid MenuRequest request, Member member,
@@ -53,20 +52,8 @@ public class MenuService {
 		if (isDuplicatedMenu) {
 			throw new GlobalException(DUPLICATED_MENU);
 		}
-		String fileName = null;
-		if (!file.isEmpty()) {
-			try {
-				String uuid = UUID.randomUUID().toString();
-				fileName = "menu/" + file.getOriginalFilename() + "_" + uuid;
-				ObjectMetadata metadata = new ObjectMetadata();
-				metadata.setContentType(file.getContentType());
-				metadata.setContentLength(file.getSize());
-				amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
 
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		String fileName = s3Uploader.upload(file);
 
 		Menu menu = Menu.createOf(request.getName(), request.getPrice(), fileName, store);
 		menuRepository.save(menu);
@@ -94,23 +81,8 @@ public class MenuService {
 			menu.updateStatus(request.getStatus());
 		}
 
-		if (!file.isEmpty()) {
-			if (menu.getImage() != null) {
-				amazonS3Client.deleteObject(bucket, menu.getImage());
-			}
-			try {
-				String uuid = UUID.randomUUID().toString();
-				String fileName = "menu/" + file.getOriginalFilename() + "_" + uuid;
-				ObjectMetadata metadata = new ObjectMetadata();
-				metadata.setContentType(file.getContentType());
-				metadata.setContentLength(file.getSize());
-				amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
-
-				menu.updateImage(fileName);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		String fileName = s3Uploader.update(menu.getImage(), file);
+		menu.updateImage(fileName);
 		return MenuUpdateResponse.from(menu);
 	}
 

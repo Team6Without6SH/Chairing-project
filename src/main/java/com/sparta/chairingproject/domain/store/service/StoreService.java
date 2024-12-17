@@ -4,6 +4,7 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.sparta.chairingproject.domain.common.service.S3Uploader;
 import java.io.IOException;
 import java.util.List;
 
@@ -46,9 +47,7 @@ public class StoreService {
 	private final MemberRepository memberRepository;
 	private final MenuRepository menuRepository;
 	private final ReviewRepository reviewRepository;
-	private final AmazonS3Client amazonS3Client;
-	@Value("${cloud.aws.s3.bucket}")
-	private String bucket;
+	private final S3Uploader s3Uploader;
 
 	@Transactional
 	public StoreResponse registerStore(StoreRequest request, UserDetailsImpl authMember,
@@ -67,20 +66,7 @@ public class StoreService {
 		}
 
 		// 이미지 업로드 로직 추가 필요 (예: S3)
-		String fileName = null;
-		if (!file.isEmpty()) {
-			try {
-				String uuid = UUID.randomUUID().toString();
-				fileName = "store/" + file.getOriginalFilename() + "_" + uuid;
-				ObjectMetadata metadata = new ObjectMetadata();
-				metadata.setContentType(file.getContentType());
-				metadata.setContentLength(file.getSize());
-				amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+		String fileName = s3Uploader.upload(file);
 
 		Store store = new Store( // request 에 맞게 생성자 추가하고 -> pending 값을 여기다 담아두고 ->save  하기 ->
 			request.getName(), request.getAddress(), fileName, request.getDescription(), owner);
@@ -139,24 +125,8 @@ public class StoreService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		if (!file.isEmpty()) {
-			if (store.getImage() != null) {
-				amazonS3Client.deleteObject(bucket, store.getImage());
-			}
-			try {
-				String uuid = UUID.randomUUID().toString();
-				String fileName = "store/" + file.getOriginalFilename() + "_" + uuid;
-				ObjectMetadata metadata = new ObjectMetadata();
-				metadata.setContentType(file.getContentType());
-				metadata.setContentLength(file.getSize());
-				amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
-
-				req.setImage(fileName);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
+		String fileName = s3Uploader.update(store.getImage(), file);
+		req.setImage(fileName);
 		store.updateStore(req);
 		storeRepository.save(store);
 
