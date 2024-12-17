@@ -8,6 +8,7 @@ import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.Issuance.repository.IssuanceRepository;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
+import com.sparta.chairingproject.domain.member.dto.request.CheckPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.response.MemberIssuanceResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
@@ -104,9 +105,14 @@ public class MemberService {
 	}
 
 	@Transactional
-	public void deleteMember(UserDetailsImpl authMember, RequestDto request) {
+	public void deleteMember(UserDetailsImpl authMember, CheckPasswordRequest request) {
 		Member member = memberRepository.findById(authMember.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+
+		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+			throw new GlobalException(NOT_MATCH_PASSWORD);
+		}
+		
 		if (member.getDeletedAt() != null) {
 			throw new GlobalException(DELETED_USER);
 		}

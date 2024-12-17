@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.member.controller;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
+import com.sparta.chairingproject.domain.member.dto.request.CheckPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.response.MemberIssuanceResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
@@ -75,7 +76,7 @@ public class MemberController {
 
 	@DeleteMapping("/delete")
 	public void deletedMember(
-		@RequestBody RequestDto request,
+		@RequestBody CheckPasswordRequest request,
 		@AuthenticationPrincipal UserDetailsImpl authMember) {
 		memberService.deleteMember(authMember, request);
 	}
