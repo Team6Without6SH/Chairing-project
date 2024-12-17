@@ -35,6 +35,7 @@ public class RedisConfig {
 		return template;
 	}
 
+	// Todo: 이부분은 RedisTemplate 충돌이 일어날까봐 일단은 따로 분리해서 구현할 계획
 	@Bean
 	public RedisTemplate<String, Object> redisTemplate2(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, Object> template = new RedisTemplate<>();
