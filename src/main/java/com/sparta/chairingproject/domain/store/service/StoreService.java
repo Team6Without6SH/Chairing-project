@@ -18,6 +18,8 @@ import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.review.dto.ReviewResponse;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
+import com.sparta.chairingproject.domain.store.dto.StoreOpenCloseRequest;
+import com.sparta.chairingproject.domain.store.dto.StoreOpenCloseResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreOwnerResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
@@ -170,5 +172,21 @@ public class StoreService {
 		storeRepository.save(store);
 
 		// 알림 정도 추가 가능할듯?
+	}
+
+	public StoreOpenCloseResponse storeOpenClose(Long storeId, Member member, StoreOpenCloseRequest request) {
+		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+
+		if (!store.getOwner().getId().equals(member.getId())) {
+			throw new GlobalException(ONLY_OWNER_ALLOWED);
+		}
+		StoreStatus newStatus = StoreStatus.valueOf(request.getStatus().toUpperCase());
+
+		store.storeOpenClose(newStatus);
+
+		return StoreOpenCloseResponse.builder()
+			.storeId(store.getId())
+			.status(newStatus.name())
+			.build();
 	}
 }

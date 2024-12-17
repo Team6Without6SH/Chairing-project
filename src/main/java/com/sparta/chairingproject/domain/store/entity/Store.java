@@ -10,6 +10,7 @@ import com.sparta.chairingproject.domain.menu.entity.Menu;
 import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
 import com.sparta.chairingproject.domain.review.entity.Review;
+import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.dto.UpdateStoreRequest;
 
 import jakarta.persistence.CascadeType;
@@ -137,5 +138,9 @@ public class Store extends Timestamped {
 
 	public void rejectDeleteRequest() {
 		this.requestStatus = StoreRequestStatus.DELETE_REJECTED;
+	}
+
+	public void storeOpenClose(StoreStatus status) {
+		this.status = status;
 	}
 }
