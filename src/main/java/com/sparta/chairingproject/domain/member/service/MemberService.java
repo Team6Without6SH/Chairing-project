@@ -3,6 +3,8 @@ package com.sparta.chairingproject.domain.member.service;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
@@ -20,13 +22,17 @@ import com.sparta.chairingproject.domain.order.entity.Order;
 import com.sparta.chairingproject.domain.order.repository.OrderRepository;
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
 import com.sparta.chairingproject.domain.reservation.repository.ReservationRepository;
+import java.io.IOException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +43,10 @@ public class MemberService {
 	private final OrderRepository orderRepository;
 	private final ReservationRepository reservationRepository;
 	private final IssuanceRepository issuanceRepository;
+
+	private final AmazonS3Client amazonS3Client;
+	@Value("${cloud.aws.s3.bucket}")
+	private String bucket;
 
 
 	public MemberResponse getMemberDetails(UserDetailsImpl authMember) {
@@ -112,11 +122,36 @@ public class MemberService {
 		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
 			throw new GlobalException(NOT_MATCH_PASSWORD);
 		}
-		
+
 		if (member.getDeletedAt() != null) {
 			throw new GlobalException(DELETED_USER);
 		}
 		member.delete();
+
+	}
+
+	@Transactional
+	public void updateImage(UserDetailsImpl authMember, MultipartFile file) {
+
+		Member member = memberRepository.findById(authMember.getMember().getId())
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
+
+		if (member.getImage() != null) {
+			amazonS3Client.deleteObject(bucket, member.getImage());
+		}
+
+		try {
+			String uuid = UUID.randomUUID().toString();
+			String fileName = "userProfile/" + file.getOriginalFilename() + "_" + uuid;
+			ObjectMetadata metadata = new ObjectMetadata();
+			metadata.setContentType(file.getContentType());
+			metadata.setContentLength(file.getSize());
+			amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
+
+			member.updateImage(fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 }

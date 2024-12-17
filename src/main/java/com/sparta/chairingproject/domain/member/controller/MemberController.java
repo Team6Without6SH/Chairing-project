@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +43,14 @@ public class MemberController {
 		@Valid @RequestBody MemberPasswordRequest request,
 		@AuthenticationPrincipal UserDetailsImpl authMember) {
 		memberService.updatePassword(authMember, request);
+	}
+
+	@PatchMapping("/images")
+	public void updateImage(
+		@RequestPart(value = "profile") MultipartFile file,
+		@AuthenticationPrincipal UserDetailsImpl authMember
+	) {
+		memberService.updateImage(authMember, file);
 	}
 
 	@GetMapping("/orders")
