@@ -95,4 +95,8 @@ public class Menu extends Timestamped {
 		}
 		this.deletedAt = LocalDateTime.now();
 	}
+
+	public void updateImage(String fileName) {
+		this.image = fileName;
+	}
 }
