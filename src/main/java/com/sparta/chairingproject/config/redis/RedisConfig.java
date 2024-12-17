@@ -33,16 +33,16 @@ public class RedisConfig {
 	}
 
 	@Bean
-	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
 		RedisTemplate<String, Object> template = new RedisTemplate<>();
-		template.setConnectionFactory(connectionFactory);
+		template.setConnectionFactory(redisConnectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
 		return template;
 	}
 
 	@Bean
-	public RedisTemplate<String, Object> redisTemplate2(LettuceConnectionFactory connectionFactory) {
+	public RedisTemplate<String, Object> redisTemplate2(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
@@ -51,17 +51,9 @@ public class RedisConfig {
 	}
 
 	@Bean
-	public MessageListenerAdapter messageListenerAdapter(OrderStatusSubscriber subscriber) {
-		return new MessageListenerAdapter(subscriber, "handleMessage");
-	}
-
-	@Bean
-	public RedisMessageListenerContainer redisContainer(
-		LettuceConnectionFactory connectionFactory,
-		MessageListenerAdapter messageListenerAdapter) {
+	public RedisMessageListenerContainer redisMessageListenerContainer(LettuceConnectionFactory connectionFactory) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(connectionFactory);
-		container.addMessageListener(messageListenerAdapter, new ChannelTopic("order-status"));
 		return container;
 	}
 }
