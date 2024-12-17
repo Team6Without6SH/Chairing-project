@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
-import com.sparta.chairingproject.config.websocket.WebSocketHandler;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -45,7 +44,7 @@ public class OrderService {
 	private final MenuRepository menuRepository;
 	private final StoreRepository storeRepository;
 	private final OrderStatusPublisher orderStatusPublisher;
-	private final WebSocketHandler webSocketHandler;
+	private final RedisSubscriberService redisSubscriberService;
 
 	@Transactional
 	public OrderResponse createOrder(Long storeId, Member authMember,
@@ -86,9 +85,8 @@ public class OrderService {
 		);
 		orderRepository.save(order);
 
-		// WebSocketHandler 에 사용자 등록 및 Redis 채널 구독
-		String channel = "order-status:member:" + authMember.getId();
-		webSocketHandler.subscribeUserToChannel(authMember.getId(), channel);
+		// Redis 채널 구독
+		redisSubscriberService.subscribeToChannel(authMember.getId());
 
 		// Redis 채널 메시지 발행
 		String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
@@ -154,9 +152,8 @@ public class OrderService {
 		);
 		orderRepository.save(order);
 
-		// WebSocketHandler 에 사용자 등록 및 Redis 채널 구독
-		String channel = "order-status:member:" + member.getId();
-		webSocketHandler.subscribeUserToChannel(member.getId(), channel);
+		// Redis 채널 구독
+		redisSubscriberService.subscribeToChannel(member.getId());
 
 		// Redis 채널 메시지 발행
 		String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";

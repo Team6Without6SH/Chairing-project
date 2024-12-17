@@ -5,14 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
-
-import com.sparta.chairingproject.config.redis.RedisSubscriptionEvent;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSocketHandler extends TextWebSocketHandler {
 	private static final ConcurrentHashMap<Long, WebSocketSession> CLIENTS = new ConcurrentHashMap<>();
-	private final ApplicationEventPublisher eventPublisher;
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) {
@@ -51,6 +47,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		System.out.println("클라이언트 추가 성공: memberId=" + memberId + ", 세션 ID=" + session.getId());
 	}
 
+	// 이 메서드는 WebSocket 으로 메세지를 전송
 	public void sendMessageToUser(Long memberId, String message) {
 		WebSocketSession session = CLIENTS.get(memberId);
 		if (session != null && session.isOpen()) {
@@ -62,16 +59,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
 			}
 		} else {
 			System.out.println("세션 없음: 사용자 ID=" + memberId);
-		}
-	}
-
-	public void subscribeUserToChannel(Long memberId, String channel) {
-		WebSocketSession session = CLIENTS.get(memberId);
-		if (session != null) {
-			eventPublisher.publishEvent(new RedisSubscriptionEvent(this, memberId, channel, session));
-			System.out.println("Redis 채널 구독 성공: memberId=" + memberId + ", 채널=" + channel);
-		} else {
-			System.out.println("구독 실패: memberId=" + memberId + ", 세션이 존재하지 않음");
 		}
 	}
 
