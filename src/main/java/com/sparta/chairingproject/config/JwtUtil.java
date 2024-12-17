@@ -3,6 +3,7 @@ package com.sparta.chairingproject.config;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.rmi.ServerException;
 import java.security.Key;
 import java.util.Base64;
 import java.util.Date;
@@ -34,10 +35,11 @@ public class JwtUtil {
 	private static final String AUTHORIZATION_HEADER = "Authorization";
 	private static final String BEARER_PREFIX = "Bearer ";
 	private static final long TOKEN_TIME = 60000 * 60 * 1000L; // 60분
-	private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+
 	@Value("${jwt.secret.key}")
 	private String secretKey;
 	private Key key;
+	private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
 
 	@PostConstruct
 	public void init() {
@@ -45,7 +47,7 @@ public class JwtUtil {
 		key = Keys.hmacShaKeyFor(bytes);
 	}
 
-	public String createToken(Long userId, String email, String image, MemberRole memberRole) {
+	public String createToken(Long userId, String email, MemberRole memberRole) {
 		Date date = new Date();
 
 		return BEARER_PREFIX +
@@ -53,7 +55,6 @@ public class JwtUtil {
 				.setSubject(String.valueOf(userId))
 				.claim("email", email)
 				.claim("memberRole", memberRole)
-				.claim("image", image)
 				.setExpiration(new Date(date.getTime() + TOKEN_TIME))
 				.setIssuedAt(date) // 발급일
 				.signWith(key, signatureAlgorithm) // 암호화 알고리즘
@@ -78,8 +79,7 @@ public class JwtUtil {
 	//생성된 JWT 를 Cookie 에 저장
 	public void addJwtToCookie(String token, HttpServletResponse res) {
 		try {
-			token = URLEncoder.encode(token, "utf-8")
-				.replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
+			token = URLEncoder.encode(token, "utf-8").replaceAll("\\+", "%20"); // Cookie Value 에는 공백이 불가능해서 encoding 진행
 
 			Cookie cookie = new Cookie(AUTHORIZATION_HEADER, token); // Name-Value
 			cookie.setPath("/");
@@ -94,12 +94,11 @@ public class JwtUtil {
 	// HttpServletRequest 에서 Cookie Value : JWT 가져오기
 	public String getTokenFromRequest(HttpServletRequest req) {
 		Cookie[] cookies = req.getCookies();
-		if (cookies != null) {
+		if(cookies != null) {
 			for (Cookie cookie : cookies) {
 				if (cookie.getName().equals(AUTHORIZATION_HEADER)) {
 					try {
-						return URLDecoder.decode(cookie.getValue(),
-							"UTF-8"); // Encode 되어 넘어간 Value 다시 Decode
+						return URLDecoder.decode(cookie.getValue(), "UTF-8"); // Encode 되어 넘어간 Value 다시 Decode
 					} catch (UnsupportedEncodingException e) {
 						return null;
 					}
