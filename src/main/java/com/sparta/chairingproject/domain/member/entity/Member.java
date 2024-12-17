@@ -46,14 +46,19 @@ public class Member extends Timestamped {
 	private String email;
 	@Column(nullable = false)
 	private String password;
+	@Column
+	private String image;
 	@Enumerated(EnumType.STRING)
 	private MemberRole memberRole;
+	@Column(nullable = false)
+	private boolean deleted;
 
-	public Member(String name, @NotBlank @Email String email, String password,
+	public Member(String name, @NotBlank @Email String email, String password, String image,
 		MemberRole memberRole) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
+		this.image = image;
 		this.memberRole = memberRole;
 	}
 
@@ -63,5 +68,9 @@ public class Member extends Timestamped {
 
 	public void delete() {
 		deletedAt = LocalDateTime.now();
+	}
+
+	public void updateImage(String fileName) {
+		this.image = fileName;
 	}
 }

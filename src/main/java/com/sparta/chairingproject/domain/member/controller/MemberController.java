@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.member.controller;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
+import com.sparta.chairingproject.domain.member.dto.request.CheckPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.request.MemberPasswordRequest;
 import com.sparta.chairingproject.domain.member.dto.response.MemberIssuanceResponse;
 import com.sparta.chairingproject.domain.member.dto.response.MemberOrderResponse;
@@ -20,7 +21,9 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -40,6 +43,14 @@ public class MemberController {
 		@Valid @RequestBody MemberPasswordRequest request,
 		@AuthenticationPrincipal UserDetailsImpl authMember) {
 		memberService.updatePassword(authMember, request);
+	}
+
+	@PatchMapping("/images")
+	public void updateImage(
+		@RequestPart(value = "profile") MultipartFile file,
+		@AuthenticationPrincipal UserDetailsImpl authMember
+	) {
+		memberService.updateImage(authMember, file);
 	}
 
 	@GetMapping("/orders")
@@ -75,7 +86,7 @@ public class MemberController {
 
 	@DeleteMapping("/delete")
 	public void deletedMember(
-		@RequestBody RequestDto request,
+		@RequestBody CheckPasswordRequest request,
 		@AuthenticationPrincipal UserDetailsImpl authMember) {
 		memberService.deleteMember(authMember, request);
 	}
