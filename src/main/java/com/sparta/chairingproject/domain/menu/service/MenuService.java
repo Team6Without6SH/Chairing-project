@@ -4,6 +4,8 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,7 @@ public class MenuService {
 	private final StoreRepository storeRepository;
 
 	@Transactional
+	@CacheEvict(value = "menus", key = "'store:' + #storeId + ':menus'")
 	public MenuResponse createMenu(Long storeId, @Valid MenuRequest request, Member member) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_MENU));
@@ -49,6 +52,7 @@ public class MenuService {
 	}
 
 	@Transactional
+	@CacheEvict(value = "menus", key = "'store:' + #storeId + ':menus'")
 	public MenuUpdateResponse updateMenu(Long storeId, Long menuId, MenuUpdateRequest request, Member member) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
@@ -71,6 +75,7 @@ public class MenuService {
 	}
 
 	@Transactional
+	@CacheEvict(value = "menus", key = "'store:' + #storeId + ':menus'")
 	public MenuDeleteResponse deleteMenu(Long storeId, Long menuId, Member member, RequestDto request) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
@@ -84,6 +89,7 @@ public class MenuService {
 		return MenuDeleteResponse.from(menu);
 	}
 
+	@Cacheable(value = "menus", key = "'store:' + #storeId + ':menus'")
 	@Transactional(readOnly = true)
 	public List<MenuDetailResponse> getAllMenusByStore(Long storeId, Member member) {
 		Store store = storeRepository.findById(storeId)
