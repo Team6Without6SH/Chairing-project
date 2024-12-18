@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.transaction.AfterCommitAction;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.entity.Menu;
@@ -88,9 +89,11 @@ public class OrderService {
 		// Redis 채널 구독
 		redisSubscriberService.subscribeToChannel(authMember.getId());
 
-		// Redis 채널 메시지 발행
-		String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
-		orderStatusPublisher.publishOrderStatus(authMember.getId(), order.getId(), message);
+		AfterCommitAction.register(() -> {
+			// Redis 채널 메시지 발행
+			String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
+			orderStatusPublisher.publishOrderStatus(authMember.getId(), order.getId(), message);
+		});
 
 		int waitingTeams = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING);
 
@@ -155,9 +158,11 @@ public class OrderService {
 		// Redis 채널 구독
 		redisSubscriberService.subscribeToChannel(member.getId());
 
-		// Redis 채널 메시지 발행
-		String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
-		orderStatusPublisher.publishOrderStatus(member.getId(), order.getId(), message);
+		AfterCommitAction.register(() -> {
+			// Redis 채널 메시지 발행
+			String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
+			orderStatusPublisher.publishOrderStatus(member.getId(), order.getId(), message);
+		});
 
 		int waitingTeams = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING);
 
@@ -207,9 +212,11 @@ public class OrderService {
 		order.changeStatus(newStatus);
 		orderRepository.save(order);
 
-		// Redis로 메시지 발행
-		String message = "주문 상태가 업데이트되었습니다: " + newStatus.name();
-		orderStatusPublisher.publishOrderStatus(order.getMember().getId(), order.getId(), message);
+		AfterCommitAction.register(() -> {
+			// Redis 로 메시지 발행
+			String message = "주문 상태가 업데이트되었습니다: " + newStatus.name();
+			orderStatusPublisher.publishOrderStatus(order.getMember().getId(), order.getId(), message);
+		});
 
 		return OrderStatusUpdateResponse.builder()
 			.orderId(order.getId())
