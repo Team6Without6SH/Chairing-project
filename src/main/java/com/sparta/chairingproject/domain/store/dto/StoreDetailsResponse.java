@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.domain.store.dto;
 
+import java.io.Serializable;
 import java.util.List;
 
 import com.sparta.chairingproject.domain.menu.dto.response.MenuSummaryResponse;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class StoreDetailsResponse {
+public class StoreDetailsResponse implements Serializable {
 	private String name;
 	private String image;
 	private String description;

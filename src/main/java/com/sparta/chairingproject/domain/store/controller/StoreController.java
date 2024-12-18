@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,6 +24,8 @@ import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.order.dto.response.OrderPageResponse;
 import com.sparta.chairingproject.domain.order.service.OrderService;
 import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
+import com.sparta.chairingproject.domain.store.dto.StoreOpenCloseRequest;
+import com.sparta.chairingproject.domain.store.dto.StoreOpenCloseResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreOwnerResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
@@ -103,5 +106,15 @@ public class StoreController {
 	) {
 		storeService.requestDeleteStore(storeId, authMember);
 		return ResponseEntity.ok().build();
+	}
+
+	@Secured("ROLE_OWNER")
+	@PatchMapping("/owners/stores/{storeId}")
+	public ResponseEntity<StoreOpenCloseResponse> storeOpenClose(
+		@PathVariable Long storeId,
+		@AuthenticationPrincipal UserDetailsImpl authMember,
+		@RequestBody @Valid StoreOpenCloseRequest request
+	) {
+		return ResponseEntity.ok(storeService.storeOpenClose(storeId, authMember.getMember(), request));
 	}
 }

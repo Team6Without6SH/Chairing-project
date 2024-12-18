@@ -4,6 +4,8 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,8 @@ import com.sparta.chairingproject.domain.menu.repository.MenuRepository;
 import com.sparta.chairingproject.domain.review.dto.ReviewResponse;
 import com.sparta.chairingproject.domain.review.repository.ReviewRepository;
 import com.sparta.chairingproject.domain.store.dto.StoreDetailsResponse;
+import com.sparta.chairingproject.domain.store.dto.StoreOpenCloseRequest;
+import com.sparta.chairingproject.domain.store.dto.StoreOpenCloseResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreOwnerResponse;
 import com.sparta.chairingproject.domain.store.dto.StoreRequest;
 import com.sparta.chairingproject.domain.store.dto.StoreResponse;
@@ -76,7 +80,9 @@ public class StoreService {
 		return StoreMapper.toStoreResponseList(stores);
 	}
 
+	@Cacheable(value = "storeDetails", key = "'store:' + #storeId + ':details'")
 	public StoreDetailsResponse getStoreDetails(Long storeId) {
+		System.out.println("DB 조회 실행: storeId = " + storeId);
 
 		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
@@ -96,6 +102,8 @@ public class StoreService {
 			menus, reviews, waitingCount);
 	}
 
+	@Transactional
+	@CacheEvict(value = "storeDetails", key = "'store:' + #storeId + ':details'")
 	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req, UserDetailsImpl authUser) {
 		Member owner = memberRepository.findById(authUser.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
@@ -164,5 +172,21 @@ public class StoreService {
 		storeRepository.save(store);
 
 		// 알림 정도 추가 가능할듯?
+	}
+
+	public StoreOpenCloseResponse storeOpenClose(Long storeId, Member member, StoreOpenCloseRequest request) {
+		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+
+		if (!store.getOwner().getId().equals(member.getId())) {
+			throw new GlobalException(ONLY_OWNER_ALLOWED);
+		}
+		StoreStatus newStatus = StoreStatus.valueOf(request.getStatus().toUpperCase());
+
+		store.storeOpenClose(newStatus);
+
+		return StoreOpenCloseResponse.builder()
+			.storeId(store.getId())
+			.status(newStatus.name())
+			.build();
 	}
 }
