@@ -61,6 +61,7 @@ public class WebSecurityConfig {
 				.permitAll() // resources 접근 허용 설정
 				.requestMatchers("/auth/**").permitAll() // '/auth/'로 시작하는 요청 모두 접근 허가
 				.requestMatchers("/websocket/**").permitAll()
+        .requestMatchers("/api/v1/fcm/**").permitAll() // fcm 접근 허가ㅍ
 				.anyRequest().authenticated() // 그 외 모든 요청 인증처리
 		);
 
