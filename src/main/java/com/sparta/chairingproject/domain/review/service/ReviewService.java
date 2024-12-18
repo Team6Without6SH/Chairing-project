@@ -86,7 +86,7 @@ public class ReviewService {
 	}
 
 	@Transactional
-	@CacheEvict(value = "reviews", key = "'store:' + #storeId + ':reviews'")
+	@CacheEvict(value = "reviews", key = "'store:' + #review.store.id + ':reviews'")
 	public void updateReview(Long reviewId, ReviewRequest request, Member member) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_REVIEW));
@@ -103,7 +103,7 @@ public class ReviewService {
 	}
 
 	@Transactional
-	@CacheEvict(value = "reviews", key = "'store:' + #storeId + ':reviews'")
+	@CacheEvict(value = "reviews", key = "'store:' + #review.store.id + ':reviews'")
 	public void deleteReview(Long reviewId, RequestDto request, Member member) {
 
 		Review review = reviewRepository.findById(reviewId)
