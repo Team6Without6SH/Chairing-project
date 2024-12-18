@@ -117,8 +117,8 @@ public class StoreService {
 		storeRepository.save(store);
 
 		// 캐시 무효화 메세지 발행
-		String cacheKey = "store:" + storeId + ":details";
-		cacheEvictionPublisher.publish(cacheKey);
+		String storeDetailsCacheKey = "store:" + storeId + ":details";
+		cacheEvictionPublisher.publish(storeDetailsCacheKey);
 
 		List<MenuSummaryResponse> menus = menuRepository.findByStoreId(storeId)
 			.stream()
