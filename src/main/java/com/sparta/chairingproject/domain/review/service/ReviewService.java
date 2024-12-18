@@ -2,8 +2,11 @@ package com.sparta.chairingproject.domain.review.service;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +35,10 @@ public class ReviewService {
 	private final StoreRepository storeRepository;
 	private final OrderRepository orderRepository;
 	private final CommentRepository commentRepository;
+	private final RedisTemplate<String, Object> redisTemplate;
 
+	@Transactional
+	@CacheEvict(value = "reviews", key = "'store:' + #storeId + ':reviews'")
 	public Review createReview(Long storeId, Long orderId, ReviewRequest request, Member member) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
@@ -68,6 +74,7 @@ public class ReviewService {
 		return reviewRepository.save(review);
 	}
 
+	@Cacheable(value = "reviews", key = "'store:' + #storeId + ':reviews'")
 	public Page<ReviewWithCommentResponse> getReviewsByStore(Long storeId, RequestDto request, Pageable pageable) {
 		storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
@@ -79,6 +86,7 @@ public class ReviewService {
 	}
 
 	@Transactional
+	@CacheEvict(value = "reviews", key = "'store:' + #storeId + ':reviews'")
 	public void updateReview(Long reviewId, ReviewRequest request, Member member) {
 		Review review = reviewRepository.findById(reviewId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_REVIEW));
@@ -95,6 +103,7 @@ public class ReviewService {
 	}
 
 	@Transactional
+	@CacheEvict(value = "reviews", key = "'store:' + #storeId + ':reviews'")
 	public void deleteReview(Long reviewId, RequestDto request, Member member) {
 
 		Review review = reviewRepository.findById(reviewId)
