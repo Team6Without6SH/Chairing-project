@@ -16,7 +16,7 @@ import lombok.ToString;
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class FcmRequest {
+public class FcmMessageRequest {
 	private String token;
 
 	private String title;
@@ -24,7 +24,7 @@ public class FcmRequest {
 	private String body;
 
 	@Builder(toBuilder = true)
-	public FcmRequest(String token, String title, String body) {
+	public FcmMessageRequest(String token, String title, String body) {
 		this.token = token;
 		this.title = title;
 		this.body = body;

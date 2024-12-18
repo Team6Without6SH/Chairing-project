@@ -4,11 +4,11 @@ import java.io.IOException;
 
 import org.springframework.stereotype.Service;
 
-import com.sparta.chairingproject.domain.fcm.dto.request.FcmRequest;
+import com.sparta.chairingproject.domain.fcm.dto.request.FcmMessageRequest;
 
 @Service
 public interface FcmService {
 
-	int sendMessageTo(FcmRequest req) throws IOException;
+	int sendMessageTo(FcmMessageRequest req) throws IOException;
 
 }

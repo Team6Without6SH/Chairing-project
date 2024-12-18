@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.sparta.chairingproject.domain.fcm.dto.response.FcmMessageResponse;
-import com.sparta.chairingproject.domain.fcm.dto.request.FcmRequest;
+import com.sparta.chairingproject.domain.fcm.dto.request.FcmMessageRequest;
 
 @Service
 public class FcmServiceImpl implements FcmService {
@@ -31,7 +31,7 @@ public class FcmServiceImpl implements FcmService {
 	 * @return 성공(1), 실패(0)
 	 */
 	@Override
-	public int sendMessageTo(FcmRequest req) throws IOException {
+	public int sendMessageTo(FcmMessageRequest req) throws IOException {
 
 		String message = makeMessage(req);
 		RestTemplate restTemplate = new RestTemplate();
@@ -87,7 +87,7 @@ public class FcmServiceImpl implements FcmService {
 	 * @param req FcmSendDto
 	 * @return String
 	 */
-	private String makeMessage(FcmRequest req) throws JsonProcessingException {
+	private String makeMessage(FcmMessageRequest req) throws JsonProcessingException {
 		ObjectMapper om = new ObjectMapper();
 		FcmMessageResponse fcmMessageResponse = FcmMessageResponse.builder()
 			.message(FcmMessageResponse.Message.builder()

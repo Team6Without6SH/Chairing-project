@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sparta.chairingproject.domain.fcm.dto.request.FcmRequest;
+import com.sparta.chairingproject.domain.fcm.dto.request.FcmMessageRequest;
 import com.sparta.chairingproject.domain.fcm.sevice.FcmService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ public class FcmController {
 	}
 
 	@PostMapping("/send")
-	public ResponseEntity<Object> pushMessage(@RequestBody @Validated FcmRequest req) throws
+	public ResponseEntity<Object> pushMessage(@RequestBody @Validated FcmMessageRequest req) throws
 		IOException {
 		log.debug("[+] 푸시 메시지를 전송합니다. ");
 		int result = fcmService.sendMessageTo(req);
