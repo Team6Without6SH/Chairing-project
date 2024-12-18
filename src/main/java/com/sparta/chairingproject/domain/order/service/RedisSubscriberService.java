@@ -5,8 +5,6 @@ import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
 
-import com.sparta.chairingproject.config.websocket.WebSocketHandler;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -14,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 public class RedisSubscriberService {
 
 	private final RedisMessageListenerContainer listenerContainer;
-	private final WebSocketHandler webSocketHandler;
+	private final OrderNotificationService orderNotificationService;
 
 	public void subscribeToChannel(Long memberId) {
 		String channel = "order-status:member:" + memberId;
@@ -22,8 +20,7 @@ public class RedisSubscriberService {
 			String payload = new String(message.getBody());
 			System.out.println("Redis 메세지 수신: " + payload);
 
-			webSocketHandler.sendMessageToUser(memberId, payload);
-			System.out.println("WebSocket 송신: memberId= " + memberId + ", message= " + payload);
+			orderNotificationService.sendNotification(memberId, payload);
 		};
 
 		ChannelTopic topic = new ChannelTopic(channel);
