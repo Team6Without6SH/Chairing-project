@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.redis.CacheEvictionPublisher;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.menu.dto.request.MenuRequest;
@@ -33,6 +34,7 @@ public class MenuService {
 
 	private final MenuRepository menuRepository;
 	private final StoreRepository storeRepository;
+	private final CacheEvictionPublisher cacheEvictionPublisher;
 
 	@Transactional
 	@CacheEvict(value = "menus", key = "'store:' + #storeId + ':menus'")
@@ -48,6 +50,11 @@ public class MenuService {
 		}
 		Menu menu = Menu.createOf(request.getName(), request.getPrice(), request.getImage(), store);
 		menuRepository.save(menu);
+
+		//storeDetails 캐시 무효화 메세지 발행
+		String storeDetailsCacheKey = "store:" + storeId + ":details";
+		cacheEvictionPublisher.publish(storeDetailsCacheKey);
+
 		return MenuResponse.from(menu);
 	}
 
@@ -71,6 +78,11 @@ public class MenuService {
 		if (request.getStatus() != null) {
 			menu.updateStatus(request.getStatus());
 		}
+
+		//storeDetails 캐시 무효화 메세지 발행
+		String storeDetailsCacheKey = "store:" + storeId + ":details";
+		cacheEvictionPublisher.publish(storeDetailsCacheKey);
+
 		return MenuUpdateResponse.from(menu);
 	}
 
@@ -85,6 +97,10 @@ public class MenuService {
 		Menu menu = menuRepository.findByIdAndStatus(menuId, MenuStatus.DELETED)
 			.orElseThrow(() -> new GlobalException(ONLY_DELETED_MENU_CAN_BE_REMOVED));
 		menu.delete();
+
+		//storeDetails 캐시 무효화 메세지 발행
+		String storeDetailsCacheKey = "store:" + storeId + ":details";
+		cacheEvictionPublisher.publish(storeDetailsCacheKey);
 
 		return MenuDeleteResponse.from(menu);
 	}
