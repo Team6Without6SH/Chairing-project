@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.redis.CacheEvictionPublisher;
 import com.sparta.chairingproject.domain.comment.entity.Comment;
 import com.sparta.chairingproject.domain.comment.repository.CommentRepository;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
@@ -35,7 +36,7 @@ public class ReviewService {
 	private final StoreRepository storeRepository;
 	private final OrderRepository orderRepository;
 	private final CommentRepository commentRepository;
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final CacheEvictionPublisher cacheEvictionPublisher;
 
 	@Transactional
 	@CacheEvict(value = "reviews", key = "'store:' + #storeId + ':reviews'")
@@ -71,7 +72,13 @@ public class ReviewService {
 			.order(order)
 			.build();
 
-		return reviewRepository.save(review);
+		reviewRepository.save(review);
+
+		// storeDetails 캐시 무효화 메시지 발행
+		String storeDetailsCacheKey = "store:" + storeId + ":details";
+		cacheEvictionPublisher.publish(storeDetailsCacheKey);
+
+		return review;
 	}
 
 	@Cacheable(value = "reviews", key = "'store:' + #storeId + ':reviews'")
@@ -100,6 +107,10 @@ public class ReviewService {
 		}
 
 		review.update(request.getContent(), request.getScore());
+
+		// storeDetails 캐시 무효화 메시지 발행
+		String storeDetailsCacheKey = "store:" + review.getStore().getId() + ":details";
+		cacheEvictionPublisher.publish(storeDetailsCacheKey);
 	}
 
 	@Transactional
@@ -118,5 +129,8 @@ public class ReviewService {
 		}
 
 		review.delete();
+
+		String storeDetailsCacheKey = "store:" + review.getStore().getId() + ":details";
+		cacheEvictionPublisher.publish(storeDetailsCacheKey);
 	}
 }
