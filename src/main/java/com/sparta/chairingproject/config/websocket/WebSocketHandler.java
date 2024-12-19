@@ -1,7 +1,9 @@
 package com.sparta.chairingproject.config.websocket;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,13 +19,18 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class WebSocketHandler extends TextWebSocketHandler {
 	private static final ConcurrentHashMap<Long, WebSocketSession> CLIENTS = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<Long, List<Long>> STORE_CLIENTS = new ConcurrentHashMap<>();
 
 	@Override
 	public void afterConnectionEstablished(WebSocketSession session) {
 		// WebSocket 연결 시 memberId 추출
 		Long memberId = extractMemberIdFromSession(session);
+		Long storeId = extractStoreIdFromSession(session);
 		if (memberId != null) {
 			addClient(memberId, session);
+			if (storeId != null) {
+				STORE_CLIENTS.computeIfAbsent(storeId, k -> new ArrayList<>()).add(memberId);
+			}
 			System.out.println("WebSocket 연결 성공: memberId=" + memberId + ", 세션 ID=" + session.getId());
 		} else {
 			System.out.println("WebSocket 연결 실패: memberId가 전달되지 않음");
@@ -39,6 +46,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 	public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
 		// 연결 종료 시 세션 제거
 		CLIENTS.entrySet().removeIf(entry -> entry.getValue().equals(session));
+		STORE_CLIENTS.values().forEach(list -> list.removeIf(memberId -> CLIENTS.get(memberId) == null));
 		System.out.println("WebSocket 연결 종료: 세션 ID = " + session.getId());
 	}
 
@@ -62,26 +70,32 @@ public class WebSocketHandler extends TextWebSocketHandler {
 		}
 	}
 
-	private Long extractMemberIdFromSession(WebSocketSession session) {
-		// WebSocket URL에서 memberId 추출
-		Map<String, String> params = parseQueryParams(session.getUri().getQuery());
-		if (params.containsKey("memberId")) {
-			return Long.valueOf(params.get("memberId"));
+	public void broadcastMessageToStore(Long storeId, String message) {
+		List<Long> memberIds = STORE_CLIENTS.getOrDefault(storeId, new ArrayList<>());
+		for (Long memberId : memberIds) {
+			sendMessageToUser(memberId, message);
 		}
-		return null;
 	}
 
-	private Map<String, String> parseQueryParams(String query) {
-		Map<String, String> params = new HashMap<>();
-		if (query != null && !query.isEmpty()) {
-			String[] pairs = query.split("&");
-			for (String pair : pairs) {
-				String[] keyValue = pair.split("=");
-				if (keyValue.length == 2) {
-					params.put(keyValue[0], keyValue[1]);
-				}
+	private Long extractMemberIdFromSession(WebSocketSession session) {
+		return extractQueryParam(session, "memberId");
+	}
+
+	private Long extractStoreIdFromSession(WebSocketSession session) {
+		return extractQueryParam(session, "storeId");
+	}
+
+	private Long extractQueryParam(WebSocketSession session, String param) {
+		String query = session.getUri().getQuery();
+		if (query == null)
+			return null;
+
+		for (String pair : query.split("&")) {
+			String[] keyValue = pair.split("=");
+			if (keyValue.length == 2 && keyValue[0].equals(param)) {
+				return Long.valueOf(keyValue[1]);
 			}
 		}
-		return params;
+		return null;
 	}
 }

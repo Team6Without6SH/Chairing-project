@@ -27,4 +27,14 @@ public class OrderStatusPublisher {
 			throw new RuntimeException("메시지 발행 실패", e);
 		}
 	}
+
+	public void publishStoreStatus(Long storeId, String message) {
+		String channel = "store-waiting-status:" + storeId;
+		redisTemplate.convertAndSend(channel, message);
+	}
+
+	public void publishMemberStatus(Long memberId, String message) {
+		String channel = "member-status:" + memberId;
+		redisTemplate.convertAndSend(channel, message);
+	}
 }
