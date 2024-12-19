@@ -1,10 +1,17 @@
 package com.sparta.chairingproject.domain.fcm.sevice;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,11 +25,39 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.sparta.chairingproject.domain.fcm.dto.response.FcmMessageResponse;
+import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.fcm.dto.request.FcmMessageRequest;
+import com.sparta.chairingproject.domain.fcm.dto.response.FcmMessageResponse;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
+@RequiredArgsConstructor
 public class FcmServiceImpl implements FcmService {
+
+	private final RedisTemplate<String, String> redisTemplate;
+
+	/**
+	 * FCM 전송 정보를 기반으로 메시지를 구성합니다. (Object -> String)
+	 *
+	 * @param req FcmSendDto
+	 * @return String
+	 */
+	private String makeMessage(FcmMessageRequest req) throws JsonProcessingException {
+		ObjectMapper om = new ObjectMapper();
+		FcmMessageResponse fcmMessageResponse = FcmMessageResponse.builder()
+			.message(FcmMessageResponse.Message.builder()
+				.token(req.getToken())
+				.notification(FcmMessageResponse.Notification.builder()
+					.title(req.getTitle())
+					.body(req.getBody())
+					.image(null)
+					.build()
+				).build()).validateOnly(false).build();
+
+		return om.writeValueAsString(fcmMessageResponse);
+	}
 
 	/**
 	 * 푸시 메시지 처리를 수행하는 비즈니스 로직
@@ -80,25 +115,65 @@ public class FcmServiceImpl implements FcmService {
 		return tokenValue;
 	}
 
+	public void updateAccessToken(Long userId, String fcmToken) {
+		// 현재 시간 + TTL로 만료 시간 계산
+		long ttlInSeconds = 60 * 60 * 24 * 30; // 한 달
+		long expirationTimestamp = System.currentTimeMillis() / 1000 + ttlInSeconds;
 
-	/**
-	 * FCM 전송 정보를 기반으로 메시지를 구성합니다. (Object -> String)
-	 *
-	 * @param req FcmSendDto
-	 * @return String
-	 */
-	private String makeMessage(FcmMessageRequest req) throws JsonProcessingException {
-		ObjectMapper om = new ObjectMapper();
-		FcmMessageResponse fcmMessageResponse = FcmMessageResponse.builder()
-			.message(FcmMessageResponse.Message.builder()
-				.token(req.getToken())
-				.notification(FcmMessageResponse.Notification.builder()
-					.title(req.getTitle())
-					.body(req.getBody())
-					.image(null)
-					.build()
-				).build()).validateOnly(false).build();
+		String key = "fcm:user:" + userId;
 
-		return om.writeValueAsString(fcmMessageResponse);
+		// ZSET에 FCM 토큰 저장 (TTL을 스코어로 설정)
+		redisTemplate.opsForZSet().add(key, fcmToken, expirationTimestamp);
+
+		// 전체 Key의 TTL 설정 (최신 만료 시간 기준으로 관리)
+		redisTemplate.expire(key, ttlInSeconds, TimeUnit.SECONDS);
+
+	}
+
+	public Set<String> getValidTokens(Long userId) {
+		String key = "fcm:user:" + userId;
+
+		if (Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
+			throw new GlobalException(NOT_FOUND_FCM_TOKEN);
+		}
+
+		long currentTimestamp = System.currentTimeMillis() / 1000;
+
+		// ZSET에서 만료되지 않은 토큰 조회
+		return redisTemplate.opsForZSet().rangeByScore(key, currentTimestamp, Double.MAX_VALUE);
+	}
+
+	public void deleteTokens(Long userId, String fcmToken) {
+		String key = "fcm:user:" + userId;
+
+		redisTemplate.opsForZSet().remove(key, fcmToken);
+	}
+
+	public void cleanExpiredTokens(String userId) {
+		long currentTimestamp = System.currentTimeMillis() / 1000;
+
+		String key = "fcm:user:" + userId;
+
+		// ZSET에서 만료된 토큰 제거
+		redisTemplate.opsForZSet().removeRangeByScore(key, 0, currentTimestamp);
+	}
+
+	public void sendMessageToUser(Long userId, String title, String body) {
+		Set<String> validTokens = getValidTokens(userId);
+
+		// 유효한 모든 토큰에 메시지 발송
+		for (String fcmToken : validTokens) {
+			FcmMessageRequest fcmMessageRequest = FcmMessageRequest.builder()
+				.token(fcmToken)
+				.title(title)
+				.body(body)
+				.build();
+
+			try {
+				sendMessageTo(fcmMessageRequest); // 기존 메시지 전송 메서드 호출
+			} catch (IOException e) {
+				throw new GlobalException(FCM_MESSAGE_SEND_FAILURE);
+			}
+		}
 	}
 }

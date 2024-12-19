@@ -3,6 +3,7 @@ package com.sparta.chairingproject.config.filter;
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.DELETED_USER;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.domain.fcm.sevice.FcmServiceImpl;
 import com.sparta.chairingproject.domain.member.entity.Member;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
 import java.io.IOException;
@@ -29,11 +30,15 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final JwtUtil jwtUtil;
+    private final FcmServiceImpl fcmService;
+
     private final MemberRepository memberRepository;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, MemberRepository memberRepository) {
+
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, MemberRepository memberRepository, FcmServiceImpl fcmService) {
         this.jwtUtil = jwtUtil;
         this.memberRepository = memberRepository;
+        this.fcmService = fcmService;
         setFilterProcessesUrl("/auth/signin");
     }
 
@@ -52,14 +57,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             if (member.getDeletedAt() != null) {
                 throw new GlobalException(DELETED_USER);
             }
-            return getAuthenticationManager().authenticate(
+
+            UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(
                     requestDto.getEmail(),
                     requestDto.getPassword(),
                     null
-                )
-            );
+                );
 
+            authToken.setDetails(requestDto.getFcmToken());
+
+            return getAuthenticationManager().authenticate(authToken);
 
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -80,6 +88,16 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             ((UserDetailsImpl) authResult.getPrincipal()).getMember().getEmail(),
             role);
         jwtUtil.addJwtToCookie(token, response);
+
+		// FCM 토큰 처리
+		String fcmToken = (String) authResult.getDetails();
+
+		if (fcmToken != null && !fcmToken.isEmpty()) {
+			fcmService.updateAccessToken(
+				((UserDetailsImpl) authResult.getPrincipal()).getMember().getId(),
+				fcmToken
+			);
+		}
     }
 
     @Override

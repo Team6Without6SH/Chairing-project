@@ -4,6 +4,9 @@ import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 
+import lombok.Getter;
+
+@Getter
 public enum ReservationStatus {
 	PENDING("대기 중"),
 	APPROVED("승인됨"),
