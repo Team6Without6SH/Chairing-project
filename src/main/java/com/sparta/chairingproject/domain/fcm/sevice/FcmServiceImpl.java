@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
+import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.fcm.dto.request.FcmMessageRequest;
 import com.sparta.chairingproject.domain.fcm.dto.response.FcmMessageResponse;
 
@@ -154,5 +155,24 @@ public class FcmServiceImpl implements FcmService {
 
 		// ZSET에서 만료된 토큰 제거
 		redisTemplate.opsForZSet().removeRangeByScore(key, 0, currentTimestamp);
+	}
+
+	public void sendMessageToUser(Long userId, String title, String body) {
+		Set<String> validTokens = getValidTokens(userId);
+
+		// 유효한 모든 토큰에 메시지 발송
+		for (String fcmToken : validTokens) {
+			FcmMessageRequest fcmMessageRequest = FcmMessageRequest.builder()
+				.token(fcmToken)
+				.title(title)
+				.body(body)
+				.build();
+
+			try {
+				sendMessageTo(fcmMessageRequest); // 기존 메시지 전송 메서드 호출
+			} catch (IOException e) {
+				throw new GlobalException(FCM_MESSAGE_SEND_FAILURE);
+			}
+		}
 	}
 }
