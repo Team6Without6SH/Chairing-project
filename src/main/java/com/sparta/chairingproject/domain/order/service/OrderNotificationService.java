@@ -25,7 +25,7 @@ public class OrderNotificationService {
 	// 실패 메세지 이곳에 저장
 	private final Queue<NotificationMessage> retryQueue = new ConcurrentLinkedQueue<>();
 
-	public void sendNotification(Long memberId, String message) {
+	public void sendNotification(Long storeId, String message) {
 		String messageId = extractMessageId(message);
 		if (processedMessages.getIfPresent(messageId) != null) {
 			System.out.println("중복 메세지 필터링: Message Id: " + messageId);
@@ -34,22 +34,24 @@ public class OrderNotificationService {
 
 		try {
 			// WebSocket 에 메세지 전송
-			webSocketHandler.sendMessageToUser(memberId, message);
-
+			webSocketHandler.broadcastMessageToStore(storeId, message);
 			// 메세지 ID 를 Caffeine Cache 로 각 메세지마다의 TTL 을 걸수있음
 			processedMessages.put(messageId, true);
-			System.out.println("WebSocket 송신: memberId= " + memberId + ", message= " + message);
+			System.out.println("WebSocket 송신: storeId= " + storeId + ", message= " + message);
 		} catch (Exception e) {
 			System.out.println("WebSocket 송신 실패, 재시도 큐에 추가: " + message);
-			retryQueue.add(new NotificationMessage(memberId, message, messageId));
+			retryQueue.add(new NotificationMessage(storeId, message, messageId));
 		}
+	}
+
+	public void sendNotificationToMember(Long memberId, String message) {
+		webSocketHandler.sendMessageToUser(memberId, message);
 	}
 
 	@Scheduled(fixedRate = 10000) // 10초마다 메서드 실행
 	public void retryFailedMessages() {
 		while (!retryQueue.isEmpty()) {
 			NotificationMessage message = retryQueue.poll();
-
 			if (processedMessages.getIfPresent(message.getMessageId()) != null) {
 				System.out.println("재시도. 중복 메세지 필터링 Message ID: " + message.getMessageId());
 				continue;
@@ -58,7 +60,6 @@ public class OrderNotificationService {
 			try {
 				// 메세지 재전송
 				webSocketHandler.sendMessageToUser(message.getMemberId(), message.getMessage());
-
 				// 성공한 메세지 저장
 				processedMessages.put(message.getMessageId(), true);
 				System.out.println("재시도 메세지 전송 성공 Message ID: " + message.getMessageId());

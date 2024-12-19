@@ -11,7 +11,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.transaction.AfterCommitAction;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
@@ -46,6 +45,7 @@ public class OrderService {
 	private final StoreRepository storeRepository;
 	private final OrderStatusPublisher orderStatusPublisher;
 	private final RedisSubscriberService redisSubscriberService;
+	private final WaitingQueueService waitingQueueService;
 
 	@Transactional
 	public OrderResponse createOrder(Long storeId, Member authMember,
@@ -68,31 +68,35 @@ public class OrderService {
 			}
 		}
 
-		OrderStatus orderStatus = OrderStatus.WAITING;
+		// 초기 주문 상태 설정
+		int waitingOrders = waitingQueueService.getWaitingQueue(storeId).size();
+		int inProgressOrders = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS);
+		OrderStatus orderStatus = (waitingOrders == 0 && inProgressOrders < store.getTableCount())
+			? OrderStatus.ADMISSION
+			: OrderStatus.WAITING;
 
-		// 가게에 여유 테이블이 있는 경우 바로 입장 가능하면 ADMISSION 상태로 변경
-		int inProgressOrders = orderRepository.countByStoreIdAndStatus(storeId,
-			OrderStatus.IN_PROGRESS);
-		if (inProgressOrders < store.getTableCount()) {
-			orderStatus = OrderStatus.ADMISSION; // 여유 테이블이 있으면 바로 입장
-		}
-
-		Order order = Order.createOf(
-			authMember,
-			store,
-			menus,
-			orderStatus,
-			totalPrice
-		);
+		Order order = Order.createOf(authMember, store, menus, orderStatus, totalPrice);
 		orderRepository.save(order);
 
-		// Redis 채널 구독
-		redisSubscriberService.subscribeToChannel(authMember.getId());
+		if (orderStatus.equals(OrderStatus.WAITING)) {
+			waitingQueueService.addToWaitingQueue(storeId, authMember.getId());
+		}
 
 		AfterCommitAction.register(() -> {
-			// Redis 채널 메시지 발행
-			String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
-			orderStatusPublisher.publishOrderStatus(authMember.getId(), order.getId(), message);
+			// Redis 채널 구독
+			redisSubscriberService.subscribeToChannel(storeId);
+			redisSubscriberService.subscribeToMemberChannel(authMember.getId());
+
+			// 개인 메시지 발행 (대기 순서 메시지는 개인 채널로만 전송)
+			if (orderStatus == OrderStatus.WAITING) {
+				List<String> waitingQueue = waitingQueueService.getWaitingQueue(storeId);
+				int userPosition = waitingQueue.indexOf(String.valueOf(authMember.getId())) + 1;
+				String personalMessage = "주문이 생성되었습니다. 현재 대기 순서: " + userPosition;
+				orderStatusPublisher.publishMemberStatus(authMember.getId(), personalMessage);
+			} else {
+				String personalMessage = "입장 처리되었습니다.";
+				orderStatusPublisher.publishMemberStatus(authMember.getId(), personalMessage);
+			}
 		});
 
 		int waitingTeams = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING);
@@ -139,29 +143,34 @@ public class OrderService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		int inProgressOrders = orderRepository.countByStoreIdAndStatus(storeId,
-			OrderStatus.IN_PROGRESS);
+		int inProgressOrders = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS);
 
 		// 처음 웨이팅 걸었을때 가게 상황에 맞춰 바로 입장(ADMISSION) or 웨이팅 으로 설정
 		OrderStatus orderStatus = (inProgressOrders < store.getTableCount())
 			? OrderStatus.ADMISSION : OrderStatus.WAITING;
 
-		Order order = Order.createOf(
-			member,
-			store,
-			Collections.emptyList(),
-			orderStatus,
-			0
-		);
+		Order order = Order.createOf(member, store, Collections.emptyList(), orderStatus, 0);
 		orderRepository.save(order);
 
-		// Redis 채널 구독
-		redisSubscriberService.subscribeToChannel(member.getId());
+		if (orderStatus.equals(OrderStatus.WAITING)) {
+			waitingQueueService.addToWaitingQueue(storeId, member.getId());
+		}
 
 		AfterCommitAction.register(() -> {
-			// Redis 채널 메시지 발행
-			String message = "고객님의 주문 (주문 ID: " + order.getId() + ") 이 요청되었습니다.";
-			orderStatusPublisher.publishOrderStatus(member.getId(), order.getId(), message);
+			// Redis 채널 구독
+			redisSubscriberService.subscribeToChannel(storeId);
+			redisSubscriberService.subscribeToMemberChannel(member.getId());
+
+			// 개인 메시지 발행 (대기 순서 메시지는 개인 채널로만 전송)
+			if (orderStatus == OrderStatus.WAITING) {
+				List<String> waitingQueue = waitingQueueService.getWaitingQueue(storeId);
+				int userPosition = waitingQueue.indexOf(String.valueOf(member.getId())) + 1;
+				String personalMessage = "주문이 생성되었습니다. 현재 대기 순서: " + userPosition;
+				orderStatusPublisher.publishMemberStatus(member.getId(), personalMessage);
+			} else {
+				String personalMessage = "입장 처리되었습니다.";
+				orderStatusPublisher.publishMemberStatus(member.getId(), personalMessage);
+			}
 		});
 
 		int waitingTeams = orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.WAITING);
@@ -175,7 +184,7 @@ public class OrderService {
 
 	@Transactional
 	public OrderStatusUpdateResponse updateOrderStatus(Long storeId, Long orderId, OrderStatusUpdateRequest request,
-		Member member) throws JsonProcessingException {
+		Member member) {
 		Store store = storeRepository.findById(storeId) //가게 검증
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 		if (!store.getOwner().getId().equals(member.getId())) {
@@ -213,9 +222,20 @@ public class OrderService {
 		orderRepository.save(order);
 
 		AfterCommitAction.register(() -> {
-			// Redis 로 메시지 발행
-			String message = "주문 상태가 업데이트되었습니다: " + newStatus.name();
-			orderStatusPublisher.publishOrderStatus(order.getMember().getId(), order.getId(), message);
+			if (newStatus == OrderStatus.ADMISSION || newStatus == OrderStatus.CANCELLED) {
+				waitingQueueService.removeFromWaitingQueue(storeId, order.getMember().getId());
+				String personalMessage = newStatus == OrderStatus.ADMISSION
+					? "입장 처리되었습니다."
+					: "주문이 취소되었습니다.";
+				orderStatusPublisher.publishMemberStatus(order.getMember().getId(), personalMessage);
+			}
+
+			List<String> queue = waitingQueueService.getWaitingQueue(storeId);
+			for (int i = 0; i < queue.size(); i++) {
+				Long memberId = Long.valueOf(queue.get(i));
+				String queueMessage = "현재 대기 순서: " + (i + 1) + ", 총 대기: " + queue.size();
+				orderStatusPublisher.publishMemberStatus(memberId, queueMessage);
+			}
 		});
 
 		return OrderStatusUpdateResponse.builder()

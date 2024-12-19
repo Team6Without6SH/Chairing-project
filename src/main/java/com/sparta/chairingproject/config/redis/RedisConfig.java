@@ -1,9 +1,13 @@
 package com.sparta.chairingproject.config.redis;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -15,15 +19,15 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @EnableRedisRepositories
 public class RedisConfig {
 
-	@Value("${spring.data.redis.host}")
-	private String host;
-
-	@Value("${spring.data.redis.port}")
-	private int port;
-
 	@Bean
 	public RedisConnectionFactory redisConnectionFactory() {
-		return new LettuceConnectionFactory(host, port);
+		LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+			.commandTimeout(Duration.ofSeconds(2))
+			.shutdownTimeout(Duration.ofMillis(100))
+			.build();
+
+		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
+		return new LettuceConnectionFactory(redisConfig, clientConfig);
 	}
 
 	@Bean
@@ -32,16 +36,6 @@ public class RedisConfig {
 		template.setConnectionFactory(redisConnectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-		return template;
-	}
-
-	// Todo: 이부분은 RedisTemplate 충돌이 일어날까봐 일단은 따로 분리해서 구현할 계획
-	@Bean
-	public RedisTemplate<String, Object> redisTemplate2(RedisConnectionFactory connectionFactory) {
-		RedisTemplate<String, Object> template = new RedisTemplate<>();
-		template.setConnectionFactory(connectionFactory);
-		template.setKeySerializer(new StringRedisSerializer());
-		template.setValueSerializer(new StringRedisSerializer());
 		return template;
 	}
 
