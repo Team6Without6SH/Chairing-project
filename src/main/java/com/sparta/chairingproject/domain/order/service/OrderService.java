@@ -75,13 +75,7 @@ public class OrderService {
 			? OrderStatus.ADMISSION
 			: OrderStatus.WAITING;
 
-		Order order = Order.createOf(
-			authMember,
-			store,
-			menus,
-			orderStatus,
-			totalPrice
-		);
+		Order order = Order.createOf(authMember, store, menus, orderStatus, totalPrice);
 		orderRepository.save(order);
 
 		if (orderStatus.equals(OrderStatus.WAITING)) {
@@ -155,13 +149,7 @@ public class OrderService {
 		OrderStatus orderStatus = (inProgressOrders < store.getTableCount())
 			? OrderStatus.ADMISSION : OrderStatus.WAITING;
 
-		Order order = Order.createOf(
-			member,
-			store,
-			Collections.emptyList(),
-			orderStatus,
-			0
-		);
+		Order order = Order.createOf(member, store, Collections.emptyList(), orderStatus, 0);
 		orderRepository.save(order);
 
 		if (orderStatus.equals(OrderStatus.WAITING)) {
@@ -246,7 +234,7 @@ public class OrderService {
 			for (int i = 0; i < queue.size(); i++) {
 				Long memberId = Long.valueOf(queue.get(i));
 				String queueMessage = "현재 대기 순서: " + (i + 1) + ", 총 대기: " + queue.size();
-				orderStatusPublisher.publishStoreStatus(storeId, queueMessage);
+				orderStatusPublisher.publishMemberStatus(memberId, queueMessage);
 			}
 		});
 

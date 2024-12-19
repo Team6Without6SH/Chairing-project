@@ -14,7 +14,7 @@ public class WaitingQueueService {
 
 	public void addToWaitingQueue(Long storeId, Long memberId) {
 		String queueKey = "store:" + storeId + ":waiting";
-		redisTemplate.opsForList().leftPush(queueKey, String.valueOf(memberId));
+		redisTemplate.opsForList().rightPush(queueKey, String.valueOf(memberId));
 	}
 
 	public void removeFromWaitingQueue(Long storeId, Long memberId) {

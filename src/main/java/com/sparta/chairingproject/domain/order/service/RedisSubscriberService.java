@@ -15,7 +15,7 @@ public class RedisSubscriberService {
 	private final OrderNotificationService orderNotificationService;
 
 	public void subscribeToChannel(Long storeId) {
-		String channel = "order-status:store:" + storeId;
+		String channel = "store-waiting-status:" + storeId;
 		MessageListener listener = (message, pattern) -> {
 			String payload = new String(message.getBody());
 			System.out.println("Redis 메세지 수신: " + payload);
