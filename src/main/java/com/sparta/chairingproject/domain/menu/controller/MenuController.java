@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
@@ -26,6 +27,7 @@ import com.sparta.chairingproject.domain.menu.service.MenuService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/owners/stores/{storeId}")
@@ -38,10 +40,12 @@ public class MenuController {
 	@PostMapping("/menus")
 	public ResponseEntity<MenuResponse> createMenu(
 		@PathVariable Long storeId,
-		@Valid @RequestBody MenuRequest request,
+		@Valid @RequestPart(value = "request") MenuRequest request,
+		@RequestPart(value = "menuImage", required = false) MultipartFile file,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
-		return ResponseEntity.ok(menuService.createMenu(storeId, request, authMember.getMember()));
+		return ResponseEntity.ok(
+			menuService.createMenu(storeId, request, authMember.getMember(), file));
 	}
 
 	@Secured("ROLE_OWNER")
@@ -49,10 +53,12 @@ public class MenuController {
 	public ResponseEntity<MenuUpdateResponse> updateMenu(
 		@PathVariable Long storeId,
 		@PathVariable Long menuId,
-		@RequestBody MenuUpdateRequest request,
+		@Valid @RequestPart(value = "request") MenuUpdateRequest request,
+		@RequestPart(value = "menuImage", required = false) MultipartFile file,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
-		return ResponseEntity.ok(menuService.updateMenu(storeId, menuId, request, authMember.getMember()));
+		return ResponseEntity.ok(
+			menuService.updateMenu(storeId, menuId, request, authMember.getMember(), file));
 	}
 
 	@Secured("ROLE_ADMIN")
@@ -63,7 +69,8 @@ public class MenuController {
 		@AuthenticationPrincipal UserDetailsImpl authMember,
 		@RequestBody RequestDto request
 	) {
-		return ResponseEntity.ok(menuService.deleteMenu(storeId, menuId, authMember.getMember(), request));
+		return ResponseEntity.ok(
+			menuService.deleteMenu(storeId, menuId, authMember.getMember(), request));
 	}
 
 	@Secured("ROLE_OWNER")
@@ -72,7 +79,8 @@ public class MenuController {
 		@PathVariable Long storeId,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
-		List<MenuDetailResponse> menus = menuService.getAllMenusByStore(storeId, authMember.getMember());
+		List<MenuDetailResponse> menus = menuService.getAllMenusByStore(storeId,
+			authMember.getMember());
 		return ResponseEntity.ok(menus);
 	}
 }
