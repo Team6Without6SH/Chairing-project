@@ -10,6 +10,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -28,14 +30,13 @@ import com.sparta.chairingproject.config.exception.enums.ExceptionCode;
 import com.sparta.chairingproject.domain.fcm.dto.request.FcmMessageRequest;
 import com.sparta.chairingproject.domain.fcm.dto.response.FcmMessageResponse;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class FcmServiceImpl implements FcmService {
 
 	private final RedisTemplate<String, String> redisTemplate;
-
-	public FcmServiceImpl() {
-		redisTemplate = new RedisTemplate<>();
-	}
 
 	/**
 	 * FCM 전송 정보를 기반으로 메시지를 구성합니다. (Object -> String)
@@ -132,7 +133,7 @@ public class FcmServiceImpl implements FcmService {
 	public Set<String> getValidTokens(Long userId) {
 		String key = "fcm:user:" + userId;
 
-		if (!Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
+		if (Boolean.FALSE.equals(redisTemplate.hasKey(key))) {
 			throw new GlobalException(NOT_FOUND_FCM_TOKEN);
 		}
 

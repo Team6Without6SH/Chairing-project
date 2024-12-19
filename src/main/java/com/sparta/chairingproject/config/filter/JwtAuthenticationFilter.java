@@ -35,10 +35,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final MemberRepository memberRepository;
 
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, MemberRepository memberRepository) {
+    public JwtAuthenticationFilter(JwtUtil jwtUtil, MemberRepository memberRepository, FcmServiceImpl fcmService) {
         this.jwtUtil = jwtUtil;
         this.memberRepository = memberRepository;
-        this.fcmService = new FcmServiceImpl();
+        this.fcmService = fcmService;
         setFilterProcessesUrl("/auth/signin");
     }
 
