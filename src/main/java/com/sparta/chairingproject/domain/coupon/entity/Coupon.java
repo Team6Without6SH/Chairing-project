@@ -1,5 +1,10 @@
 package com.sparta.chairingproject.domain.coupon.entity;
 
+import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.domain.Issuance.entity.Issuance;
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
@@ -11,19 +16,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.COUPON_OUT_OF_STOCK;
 
 @Getter
 @Entity
@@ -49,6 +46,8 @@ public class Coupon extends Timestamped {
 	@Builder.Default
 	private List<Issuance> issuances = new ArrayList<>();
 
+	@Version
+	private Long version; // 낙관적 락을 위한 버전 컬럼
 
 	public void validateQuantity() {
 		if (this.quantity <= 0) {
