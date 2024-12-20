@@ -32,6 +32,7 @@ public enum ExceptionCode {
 	NOT_FOUND_STORE(HttpStatus.NOT_FOUND, "해당 가게가 없습니다"),
 	CANNOT_EXCEED_STORE_LIMIT(HttpStatus.FORBIDDEN, "최대 가게 3개만 소유 가능합니다."),
 	UNAUTHORIZED_STORE_ACCESS(HttpStatus.FORBIDDEN, "해당 가게의 접근 권한이 없습니다."),
+	NOT_FOUND_DATA(HttpStatus.NOT_FOUND, "가게 데이터를 찾을 수 없습니다."),
 
 	/* --- 예약 --- */
 	RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 예약을 찾을 수 없습니다."),

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,13 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 	@Transactional
 	@Query("UPDATE Store s SET s.requestStatus = 'DELETED', s.deletedAt = :deletedAt, s.status = 'CLOSED' WHERE s.id = :storeId")
 	void softDeleteById(@Param("storeId") Long storeId, @Param("deletedAt") LocalDateTime deletedAt);
+
+	@Query("""
+		    SELECT s
+		    FROM Store s
+		    LEFT JOIN s.orders o
+		    GROUP BY s.id
+		    ORDER BY COUNT(o) DESC
+		""")
+	List<Store> findTopStoresByOrderCount(Pageable pageable);
 }

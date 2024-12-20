@@ -143,4 +143,14 @@ public class Store extends Timestamped {
 	public void storeOpenClose(StoreStatus status) {
 		this.status = status;
 	}
+
+	public double calculateAverageScore() {
+		if (reviews == null || reviews.isEmpty()) {
+			return 0.0; // 리뷰가 없을 경우 기본값
+		}
+		return reviews.stream()
+			.mapToDouble(Review::getScore)
+			.average()
+			.orElse(0.0);
+	}
 }
