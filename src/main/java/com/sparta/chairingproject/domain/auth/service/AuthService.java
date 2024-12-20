@@ -31,8 +31,10 @@ public class AuthService {
 			throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
 		}
 		// 기본 프로필이미지 정해지면 filename에 넣고 주석 삭제예정
-
-		String fileName = s3Uploader.upload(file, "userProfile/");
+		String fileName = "userProfile/";
+		if (!file.isEmpty()) {
+			fileName = s3Uploader.upload(file, "userProfile/");
+		}
 
 		String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
 
