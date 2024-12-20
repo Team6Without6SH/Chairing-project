@@ -1,4 +1,4 @@
-package com.sparta.chairingproject.config.redissonConfig;
+package com.sparta.chairingproject.config.redis;
 
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;

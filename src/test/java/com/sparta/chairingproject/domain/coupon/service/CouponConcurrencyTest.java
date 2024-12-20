@@ -66,22 +66,22 @@ public class CouponConcurrencyTest {
 	}
 
 	@Test
-	@DisplayName("Redis 락 동시성 제어 테스트")
+	@DisplayName("Redis 락 동시성 제어 & 순서 제어 테스트")
 	void redisLockConcurrencyTest() throws InterruptedException {
 		for (int i = 0; i < threadCount; i++) {
 			int threadId = i;
 			executorService.submit(() -> {
 				try {
-					System.out.println("Thread 시작: " + threadId);
+					// System.out.println("Thread 시작: " + Thread.currentThread().getId());
 					Member threadMember = new Member("Test User" + threadId, "test" + threadId + "@example.com",
 						"password", MemberRole.USER);
 					memberRepository.save(threadMember);
 					couponService.issueCoupon(coupon.getId(), new RequestDto(threadMember.getId()), threadMember);
 				} catch (GlobalException e) {
-					System.out.println("Thread 예외: " + threadId + ", " + e.getMessage());
+					System.out.println("Thread 예외: " + Thread.currentThread().getId() + ", " + e.getMessage());
 				} finally {
 					latch.countDown();
-					System.out.println("Thread 완료: " + threadId);
+					// System.out.println("Thread 완료: " + Thread.currentThread().getId());
 				}
 			});
 		}
@@ -96,5 +96,4 @@ public class CouponConcurrencyTest {
 		assertEquals(0, updatedCoupon.getQuantity());
 		assertEquals(100, issuanceRepository.count());
 	}
-
 }
