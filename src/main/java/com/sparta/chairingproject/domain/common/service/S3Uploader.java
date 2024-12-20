@@ -36,10 +36,11 @@ public class S3Uploader {
 		return null;
 	}
 
-	public String update(String image, MultipartFile file, String s) {
+	public String update(String image, MultipartFile file, String domain) {
 		if (image != null) {
 			amazonS3Client.deleteObject(bucket, image);
 		}
-		return upload(file, "menu/");
+		return upload(file, domain);
 	}
+
 }
