@@ -110,6 +110,16 @@ public enum ExceptionCode {
 	//토큰
 	NOT_VALID_TOKEN(HttpStatus.UNAUTHORIZED, "인증 토큰이 잘못되었거나 누락되었습니다"),
 
+	//----------FCM----------
+	INVALID_FCM_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 FCM 토큰입니다"),
+	EXPIRED_FCM_TOKEN(HttpStatus.BAD_REQUEST, "만료된 FCM 토큰입니다"),
+	NOT_FOUND_FCM_TOKEN(HttpStatus.NOT_FOUND, "FCM 토큰을 찾을 수 없습니다"),
+	DUPLICATE_FCM_TOKEN(HttpStatus.CONFLICT, "이미 등록된 FCM 토큰입니다"),
+	FAILED_TO_REGISTER_FCM_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 토큰 등록에 실패했습니다"),
+	FAILED_TO_DELETE_FCM_TOKEN(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 토큰 삭제에 실패했습니다"),
+	FAILED_TO_CLEAN_EXPIRED_TOKENS(HttpStatus.INTERNAL_SERVER_ERROR, "만료된 FCM 토큰 정리에 실패했습니다"),
+	FCM_MESSAGE_SEND_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 메시지 전송에 실패했습니다"),
+
 	HAS_NOT_COOKIE(HttpStatus.BAD_REQUEST, "Request has not cookie"),
 	NOT_SUPPORT_ENCODING_COOKIE(HttpStatus.BAD_REQUEST, "Not support encoding cookie"),
 	HAS_NOT_TOKEN(HttpStatus.BAD_REQUEST, "Request has not token"),
