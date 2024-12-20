@@ -135,7 +135,7 @@ public class MemberService {
 		Member member = memberRepository.findById(authMember.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
-		String fileName = s3Uploader.update(member.getImage(), file);
+		String fileName = s3Uploader.update(member.getImage(), file, "userProfile/");
 
 		member.updateImage(fileName);
 	}

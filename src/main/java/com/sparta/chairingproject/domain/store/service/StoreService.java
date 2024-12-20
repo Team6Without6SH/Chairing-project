@@ -2,14 +2,9 @@ package com.sparta.chairingproject.domain.store.service;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sparta.chairingproject.domain.common.service.S3Uploader;
-import java.io.IOException;
 import java.util.List;
 
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -66,7 +61,7 @@ public class StoreService {
 		}
 
 		// 이미지 업로드 로직 추가 필요 (예: S3)
-		String fileName = s3Uploader.upload(file);
+		String fileName = s3Uploader.upload(file, "store/");
 
 		Store store = new Store( // request 에 맞게 생성자 추가하고 -> pending 값을 여기다 담아두고 ->save  하기 ->
 			request.getName(), request.getAddress(), fileName, request.getDescription(), owner);
@@ -125,7 +120,7 @@ public class StoreService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
-		String fileName = s3Uploader.update(store.getImage(), file);
+		String fileName = s3Uploader.update(store.getImage(), file, "store/");
 		req.setImage(fileName);
 		store.updateStore(req);
 		storeRepository.save(store);

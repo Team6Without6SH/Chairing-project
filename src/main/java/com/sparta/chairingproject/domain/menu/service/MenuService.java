@@ -2,14 +2,9 @@ package com.sparta.chairingproject.domain.menu.service;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sparta.chairingproject.domain.common.service.S3Uploader;
-import java.io.IOException;
 import java.util.List;
 
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +48,7 @@ public class MenuService {
 			throw new GlobalException(DUPLICATED_MENU);
 		}
 
-		String fileName = s3Uploader.upload(file);
+		String fileName = s3Uploader.upload(file, "menu/");
 
 		Menu menu = Menu.createOf(request.getName(), request.getPrice(), fileName, store);
 		menuRepository.save(menu);
@@ -81,7 +76,7 @@ public class MenuService {
 			menu.updateStatus(request.getStatus());
 		}
 
-		String fileName = s3Uploader.update(menu.getImage(), file);
+		String fileName = s3Uploader.update(menu.getImage(), file, "menu/");
 		menu.updateImage(fileName);
 		return MenuUpdateResponse.from(menu);
 	}

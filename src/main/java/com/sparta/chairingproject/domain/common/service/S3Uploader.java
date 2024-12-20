@@ -19,11 +19,11 @@ public class S3Uploader {
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
 
-	public String upload(MultipartFile file) {
+	public String upload(MultipartFile file, String domain) {
 		if (!file.isEmpty()) {
 			try {
 				String uuid = UUID.randomUUID().toString();
-				String fileName = "userProfile/" + file.getOriginalFilename() + "_" + uuid;
+				String fileName = domain + file.getOriginalFilename() + "_" + uuid;
 				ObjectMetadata metadata = new ObjectMetadata();
 				metadata.setContentType(file.getContentType());
 				metadata.setContentLength(file.getSize());
@@ -36,10 +36,10 @@ public class S3Uploader {
 		return null;
 	}
 
-	public String update(String image, MultipartFile file) {
+	public String update(String image, MultipartFile file, String s) {
 		if (image != null) {
 			amazonS3Client.deleteObject(bucket, image);
 		}
-		return upload(file);
+		return upload(file, "menu/");
 	}
 }

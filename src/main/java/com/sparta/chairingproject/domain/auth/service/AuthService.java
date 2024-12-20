@@ -1,11 +1,6 @@
 package com.sparta.chairingproject.domain.auth.service;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.sparta.chairingproject.domain.common.service.S3Uploader;
-import java.io.IOException;
-import java.util.UUID;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +32,7 @@ public class AuthService {
 		}
 		// 기본 프로필이미지 정해지면 filename에 넣고 주석 삭제예정
 
-		String fileName = s3Uploader.upload(file);
+		String fileName = s3Uploader.upload(file, "userProfile/");
 
 		String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
 
