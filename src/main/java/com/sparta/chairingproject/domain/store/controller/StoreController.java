@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
@@ -34,6 +35,7 @@ import com.sparta.chairingproject.domain.store.service.StoreService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,10 +47,11 @@ public class StoreController {
 	@Secured("ROLE_OWNER")
 	@PostMapping("/owners/stores/register")
 	public ResponseEntity<StoreResponse> registerStore(
-		@Valid @RequestBody StoreRequest storeRequest,
+		@Valid @RequestPart(value = "storeRequest") StoreRequest storeRequest,
+		@RequestPart(value = "storeImage", required = false) MultipartFile file,
 		@AuthenticationPrincipal UserDetailsImpl authMember
 	) {
-		StoreResponse response = storeService.registerStore(storeRequest, authMember);
+		StoreResponse response = storeService.registerStore(storeRequest, authMember, file);
 		return ResponseEntity.ok(response);
 	}
 
@@ -67,17 +70,19 @@ public class StoreController {
 		@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDate endDate,
 		@RequestParam(required = false, defaultValue = "2") int days
 	) {
-		return ResponseEntity.ok(orderService.getOrdersByStore(storeId, pageable, startDate, endDate, days));
+		return ResponseEntity.ok(
+			orderService.getOrdersByStore(storeId, pageable, startDate, endDate, days));
 	}
 
 	@Secured("ROLE_OWNER")
 	@PutMapping("/owners/stores/{storeId}")
 	public ResponseEntity<StoreDetailsResponse> updateStore(
 		@PathVariable Long storeId,
-		@Valid @RequestBody UpdateStoreRequest req,
+		@Valid @RequestPart(value = "req") UpdateStoreRequest req,
+		@RequestPart(value = "storeImage", required = false) MultipartFile file,
 		@AuthenticationPrincipal UserDetailsImpl authUser
 	) {
-		return ResponseEntity.ok(storeService.updateStore(storeId, req, authUser));
+		return ResponseEntity.ok(storeService.updateStore(storeId, req, authUser, file));
 	}
 
 	@Secured("ROLE_USER")
