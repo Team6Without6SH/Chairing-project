@@ -20,4 +20,5 @@ public class ChairingProjectApplication {
 		SpringApplication.run(ChairingProjectApplication.class, args);
 	}
 
+	//github actions 테스트용 주석
 }
