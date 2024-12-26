@@ -65,7 +65,7 @@ public class WebSecurityConfig {
 				.requestMatchers("/websocket/**").permitAll()
 				.requestMatchers("/api/v1/fcm/**").permitAll() // fcm 접근 허가
 				.requestMatchers("/actuator/**").permitAll() // 액츄에이터 접근허가
-				.requestMatchers("/member/test").permitAll()
+				.requestMatchers("/members/test").permitAll()
 				.anyRequest().authenticated() // 그 외 모든 요청 인증처리
 		);
 
