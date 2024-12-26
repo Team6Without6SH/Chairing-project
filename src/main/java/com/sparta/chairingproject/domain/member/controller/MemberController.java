@@ -29,6 +29,11 @@ public class MemberController {
 
 	private final MemberService memberService;
 
+	@GetMapping("/test")
+	public ResponseEntity<String> getTest(){
+		return ResponseEntity.ok("Hello World");
+	}
+
 	@GetMapping
 	public ResponseEntity<MemberResponse> getMemberDetails(
 		@AuthenticationPrincipal UserDetailsImpl authMember) {
