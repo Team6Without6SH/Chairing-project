@@ -47,18 +47,3 @@ jobs:
             ./docker-compose.yml
             ./.env
           target: "~"
-
-      - name: SSH Commands to Deploy
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ec2-user
-          key: ${{ secrets.SSH_KEY }}
-          port: 22
-          script_stop: true
-          script: |
-            sudo yum update -y && sudo yum install -y docker docker-compose
-            sudo systemctl start docker
-            cd ~
-            docker-compose down
-            docker-compose up -d
