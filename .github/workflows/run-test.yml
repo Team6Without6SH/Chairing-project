@@ -40,6 +40,9 @@ jobs:
       - name: make executable gradlew
         run: chmod +x ./gradlew
 
+      - name: Install redis-cli
+        run: sudo apt-get update && sudo apt-get install -y redis-tools
+
       - name: Check Redis Run
         run: redis-cli -h localhost ping
 
