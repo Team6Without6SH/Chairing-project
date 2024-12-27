@@ -42,7 +42,7 @@ jobs:
           stat .env
 
       - name: Copy Docker Compose files to server
-        uses: appleboy/scp-action@v0.1.6
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
@@ -52,7 +52,8 @@ jobs:
             ./docker-compose.yml
             ./.env
           target: "~"
-          debug: true
+          rm: false
+          tar: false
 
       - name: Check transferred files on EC2
         uses: appleboy/ssh-action@v0.1.6
