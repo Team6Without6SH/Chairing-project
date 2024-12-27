@@ -18,17 +18,20 @@ public class S3Uploader {
 	private final AmazonS3Client amazonS3Client;
 	@Value("${cloud.aws.s3.bucket}")
 	private String bucket;
+	@Value("${cloud.aws.cloudfront.domain}")
+	private String cloudFrontDomain;
 
 	public String upload(MultipartFile file, String domain) {
 		if (!file.isEmpty()) {
 			try {
 				String uuid = UUID.randomUUID().toString();
 				String fileName = domain + file.getOriginalFilename() + "_" + uuid;
+				String contentType = file.getContentType();
 				ObjectMetadata metadata = new ObjectMetadata();
-				metadata.setContentType(file.getContentType());
+				metadata.setContentType(contentType);
 				metadata.setContentLength(file.getSize());
 				amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
-				return fileName;
+				return cloudFrontDomain + "/" + fileName;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
