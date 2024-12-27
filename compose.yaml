@@ -1,45 +1,22 @@
-version: '3'
 services:
-  redis:
-    image: redis:7.0-alpine
-    container_name: redis-server
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./redis-data:/data
-
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: websocket-app
-    ports:
-      - "8080:8080"
+  mysql:
+    image: 'mysql:latest'
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - REDIS_HOST=redis-server
-      - DB_HOST=${{ secrets.DB_ENDPOINT }}
-      - DB_PORT=3306
-      - DB_NAME=admin
-      - DB_USER=<DATABASE_USERNAME>
-      - DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-    depends_on:
-      - redis
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
+      - 'MYSQL_DATABASE=mydatabase'
+      - 'MYSQL_PASSWORD=secret'
+      - 'MYSQL_ROOT_PASSWORD=verysecret'
+      - 'MYSQL_USER=myuser'
     ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
+      - '3306'
+  redis:
+    image: 'redis:latest'
     ports:
-      - "3000:3000"
-    volumes:
-      - ./grafana-data:/var/lib/grafana
-    depends_on:
-      - prometheus
+      - '6379'
+  sqlserver:
+    image: 'mcr.microsoft.com/mssql/server:latest'
+    environment:
+      - 'ACCEPT_EULA=yes'
+      - 'MSSQL_PID=express'
+      - 'MSSQL_SA_PASSWORD=verYs3cret'
+    ports:
+      - '1433'

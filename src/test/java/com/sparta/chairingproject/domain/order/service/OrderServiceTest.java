@@ -106,39 +106,39 @@ class OrderServiceTest {
 		ReflectionTestUtils.setField(admissionOrder, "id", 5L);
 	}
 
-	// @Test
-	// @DisplayName("테이블이 남아 있을때는 ADMISSION 상태를 반환한다.")
-	// void createWaiting_ReturnADMISSION_When_Table_Available() {
-	// 	//given
-	// 	when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store)); //store 반환시키기
-	//
-	// 	//when
-	// 	RequestDto requestDto = new RequestDto();
-	// 	OrderWaitingResponse response = orderService.createWaiting(store.getId(), member, requestDto);
-	//
-	// 	// 결과 검증
-	// 	assertNotNull(response);
-	// 	assertEquals(OrderStatus.ADMISSION, response.getOrderStatus());
-	// 	assertEquals(0, response.getWaitingTeams());
-	// }
+	@Test
+	@DisplayName("테이블이 남아 있을때는 ADMISSION 상태를 반환한다.")
+	void createWaiting_ReturnADMISSION_When_Table_Available() {
+		//given
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store)); //store 반환시키기
 
-	// @Test
-	// @DisplayName("테이블이 다 차 있으면 WAITING 상태를 반환한다.")
-	// void createWaiting_ReturnWAITING_When_Table_Full() {
-	// 	// given
-	// 	when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
-	// 	when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.IN_PROGRESS)).thenReturn(
-	// 		5); //현재 식사중인 테이블을 5로 설정
-	//
-	// 	// when
-	// 	RequestDto requestDto = new RequestDto();
-	// 	OrderWaitingResponse response = orderService.createWaiting(store.getId(), member, requestDto);
-	//
-	// 	// then
-	// 	assertNotNull(response);
-	// 	assertEquals(OrderStatus.WAITING, response.getOrderStatus());
-	// 	assertEquals(0, response.getWaitingTeams());
-	// }
+		//when
+		RequestDto requestDto = new RequestDto();
+		OrderWaitingResponse response = orderService.createWaiting(store.getId(), member, requestDto);
+
+		// 결과 검증
+		assertNotNull(response);
+		assertEquals(OrderStatus.ADMISSION, response.getOrderStatus());
+		assertEquals(0, response.getWaitingTeams());
+	}
+
+	@Test
+	@DisplayName("테이블이 다 차 있으면 WAITING 상태를 반환한다.")
+	void createWaiting_ReturnWAITING_When_Table_Full() {
+		// given
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+		when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.IN_PROGRESS)).thenReturn(
+			5); //현재 식사중인 테이블을 5로 설정
+
+		// when
+		RequestDto requestDto = new RequestDto();
+		OrderWaitingResponse response = orderService.createWaiting(store.getId(), member, requestDto);
+
+		// then
+		assertNotNull(response);
+		assertEquals(OrderStatus.WAITING, response.getOrderStatus());
+		assertEquals(0, response.getWaitingTeams());
+	}
 
 	@Test
 	@DisplayName("유효하지 않은 storeId로 주문을 시도하면 예외가 발생한다.")
@@ -152,65 +152,65 @@ class OrderServiceTest {
 		assertThrows(GlobalException.class, () -> orderService.createWaiting(storeId, member, requestDto));
 	}
 
-	// @Test
-	// @DisplayName("메뉴가 선택되고, 웨이팅을 신청할 때, 테이블에 자리가 있으면 ADMISSION 상태로 주문 생성된다.")
-	// void createOrder_ReturnAdmission_When_Table_Available() {
-	// 	// given
-	// 	OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 15000); //메뉴 두개 주문하고 가격을 합에 맞춰 설정하기
-	// 	when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
-	// 	when(menuRepository.findAllByStoreIdAndMenuIds(store.getId(), List.of(1L, 2L))).thenReturn(
-	// 		List.of(menu, menu2));
-	// 	when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.IN_PROGRESS)).thenReturn(
-	// 		3); // 진행 중인 주문 수 3개
-	//
-	// 	// when
-	// 	OrderResponse response = orderService.createOrder(store.getId(), member, orderRequest);
-	//
-	// 	// then
-	// 	assertNotNull(response);
-	// 	assertEquals(OrderStatus.ADMISSION.name(), response.getOrderStatus()); // 상태는 ADMISSION
-	// 	assertEquals(15000, response.getTotalPrice()); // 총 가격 검증
-	// 	assertTrue(response.getMenuNames().contains("menuTest"));
-	// 	assertTrue(response.getMenuNames().contains("menuTest2"));
-	// }
+	@Test
+	@DisplayName("메뉴가 선택되고, 웨이팅을 신청할 때, 테이블에 자리가 있으면 ADMISSION 상태로 주문 생성된다.")
+	void createOrder_ReturnAdmission_When_Table_Available() {
+		// given
+		OrderRequest orderRequest = new OrderRequest(List.of(1L, 2L), 15000); //메뉴 두개 주문하고 가격을 합에 맞춰 설정하기
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+		when(menuRepository.findAllByStoreIdAndMenuIds(store.getId(), List.of(1L, 2L))).thenReturn(
+			List.of(menu, menu2));
+		when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.IN_PROGRESS)).thenReturn(
+			3); // 진행 중인 주문 수 3개
 
-	// @Test
-	// @DisplayName("메뉴를 선택하지 않고, 웨이팅을 신청할 때, 테이블에 자리가 없으면 WAITING 상태로 주문이 생성된다.")
-	// void createOrder_ReturnWaiting_When_NoMenu_TableFull() {
-	// 	//given
-	// 	OrderRequest orderRequest = new OrderRequest(Collections.emptyList(), 0);
-	// 	when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
-	// 	when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.IN_PROGRESS)).thenReturn(
-	// 		5); // 진행 중인 주문 수가 5
-	//
-	// 	//when
-	// 	OrderResponse response = orderService.createOrder(store.getId(), member, orderRequest);
-	//
-	// 	//then
-	// 	assertNotNull(response);
-	// 	assertEquals(OrderStatus.WAITING.name(), response.getOrderStatus()); // 상태 WAITING
-	// 	assertEquals(0, response.getTotalPrice()); // 금액 0 d인지 확인
-	// 	assertTrue(response.getMenuNames().isEmpty()); // 메뉴는 신청 잘 안했는지
-	// }
+		// when
+		OrderResponse response = orderService.createOrder(store.getId(), member, orderRequest);
 
-	// @Test
-	// @DisplayName("메뉴를 선택하지 않고, 웨이팅을 신청할 때, 테이블에 자리가 없고, WAITING 인 상태가 3팀인 경우 3이 반환이 된다.")
-	// void createOrder_ReturnWaiting_WithTheNumberOfTeams_When_NoMenu_TableFull() {
-	// 	//given
-	// 	OrderRequest orderRequest = new OrderRequest(Collections.emptyList(), 0);
-	// 	when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
-	// 	when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.IN_PROGRESS)).thenReturn(5);
-	// 	when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.WAITING)).thenReturn(3);
-	//
-	// 	// when
-	// 	OrderResponse response = orderService.createOrder(store.getId(), member, orderRequest);
-	//
-	// 	//then
-	// 	assertNotNull(response);
-	// 	assertEquals(OrderStatus.WAITING.name(), response.getOrderStatus()); // 상태는 WAITING
-	// 	assertEquals(0, response.getTotalPrice()); // 총 금액은 0
-	// 	assertEquals(3, response.getWaitingTeams()); // 앞에 대기 팀 수 3팀
-	// }
+		// then
+		assertNotNull(response);
+		assertEquals(OrderStatus.ADMISSION.name(), response.getOrderStatus()); // 상태는 ADMISSION
+		assertEquals(15000, response.getTotalPrice()); // 총 가격 검증
+		assertTrue(response.getMenuNames().contains("menuTest"));
+		assertTrue(response.getMenuNames().contains("menuTest2"));
+	}
+
+	@Test
+	@DisplayName("메뉴를 선택하지 않고, 웨이팅을 신청할 때, 테이블에 자리가 없으면 WAITING 상태로 주문이 생성된다.")
+	void createOrder_ReturnWaiting_When_NoMenu_TableFull() {
+		//given
+		OrderRequest orderRequest = new OrderRequest(Collections.emptyList(), 0);
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+		when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.IN_PROGRESS)).thenReturn(
+			5); // 진행 중인 주문 수가 5
+
+		//when
+		OrderResponse response = orderService.createOrder(store.getId(), member, orderRequest);
+
+		//then
+		assertNotNull(response);
+		assertEquals(OrderStatus.WAITING.name(), response.getOrderStatus()); // 상태 WAITING
+		assertEquals(0, response.getTotalPrice()); // 금액 0 d인지 확인
+		assertTrue(response.getMenuNames().isEmpty()); // 메뉴는 신청 잘 안했는지
+	}
+
+	@Test
+	@DisplayName("메뉴를 선택하지 않고, 웨이팅을 신청할 때, 테이블에 자리가 없고, WAITING 인 상태가 3팀인 경우 3이 반환이 된다.")
+	void createOrder_ReturnWaiting_WithTheNumberOfTeams_When_NoMenu_TableFull() {
+		//given
+		OrderRequest orderRequest = new OrderRequest(Collections.emptyList(), 0);
+		when(storeRepository.findById(store.getId())).thenReturn(Optional.of(store));
+		when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.IN_PROGRESS)).thenReturn(5);
+		when(orderRepository.countByStoreIdAndStatus(store.getId(), OrderStatus.WAITING)).thenReturn(3);
+
+		// when
+		OrderResponse response = orderService.createOrder(store.getId(), member, orderRequest);
+
+		//then
+		assertNotNull(response);
+		assertEquals(OrderStatus.WAITING.name(), response.getOrderStatus()); // 상태는 WAITING
+		assertEquals(0, response.getTotalPrice()); // 총 금액은 0
+		assertEquals(3, response.getWaitingTeams()); // 앞에 대기 팀 수 3팀
+	}
 
 	@Test
 	@DisplayName("선택된 메뉴 수와, 실제 메뉴 수가 일치하지 않으면 예외가 발생한다.")
@@ -446,22 +446,22 @@ class OrderServiceTest {
 		assertEquals(ExceptionCode.IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION, exception.getExceptionCode());
 	}
 
-	// @Test
-	// @DisplayName("정상적으로 상태변경에 성공하는 경우: 200. OK")
-	// void updateOrderStatus_Success() {
-	// 	Long storeId = 1L;
-	// 	Long orderId = 1L;
-	// 	when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-	// 	when(orderRepository.findById(orderId)).thenReturn(Optional.of(admissionOrder));
-	//
-	// 	//when
-	// 	OrderStatusUpdateResponse response = orderService.updateOrderStatus(storeId, orderId,
-	// 		new OrderStatusUpdateRequest("IN_PROGRESS"), owner);
-	//
-	// 	//then
-	// 	assertEquals("IN_PROGRESS", response.getOrderStatus());
-	// 	verify(orderRepository).save(any(Order.class));
-	// }
+	@Test
+	@DisplayName("정상적으로 상태변경에 성공하는 경우: 200. OK")
+	void updateOrderStatus_Success() {
+		Long storeId = 1L;
+		Long orderId = 1L;
+		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
+		when(orderRepository.findById(orderId)).thenReturn(Optional.of(admissionOrder));
+
+		//when
+		OrderStatusUpdateResponse response = orderService.updateOrderStatus(storeId, orderId,
+			new OrderStatusUpdateRequest("IN_PROGRESS"), owner);
+
+		//then
+		assertEquals("IN_PROGRESS", response.getOrderStatus());
+		verify(orderRepository).save(any(Order.class));
+	}
 
 	@Test
 	@DisplayName("가게가 없을때 예외가 발생한다")
