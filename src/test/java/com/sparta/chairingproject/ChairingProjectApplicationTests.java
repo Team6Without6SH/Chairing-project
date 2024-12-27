@@ -10,15 +10,8 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 class ChairingProjectApplicationTests {
 
-	@Mock
-	private RedisTemplate<String, String> redisTemplate;
-
 	@Test
 	void contextLoads() {
-		assertNotNull(redisTemplate);
-	}
-
-	private void assertNotNull(RedisTemplate<String, String> redisTemplate) {
 	}
 
 }
