@@ -1,45 +1,42 @@
 version: '3'
+
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chairing-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.DB_ENDPOINT }}:3306/chairingproject
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+    depends_on:
+      - mysql
+      - redis
+
   redis:
     image: redis:7.0-alpine
     container_name: redis-server
     ports:
       - "6379:6379"
-    volumes:
-      - ./redis-data:/data
 
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: websocket-app
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
     ports:
-      - "8080:8080"
+      - "3306:3306"
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
-      - REDIS_HOST=redis-server
-      - DB_HOST=${{ secrets.DB_ENDPOINT }}
-      - DB_PORT=3306
-      - DB_NAME=admin
-      - DB_USER=<DATABASE_USERNAME>
-      - DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-    depends_on:
-      - redis
-
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: prometheus
-    ports:
-      - "9090:9090"
+      MYSQL_ROOT_PASSWORD: root-password
+      MYSQL_DATABASE: chairingproject
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: your-password
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - mysql-data:/var/lib/mysql
 
-  grafana:
-    image: grafana/grafana:latest
-    container_name: grafana
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./grafana-data:/var/lib/grafana
-    depends_on:
-      - prometheus
+volumes:
+  mysql-data:
