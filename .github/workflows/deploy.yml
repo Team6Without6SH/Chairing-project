@@ -9,35 +9,34 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v2
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'adopt'
 
-      - name: Generate .env File
-        run: |
-          echo "SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.DB_ENDPOINT }}:3306/chairingproject" >> .env
-          echo "SPRING_DATASOURCE_USERNAME=admin" >> .env
-          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "SPRING_DATA_REDIS_HOST=redis" >> .env
-          echo "SPRING_DATA_REDIS_PORT=6379" >> .env
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
 
-      - name: Copy Docker Compose files to server
+      - name: gradlew bootJar
+        run: ./gradlew bootJar
+
+      - name: copy jar to server
         uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ec2-user
           key: ${{ secrets.SSH_KEY }}
           port: 22
-          source: |
-            ./docker-compose.yml
-            ./.env
+          source: "./build/libs/*.jar"
           target: "~"
+          strip_components: 2
 
-      - name: SSH Commands to Deploy
+      - name: SSH Commands
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SSH_HOST }}
@@ -46,8 +45,11 @@ jobs:
           port: 22
           script_stop: true
           script: |
-            sudo yum update -y && sudo yum install -y docker docker-compose
-            sudo systemctl start docker
-            cd ~
-            docker-compose down
-            docker-compose up -d
+            sudo yum update -y && sudo yum install -y java-21-amazon-corretto
+            for pid in $(pgrep java); do
+              if ps -p $pid -o args= | grep -q 'java -jar'; then
+                echo "Java process with 'java -jar' found (PID: $pid). Terminating..."
+                kill -9 $pid
+              fi
+            done
+            echo "nohup java -jar ~/*.jar > ~/app.log 2>&1 &" | at now
