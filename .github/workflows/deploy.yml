@@ -36,11 +36,6 @@ jobs:
             exit 1
           fi
 
-      - name: Check file size and permissions
-        run: |
-          stat docker-compose.yml
-          stat .env
-
       - name: Copy Docker Compose files to server
         uses: appleboy/scp-action@master
         with:
@@ -52,8 +47,7 @@ jobs:
             ./docker-compose.yml
             ./.env
           target: "~"
-          rm: false
-          tar: false
+          debug: true
 
       - name: Check transferred files on EC2
         uses: appleboy/ssh-action@v0.1.6
