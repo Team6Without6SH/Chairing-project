@@ -14,9 +14,9 @@ services:
       - SPRING_DATA_REDIS_HOST=redis-server
       - SPRING_DATA_REDIS_PORT=6379
     depends_on:
-      - redis
+      - redis-server
 
-  redis:
+  redis-server:
     image: redis:7.0-alpine
     container_name: redis-server
     ports:
