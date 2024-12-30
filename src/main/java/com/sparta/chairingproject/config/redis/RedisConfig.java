@@ -26,7 +26,6 @@ public class RedisConfig {
 		String host = dotenv.get("SPRING_DATA_REDIS_HOST", "localhost");
 		System.out.println(host);
 		int port = Integer.parseInt(dotenv.get("SPRING_DATA_REDIS_PORT", "6379"));
-		System.out.println(port);
 		config.setHostName(host); // 환경 변수에서 호스트 가져오기
 		config.setPort(port); // 환경 변수에서 포트 가져오기
 		return new LettuceConnectionFactory(config);
