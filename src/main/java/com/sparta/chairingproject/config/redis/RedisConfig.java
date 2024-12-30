@@ -22,8 +22,10 @@ public class RedisConfig {
 	@Bean
 	public LettuceConnectionFactory redisConnectionFactory() {
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-		config.setHostName(System.getenv("SPRING_DATA_REDIS_HOST")); // 환경 변수에서 호스트 가져오기
-		config.setPort(Integer.parseInt(System.getenv("SPRING_DATA_REDIS_PORT"))); // 환경 변수에서 포트 가져오기
+		String host = System.getenv("SPRING_DATA_REDIS_HOST");
+		String port = System.getenv("SPRING_DATA_REDIS_PORT");
+		config.setHostName(host != null ? host : "localhost"); // 환경 변수에서 호스트 가져오기
+		config.setPort(port != null ? Integer.parseInt(port) : 6379); // 환경 변수에서 포트 가져오기
 		return new LettuceConnectionFactory(config);
 	}
 
