@@ -5,6 +5,10 @@ on:
   push:
     branches:
       - main
+      
+env:
+  SPRING_DATA_REDIS_HOST: redis-server
+  SPRING_DATA_REDIS_PORT: 6379
 
 jobs:
   deploy:
