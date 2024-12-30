@@ -52,7 +52,8 @@ class CouponServiceTest {
 	void setUp() {
 		couponId = 1L;
 		validRequest = new CouponRequest("Discount10", 100, 10);
-		member = new Member("Test User", "test@example.com", "test-password", MemberRole.USER);
+		member = new Member("Test User", "test@example.com", "test-password", "image",
+			MemberRole.USER);
 	}
 
 	@Test
@@ -83,7 +84,8 @@ class CouponServiceTest {
 			.build();
 
 		when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
-		when(issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId)).thenReturn(Optional.empty());
+		when(issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId)).thenReturn(
+			Optional.empty());
 
 		// When
 		couponService.issueCoupon(couponId, request, member);
@@ -171,7 +173,8 @@ class CouponServiceTest {
 			.thenReturn(new PageImpl<>(List.of(coupon1, coupon2)));
 
 		// When
-		Page<CouponResponse> response = couponService.getAllCoupons(new RequestDto(1L), pageRequest);
+		Page<CouponResponse> response = couponService.getAllCoupons(new RequestDto(1L),
+			pageRequest);
 
 		// Then
 		assertNotNull(response);

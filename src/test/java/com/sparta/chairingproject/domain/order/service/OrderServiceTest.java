@@ -75,13 +75,17 @@ class OrderServiceTest {
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
-		owner = new Member("Test owner", "Test@email.com", "password123", MemberRole.OWNER);
+		owner = new Member("Test owner", "Test@email.com", "password123", "image",
+			MemberRole.OWNER);
 		ReflectionTestUtils.setField(owner, "id", 1L);
-		owner2 = new Member("Test owner3", "Test@email3.com", "password123", MemberRole.OWNER);
+		owner2 = new Member("Test owner3", "Test@email3.com", "password123", "image",
+			MemberRole.OWNER);
 		ReflectionTestUtils.setField(owner2, "id", 3L);
-		member = new Member("Test member", "Test@email2.com", "password123", MemberRole.USER);
+		member = new Member("Test member", "Test@email2.com", "password123", "image",
+			MemberRole.USER);
 		ReflectionTestUtils.setField(member, "id", 2L);
-		member2 = new Member("Test member4", "Test@email4.com", "password123", MemberRole.USER);
+		member2 = new Member("Test member4", "Test@email4.com", "password123", "image",
+			MemberRole.USER);
 		ReflectionTestUtils.setField(member2, "id", 4L);
 		store = new Store("Test Store", "Test Image", "description", "seoul", owner);
 		ReflectionTestUtils.setField(store, "id", 1L);
@@ -149,7 +153,8 @@ class OrderServiceTest {
 
 		// when & then
 		RequestDto requestDto = new RequestDto();
-		assertThrows(GlobalException.class, () -> orderService.createWaiting(storeId, member, requestDto));
+		assertThrows(GlobalException.class,
+			() -> orderService.createWaiting(storeId, member, requestDto));
 	}
 
 	// @Test
@@ -236,7 +241,8 @@ class OrderServiceTest {
 			List.of(menu, menu2));
 
 		// when & then
-		assertThrows(GlobalException.class, () -> orderService.createOrder(store.getId(), member, orderRequest));
+		assertThrows(GlobalException.class,
+			() -> orderService.createOrder(store.getId(), member, orderRequest));
 	}
 
 	@Test
@@ -246,7 +252,8 @@ class OrderServiceTest {
 
 		//when then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.requestOrderCancellation(store.getId(), order.getId(), member, null));
+			() -> orderService.requestOrderCancellation(store.getId(), order.getId(), member,
+				null));
 		assertEquals(ExceptionCode.NOT_FOUND_ORDER, exception.getExceptionCode());
 	}
 
@@ -311,7 +318,8 @@ class OrderServiceTest {
 		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
 
 		//when
-		OrderCancelResponse response = orderService.requestOrderCancellation(storeId, orderId, member, null);
+		OrderCancelResponse response = orderService.requestOrderCancellation(storeId, orderId,
+			member, null);
 
 		//then
 		assertNotNull(response);
@@ -327,7 +335,8 @@ class OrderServiceTest {
 		when(storeRepository.findById(storeId)).thenReturn(Optional.empty());
 		// when then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+			() -> orderService.updateOrderStatus(storeId, orderId,
+				new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
 		assertEquals(ExceptionCode.NOT_FOUND_STORE, exception.getExceptionCode());
 	}
 
@@ -340,7 +349,8 @@ class OrderServiceTest {
 
 		//when then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"),
+			() -> orderService.updateOrderStatus(storeId, orderId,
+				new OrderStatusUpdateRequest("IN_PROGRESS"),
 				owner2));
 		assertEquals(ExceptionCode.ONLY_OWNER_ALLOWED, exception.getExceptionCode());
 	}
@@ -355,7 +365,8 @@ class OrderServiceTest {
 
 		// when then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+			() -> orderService.updateOrderStatus(storeId, orderId,
+				new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
 		assertEquals(ExceptionCode.NOT_FOUND_ORDER, exception.getExceptionCode());
 	}
 
@@ -384,9 +395,11 @@ class OrderServiceTest {
 
 		// when then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("CANCEL_REQUEST"),
+			() -> orderService.updateOrderStatus(storeId, orderId,
+				new OrderStatusUpdateRequest("CANCEL_REQUEST"),
 				owner));
-		assertEquals(ExceptionCode.CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER, exception.getExceptionCode());
+		assertEquals(ExceptionCode.CANCEL_REQUEST_NOT_ALLOWED_BY_OWNER,
+			exception.getExceptionCode());
 	}
 
 	@Test
@@ -398,9 +411,11 @@ class OrderServiceTest {
 		when(orderRepository.findById(orderId)).thenReturn(Optional.of(completedOrder));
 
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+			() -> orderService.updateOrderStatus(storeId, orderId,
+				new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
 
-		assertEquals(ExceptionCode.CANNOT_CHANGE_COMPLETED_OR_CANCELLED, exception.getExceptionCode());
+		assertEquals(ExceptionCode.CANNOT_CHANGE_COMPLETED_OR_CANCELLED,
+			exception.getExceptionCode());
 	}
 
 	@Test
@@ -410,11 +425,13 @@ class OrderServiceTest {
 		Long orderId = 1L;
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 		when(orderRepository.findById(orderId)).thenReturn(Optional.of(order));
-		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(5);
+		when(orderRepository.countByStoreIdAndStatus(storeId, OrderStatus.IN_PROGRESS)).thenReturn(
+			5);
 
 		//when then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
+			() -> orderService.updateOrderStatus(storeId, orderId,
+				new OrderStatusUpdateRequest("IN_PROGRESS"), owner));
 		assertEquals(ExceptionCode.TABLE_FULL_CANNOT_SET_IN_PROGRESS, exception.getExceptionCode());
 	}
 
@@ -428,8 +445,10 @@ class OrderServiceTest {
 
 		// when then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("COMPLETED"), owner));
-		assertEquals(ExceptionCode.CANCELLED_ADMISSION_ALLOWED_FROM_WAITING, exception.getExceptionCode());
+			() -> orderService.updateOrderStatus(storeId, orderId,
+				new OrderStatusUpdateRequest("COMPLETED"), owner));
+		assertEquals(ExceptionCode.CANCELLED_ADMISSION_ALLOWED_FROM_WAITING,
+			exception.getExceptionCode());
 	}
 
 	@Test
@@ -441,9 +460,11 @@ class OrderServiceTest {
 		when(orderRepository.findById(orderId)).thenReturn(Optional.of(admissionOrder));
 
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> orderService.updateOrderStatus(storeId, orderId, new OrderStatusUpdateRequest("COMPLETED"), owner));
+			() -> orderService.updateOrderStatus(storeId, orderId,
+				new OrderStatusUpdateRequest("COMPLETED"), owner));
 
-		assertEquals(ExceptionCode.IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION, exception.getExceptionCode());
+		assertEquals(ExceptionCode.IN_PROGRESS_CANCELLED_ALLOWED_FROM_ADMISSION,
+			exception.getExceptionCode());
 	}
 
 	// @Test
@@ -487,7 +508,8 @@ class OrderServiceTest {
 			any(LocalDateTime.class), eq(pageable))).thenReturn(orderPage);
 
 		//when
-		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, null, null, 30);
+		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, null,
+			null, 30);
 
 		//then
 		assertEquals(1, result.getTotalElements());
@@ -506,7 +528,8 @@ class OrderServiceTest {
 			eq(endDate.atTime(23, 59, 59)), eq(pageable))).thenReturn(orderPage);
 
 		// when
-		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, null, endDate, days);
+		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, null,
+			endDate, days);
 
 		// then
 		assertEquals(1, result.getTotalElements());
@@ -522,11 +545,13 @@ class OrderServiceTest {
 		int days = 30;
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(orderRepository.findByStoreAndCreatedAtBetween(eq(storeId), eq(startDate.atStartOfDay()),
+		when(orderRepository.findByStoreAndCreatedAtBetween(eq(storeId),
+			eq(startDate.atStartOfDay()),
 			any(LocalDateTime.class), eq(pageable))).thenReturn(orderPage);
 
 		// when
-		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, startDate, null, days);
+		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, startDate,
+			null, days);
 
 		// then
 		assertEquals(1, result.getTotalElements());
@@ -543,11 +568,13 @@ class OrderServiceTest {
 		Page<Order> orderPage = new PageImpl<>(List.of(order), pageable, 1);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(orderRepository.findByStoreAndCreatedAtBetween(eq(storeId), eq(startDate.atStartOfDay()),
+		when(orderRepository.findByStoreAndCreatedAtBetween(eq(storeId),
+			eq(startDate.atStartOfDay()),
 			eq(endDate.atTime(23, 59, 59)), eq(pageable))).thenReturn(orderPage);
 
 		//when
-		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, startDate, endDate, days);
+		Page<OrderPageResponse> result = orderService.getOrdersByStore(storeId, pageable, startDate,
+			endDate, days);
 
 		//then
 		assertEquals(1, result.getTotalElements());
