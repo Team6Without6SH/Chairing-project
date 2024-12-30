@@ -20,14 +20,13 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 public class RedisConfig {
 
 	@Bean
-	public RedisConnectionFactory redisConnectionFactory() {
-		LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-			.commandTimeout(Duration.ofSeconds(2))
-			.shutdownTimeout(Duration.ofMillis(100))
-			.build();
-
-		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
-		return new LettuceConnectionFactory(redisConfig, clientConfig);
+	public LettuceConnectionFactory redisConnectionFactory() {
+		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+		String host = System.getenv("SPRING_DATA_REDIS_HOST");
+		String port = System.getenv("SPRING_DATA_REDIS_PORT");
+		config.setHostName(host != null ? host : "localhost"); // 환경 변수에서 호스트 가져오기
+		config.setPort(port != null ? Integer.parseInt(port) : 6379); // 환경 변수에서 포트 가져오기
+		return new LettuceConnectionFactory(config);
 	}
 
 	@Bean
