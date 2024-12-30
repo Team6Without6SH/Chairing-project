@@ -23,13 +23,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RedisConfig {
 
-	private final RedisProperties redisProperties;
-
 	@Value("${spring.data.redis.host}")
-	private String redisHost;
+	private static String redisHost;
 
 	@Value("${spring.data.redis.port}")
-	private int redisPort;
+	private static int redisPort;
 
 	// @Bean
 	// public LettuceConnectionFactory redisConnectionFactory() {
@@ -41,9 +39,9 @@ public class RedisConfig {
 	// 	return new LettuceConnectionFactory(config);
 	// }
 
-	private static LettuceConnectionFactory lettuceConnectionFactory(RedisProperties redisProperties) {
-		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisProperties.getHost(),
-			redisProperties.getPort());
+	private static LettuceConnectionFactory lettuceConnectionFactory() {
+		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisHost,
+			redisPort);
 		LettuceClientConfiguration lettuceConfig = LettuceClientConfiguration.builder()
 			.useSsl()
 			.disablePeerVerification()
@@ -55,7 +53,7 @@ public class RedisConfig {
 	@Bean
 	@Primary
 	public RedisConnectionFactory redisConnectionFactory() {
-		return lettuceConnectionFactory(redisProperties);
+		return lettuceConnectionFactory();
 	}
 
 	@Bean
