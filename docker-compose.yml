@@ -6,7 +6,7 @@ services:
     container_name: chairing-app
     ports:
       - "8080:8080"
-    env_file:
+    env_file: #여기가 문제임
       - .env
     depends_on:
       redis-server:
