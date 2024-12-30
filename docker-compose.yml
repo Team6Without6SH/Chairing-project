@@ -9,13 +9,20 @@ services:
     env_file:
       - .env
     depends_on:
-      - redis-server
+      redis-server:
+        condition: service_healthy
 
   redis-server:
     image: redis:7.0-alpine
     container_name: redis-server
     ports:
       - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      timeout: 2s
 
   prometheus:
     image: prom/prometheus:latest
