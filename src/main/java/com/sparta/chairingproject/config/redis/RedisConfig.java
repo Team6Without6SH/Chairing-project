@@ -1,13 +1,10 @@
 package com.sparta.chairingproject.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -15,7 +12,6 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -29,31 +25,14 @@ public class RedisConfig {
 	@Value("${spring.data.redis.port}")
 	private static int redisPort;
 
-	// @Bean
-	// public LettuceConnectionFactory redisConnectionFactory() {
-	// 	RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-	// 	System.out.println("Redis Host: " + redisHost);
-	// 	System.out.println("Redis Port: " + redisPort);
-	// 	config.setHostName(redisHost); // 환경 변수에서 호스트 가져오기
-	// 	config.setPort(redisPort); // 환경 변수에서 포트 가져오기
-	// 	return new LettuceConnectionFactory(config);
-	// }
-
-	private static LettuceConnectionFactory lettuceConnectionFactory() {
-		RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(redisHost,
-			redisPort);
-		LettuceClientConfiguration lettuceConfig = LettuceClientConfiguration.builder()
-			.useSsl()
-			.disablePeerVerification()
-			.build();
-
-		return new LettuceConnectionFactory(redisConfig, lettuceConfig);
-	}
-
 	@Bean
-	@Primary
-	public RedisConnectionFactory redisConnectionFactory() {
-		return lettuceConnectionFactory();
+	public LettuceConnectionFactory redisConnectionFactory() {
+		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
+		System.out.println("Redis Host: " + redisHost);
+		System.out.println("Redis Port: " + redisPort);
+		config.setHostName(redisHost); // 환경 변수에서 호스트 가져오기
+		config.setPort(redisPort); // 환경 변수에서 포트 가져오기
+		return new LettuceConnectionFactory(config);
 	}
 
 	@Bean
