@@ -1,5 +1,6 @@
 package com.sparta.chairingproject.config.redis;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -12,22 +13,24 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import jakarta.annotation.PostConstruct;
 
 @Configuration
 @EnableRedisRepositories
 public class RedisConfig {
 
+	@Value("${spring.data.redis.host}")
+	private String redisHost;
+
+	@Value("${spring.data.redis.port}")
+	private int redisPort;
+
 	@Bean
 	public LettuceConnectionFactory redisConnectionFactory() {
-		Dotenv dotenv = Dotenv.load();
-
 		RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-		String host = dotenv.get("SPRING_DATA_REDIS_HOST", "localhost");
-		System.out.println(host);
-		int port = Integer.parseInt(dotenv.get("SPRING_DATA_REDIS_PORT", "6379"));
-		config.setHostName(host); // 환경 변수에서 호스트 가져오기
-		config.setPort(port); // 환경 변수에서 포트 가져오기
+		System.out.println("Redis Host: " + redisHost);
+		System.out.println("Redis Port: " + redisPort);
+		config.setHostName(redisHost); // 환경 변수에서 호스트 가져오기
+		config.setPort(redisPort); // 환경 변수에서 포트 가져오기
 		return new LettuceConnectionFactory(config);
 	}
 
