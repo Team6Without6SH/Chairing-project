@@ -31,7 +31,7 @@ public class S3Uploader {
 				metadata.setContentType(contentType);
 				metadata.setContentLength(file.getSize());
 				amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
-				return cloudFrontDomain + "/" + fileName;
+				return fileName;
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
