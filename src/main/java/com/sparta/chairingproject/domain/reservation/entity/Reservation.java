@@ -65,6 +65,16 @@ public class Reservation extends Timestamped {
 		);
 	}
 
+	public ReservationEvent toEvent() {
+		return ReservationEvent.builder()
+			.ownerId(getStore().getOwner().getId())
+			.storeName(getStore().getName())
+			.date(getDate())
+			.time(getTime())
+			.guestCount(getGuestCount())
+			.build();
+	}
+
 	public void updateStatus(ReservationStatus targetStatus) {
 		status.validateTransition(targetStatus);
 		this.status = targetStatus;
