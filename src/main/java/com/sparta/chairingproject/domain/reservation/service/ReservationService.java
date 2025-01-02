@@ -6,17 +6,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sparta.chairingproject.config.exception.customException.GlobalException;
 import com.sparta.chairingproject.config.security.UserDetailsImpl;
 import com.sparta.chairingproject.domain.common.dto.RequestDto;
-import com.sparta.chairingproject.domain.fcm.dto.request.FcmMessageRequest;
-import com.sparta.chairingproject.domain.fcm.sevice.FcmService;
 import com.sparta.chairingproject.domain.fcm.sevice.FcmServiceImpl;
+import com.sparta.chairingproject.domain.outbox.OutboxRepository;
+import com.sparta.chairingproject.domain.outbox.entity.Outbox;
 import com.sparta.chairingproject.domain.reservation.dto.request.CreateReservationRequest;
 import com.sparta.chairingproject.domain.reservation.dto.request.UpdateReservationRequest;
 import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
+import com.sparta.chairingproject.domain.reservation.entity.ReservationEvent;
 import com.sparta.chairingproject.domain.reservation.entity.ReservationStatus;
 import com.sparta.chairingproject.domain.reservation.repository.ReservationRepository;
 import com.sparta.chairingproject.domain.store.entity.Store;
@@ -34,11 +36,13 @@ public class ReservationService {
 
 	private final ReservationRepository reservationRepository;
 	private final StoreRepository storeRepository;
+	private final OutboxRepository outboxRepository;
 
 	private final AuthUtils authUtils;
 
 	/* 일반 사용자 */
 
+	@Transactional
 	public ReservationResponse createReservation(Long storeId, CreateReservationRequest req, UserDetailsImpl authUser) {
 		Long memberId = authUtils.findAuthUser(req, authUser).getId();
 
@@ -48,10 +52,11 @@ public class ReservationService {
 
 		Reservation savedReservation = reservationRepository.save(req.toEntity(memberId, store));
 
-		fcmService.sendMessageToUser(store.getOwner().getId(),
-			store.getName() + "에 새로운 예약 요청",
-			"예약 정보: " + savedReservation.getDate() + " " + savedReservation.getTime() + ", 인원: "
-				+ savedReservation.getGuestCount());
+		ReservationEvent event = savedReservation.toEvent();
+
+		Outbox outbox = event.toOutbox();
+
+		outboxRepository.save(outbox);
 
 		return savedReservation.toResponse();
 	}
@@ -69,10 +74,11 @@ public class ReservationService {
 
 		reservation.updateStatus(ReservationStatus.CANCELED);
 
-		fcmService.sendMessageToUser(reservation.getStore().getOwner().getId(),
-			reservation.getStore().getName() + "의 예약 취소됨",
-			"예약 정보: " + reservation.getDate() + " " + reservation.getTime() + ", 인원: "
-				+ reservation.getGuestCount());
+		ReservationEvent event = reservation.toEvent();
+
+		Outbox outbox = event.toOutbox();
+
+		outboxRepository.save(outbox);
 
 		return reservationRepository.save(reservation).toResponse();
 	}
@@ -101,11 +107,11 @@ public class ReservationService {
 
 		reservation.updateStatus(targetStatus);
 
-		fcmService.sendMessageToUser(reservation.getMemberId(),
-			store.getName() + "의 예약이 '" + reservation.getStatus().getDescription() + "'으로 변경됨",
-			"예약 정보: " + reservation.getDate() + " " + reservation.getTime() + ", 인원: "
-				+ reservation.getGuestCount()
-			);
+		ReservationEvent event = reservation.toEvent();
+
+		Outbox outbox = event.toOutbox();
+
+		outboxRepository.save(outbox);
 
 		return reservationRepository.save(reservation).toResponse();
 	}
