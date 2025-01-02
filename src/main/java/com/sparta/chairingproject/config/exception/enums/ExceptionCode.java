@@ -121,6 +121,10 @@ public enum ExceptionCode {
 	FAILED_TO_CLEAN_EXPIRED_TOKENS(HttpStatus.INTERNAL_SERVER_ERROR, "만료된 FCM 토큰 정리에 실패했습니다"),
 	FCM_MESSAGE_SEND_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, "FCM 메시지 전송에 실패했습니다"),
 
+	/*-- outbox event --*/
+	OUTBOX_EVENT_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "올바르지 않은 상태값입니다."),
+	FAILED_TO_SERIALIZE_EVENT(HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 직렬화에 실패했습니다"),
+
 	HAS_NOT_COOKIE(HttpStatus.BAD_REQUEST, "Request has not cookie"),
 	NOT_SUPPORT_ENCODING_COOKIE(HttpStatus.BAD_REQUEST, "Not support encoding cookie"),
 	HAS_NOT_TOKEN(HttpStatus.BAD_REQUEST, "Request has not token"),
