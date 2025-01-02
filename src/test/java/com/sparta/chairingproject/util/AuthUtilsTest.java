@@ -36,7 +36,8 @@ class AuthUtilsTest {
 
 	@BeforeEach
 	void setUp() {
-		testMember = new Member("Test User", "test@example.com", "encodedPassword", MemberRole.USER);
+		testMember = new Member("Test User", "test@example.com", "encodedPassword", "image",
+			MemberRole.USER);
 		ReflectionTestUtils.setField(testMember, "id", 1L);
 		authUser = new UserDetailsImpl(testMember);
 	}
@@ -71,7 +72,8 @@ class AuthUtilsTest {
 	@DisplayName("요청 DTO의 memberId로 MemberRepository에서 조회 성공")
 	void findAuthUser_WhenMemberIdExists_ReturnsMemberFromRepository() {
 		// given
-		Member repositoryMember = new Member("Repository User", "repo@example.com", "password", MemberRole.USER);
+		Member repositoryMember = new Member("Repository User", "repo@example.com", "password",
+			"image", MemberRole.USER);
 		ReflectionTestUtils.setField(testMember, "id", 2L);
 		RequestDto req = new RequestDto(2L);
 

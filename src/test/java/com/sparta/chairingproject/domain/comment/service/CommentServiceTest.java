@@ -57,7 +57,8 @@ public class CommentServiceTest {
 		storeId = 1L;
 		reviewId = 1L;
 		commentId = 1L;
-		owner = new Member("Test Owner", "owner@example.com", "password", MemberRole.OWNER);
+		owner = new Member("Test Owner", "owner@example.com", "password", "image",
+			MemberRole.OWNER);
 		ReflectionTestUtils.setField(owner, "id", 1L);
 		store = new Store("Test Store", "storeImage", "description", "Test address", owner);
 		ReflectionTestUtils.setField(store, "id", storeId);
@@ -75,7 +76,8 @@ public class CommentServiceTest {
 		// Given
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
 		when(commentRepository.existsByReview(review)).thenReturn(false);
-		when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		when(commentRepository.save(any(Comment.class))).thenAnswer(
+			invocation -> invocation.getArgument(0));
 
 		// When
 		commentService.createComment(storeId, reviewId, request, owner);
@@ -90,10 +92,13 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 리뷰가 해당 가게의 주문과 연결되지 않음")
 	void createComment_fail_notMatchingOrderAndReview() {
 		// Given
-		Store anotherStore = new Store("Another Store", "storeImage", "description", "Test address", owner);
+		Store anotherStore = new Store("Another Store", "storeImage", "description", "Test address",
+			owner);
 		ReflectionTestUtils.setField(anotherStore, "id", 2L);
-		Order invalidOrder = Order.createOf(owner, anotherStore, List.of(), OrderStatus.COMPLETED, 10000);
-		Review differentReview = new Review("Good service", 5, anotherStore, owner, invalidOrder); // 잘못된 Order
+		Order invalidOrder = Order.createOf(owner, anotherStore, List.of(), OrderStatus.COMPLETED,
+			10000);
+		Review differentReview = new Review("Good service", 5, anotherStore, owner,
+			invalidOrder); // 잘못된 Order
 
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(differentReview));
 
@@ -112,7 +117,9 @@ public class CommentServiceTest {
 	@DisplayName("댓글 작성 실패 - 권한 없는 OWNER")
 	void createComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member("Another Owner", "different@example.com", "password", MemberRole.OWNER);
+		Member differentOwner = new Member("Another Owner", "different@example.com", "password",
+			"image",
+			MemberRole.OWNER);
 		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 
 		when(reviewRepository.findById(reviewId)).thenReturn(Optional.of(review));
@@ -195,7 +202,9 @@ public class CommentServiceTest {
 	@DisplayName("댓글 수정 실패 - 권한 없는 OWNER")
 	void updateComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member("Different Owner", "different@example.com", "password", MemberRole.OWNER);
+		Member differentOwner = new Member("Different Owner", "different@example.com", "password",
+			"image",
+			MemberRole.OWNER);
 		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 		Comment comment = new Comment("Original content", review);
 		when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
@@ -237,7 +246,8 @@ public class CommentServiceTest {
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
-			() -> commentService.updateComment(mismatchedReviewId, comment.getId(), request, owner));
+			() -> commentService.updateComment(mismatchedReviewId, comment.getId(), request,
+				owner));
 
 		assertEquals(ExceptionCode.NOT_MATCHING_COMMENT_AND_REVIEW, exception.getExceptionCode());
 
@@ -280,7 +290,9 @@ public class CommentServiceTest {
 	@DisplayName("댓글 삭제 실패 - 권한 없는 OWNER")
 	void deleteComment_fail_unauthorizedOwner() {
 		// Given
-		Member differentOwner = new Member("Different Owner", "different@example.com", "password", MemberRole.OWNER);
+		Member differentOwner = new Member("Different Owner", "different@example.com", "password",
+			"image",
+			MemberRole.OWNER);
 		ReflectionTestUtils.setField(differentOwner, "id", 2L);
 		Comment comment = new Comment("Content", review);
 		when(commentRepository.findById(commentId)).thenReturn(Optional.of(comment));
@@ -324,7 +336,8 @@ public class CommentServiceTest {
 		GlobalException exception = assertThrows(GlobalException.class,
 			() -> commentService.deleteComment(mismatchedReviewId, commentId, requestDto, owner));
 
-		assertEquals(ExceptionCode.NOT_MATCHING_COMMENT_AND_REVIEW.getMessage(), exception.getMessage());
+		assertEquals(ExceptionCode.NOT_MATCHING_COMMENT_AND_REVIEW.getMessage(),
+			exception.getMessage());
 
 		verify(commentRepository, times(1)).findById(commentId);
 		verify(commentRepository, never()).save(any());

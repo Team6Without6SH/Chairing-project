@@ -43,10 +43,12 @@ class AdminStoreServiceTest {
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
 
-		Member owner1 = new Member("Owner 1", "owner1@example.com", "password123", MemberRole.OWNER);
+		Member owner1 = new Member("Owner 1", "owner1@example.com", "password123", "image",
+			MemberRole.OWNER);
 		ReflectionTestUtils.setField(owner1, "id", 1L);
 
-		Member owner2 = new Member("Owner 2", "owner2@example.com", "password456", MemberRole.OWNER);
+		Member owner2 = new Member("Owner 2", "owner2@example.com", "password456", "image",
+			MemberRole.OWNER);
 		ReflectionTestUtils.setField(owner2, "id", 2L);
 
 		//초기
@@ -106,7 +108,8 @@ class AdminStoreServiceTest {
 
 		when(storeRepository.findAll()).thenReturn(List.of());
 
-		GlobalException exception = assertThrows(GlobalException.class, () -> adminStoreService.getAllStores());
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> adminStoreService.getAllStores());
 		assertEquals("NOT_FOUND_STORE", exception.getExceptionCode().name());
 		verify(storeRepository, times(1)).findAll();
 	}
@@ -130,7 +133,8 @@ class AdminStoreServiceTest {
 
 		when(storeRepository.findById(1L)).thenReturn(Optional.empty());
 
-		GlobalException exception = assertThrows(GlobalException.class, () -> adminStoreService.getStoreById(1L));
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> adminStoreService.getStoreById(1L));
 		assertEquals("NOT_FOUND_STORE", exception.getExceptionCode().name());
 		verify(storeRepository, times(1)).findById(1L);
 	}
@@ -231,7 +235,8 @@ class AdminStoreServiceTest {
 		StoreAdminResponse response = adminStoreService.updateStoreRequestStatus(request);
 
 		assertNotNull(response);
-		assertEquals(StoreRequestStatus.DELETE_REJECTED.name(), store1.getRequestStatus().name()); // 엔티티 상태 확인
+		assertEquals(StoreRequestStatus.DELETE_REJECTED.name(),
+			store1.getRequestStatus().name()); // 엔티티 상태 확인
 		assertEquals("DELETE_REJECTED", response.getRequestStatus());
 		verify(storeRepository, times(1)).save(store1);
 	}
@@ -256,7 +261,8 @@ class AdminStoreServiceTest {
 
 		when(storeRepository.findById(1L)).thenReturn(Optional.of(store1));
 
-		GlobalException exception = assertThrows(GlobalException.class, () -> adminStoreService.approveCloseStore(1L));
+		GlobalException exception = assertThrows(GlobalException.class,
+			() -> adminStoreService.approveCloseStore(1L));
 		assertEquals("INVALID_REQUEST_STATUS", exception.getExceptionCode().name());
 	}
 

@@ -2,7 +2,6 @@ package com.sparta.chairingproject.config.security;
 
 import com.sparta.chairingproject.domain.fcm.sevice.FcmServiceImpl;
 import com.sparta.chairingproject.domain.member.repository.MemberRepository;
-
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +42,8 @@ public class WebSecurityConfig {
 
 	@Bean
 	public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-		JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, memberRepository, fcmService);
+		JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, memberRepository,
+			fcmService);
 		filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
 		return filter;
 	}

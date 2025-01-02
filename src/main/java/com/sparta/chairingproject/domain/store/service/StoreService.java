@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.store.service;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
+import com.sparta.chairingproject.domain.common.service.S3Uploader;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -30,8 +31,8 @@ import com.sparta.chairingproject.domain.store.entity.StoreStatus;
 import com.sparta.chairingproject.domain.store.mapper.StoreMapper;
 import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -41,9 +42,11 @@ public class StoreService {
 	private final MemberRepository memberRepository;
 	private final MenuRepository menuRepository;
 	private final ReviewRepository reviewRepository;
+	private final S3Uploader s3Uploader;
 
 	@Transactional
-	public StoreResponse registerStore(StoreRequest request, UserDetailsImpl authMember) {
+	public StoreResponse registerStore(StoreRequest request, UserDetailsImpl authMember,
+		MultipartFile file) {
 
 		Member owner = memberRepository.findById(authMember.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
@@ -58,10 +61,10 @@ public class StoreService {
 		}
 
 		// 이미지 업로드 로직 추가 필요 (예: S3)
-		String imageUrl = request.getImage() == null || request.getImage().isEmpty() ? null : request.getImage();
+		String fileName = s3Uploader.upload(file, "store/");
 
 		Store store = new Store( // request 에 맞게 생성자 추가하고 -> pending 값을 여기다 담아두고 ->save  하기 ->
-			request.getName(), request.getAddress(), imageUrl, request.getDescription(), owner);
+			request.getName(), request.getAddress(), fileName, request.getDescription(), owner);
 		store.setTableCount(request.getTableCount());
 		storeRepository.save(store);
 
@@ -70,7 +73,8 @@ public class StoreService {
 
 	public List<StoreResponse> getAllOpenedStores() {
 
-		List<Store> stores = storeRepository.findAllByRequestStatusAndStatus(StoreRequestStatus.APPROVED,
+		List<Store> stores = storeRepository.findAllByRequestStatusAndStatus(
+			StoreRequestStatus.APPROVED,
 			StoreStatus.OPEN);
 
 		if (stores.isEmpty()) {
@@ -84,7 +88,8 @@ public class StoreService {
 	public StoreDetailsResponse getStoreDetails(Long storeId) {
 		System.out.println("DB 조회 실행: storeId = " + storeId);
 
-		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
 		List<MenuSummaryResponse> menus = menuRepository.findByStoreId(storeId)
 			.stream()
@@ -93,23 +98,30 @@ public class StoreService {
 
 		List<ReviewResponse> reviews = reviewRepository.findByStoreId(storeId)
 			.stream()
-			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getScore()))
+			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(),
+				review.getScore()))
 			.toList();
 
-		int waitingCount = store.getReservations() == null ? 0 : store.getReservations().size(); // 가게 예약 리스트 크기 사용
+		int waitingCount =
+			store.getReservations() == null ? 0 : store.getReservations().size(); // 가게 예약 리스트 크기 사용
 
-		return new StoreDetailsResponse(store.getName(), store.getImage(), store.getDescription(), store.getAddress(),
+		return new StoreDetailsResponse(store.getName(), store.getImage(), store.getDescription(),
+			store.getAddress(),
 			menus, reviews, waitingCount);
 	}
 
 	@Transactional
 	@CacheEvict(value = "storeDetails", key = "'store:' + #storeId + ':details'")
-	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req, UserDetailsImpl authUser) {
+	public StoreDetailsResponse updateStore(Long storeId, UpdateStoreRequest req,
+		UserDetailsImpl authUser, MultipartFile file) {
 		Member owner = memberRepository.findById(authUser.getMember().getId())
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_USER));
 
-		Store store = storeRepository.findById(storeId).orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
+		Store store = storeRepository.findById(storeId)
+			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 
+		String fileName = s3Uploader.update(store.getImage(), file, "store/");
+		req.setImage(fileName);
 		store.updateStore(req);
 		storeRepository.save(store);
 
@@ -120,12 +132,15 @@ public class StoreService {
 
 		List<ReviewResponse> reviews = reviewRepository.findByStoreId(storeId)
 			.stream()
-			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(), review.getScore()))
+			.map(review -> new ReviewResponse(review.getMember().getName(), review.getContent(),
+				review.getScore()))
 			.toList();
 
-		int waitingCount = store.getReservations() == null ? 0 : store.getReservations().size();// 가게 예약 리스트 크기 사용
+		int waitingCount =
+			store.getReservations() == null ? 0 : store.getReservations().size();// 가게 예약 리스트 크기 사용
 
-		return new StoreDetailsResponse(store.getName(), store.getImage(), store.getDescription(), store.getAddress(),
+		return new StoreDetailsResponse(store.getName(), store.getImage(), store.getDescription(),
+			store.getAddress(),
 			menus, reviews, waitingCount);
 	}
 

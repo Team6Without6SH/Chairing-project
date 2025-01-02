@@ -5,11 +5,13 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 public class UpdateStoreRequest {
+
 	@NotBlank(message = "매장 이름은 필수 입력 항목입니다.")
 	private String name;
 
@@ -29,6 +31,7 @@ public class UpdateStoreRequest {
 	@Size(max = 500, message = "설명은 500자를 초과할 수 없습니다.")
 	private String description;
 
+	@Setter
 	private String image;
 
 }

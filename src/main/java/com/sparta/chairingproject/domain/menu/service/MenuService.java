@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.menu.service;
 
 import static com.sparta.chairingproject.config.exception.enums.ExceptionCode.*;
 
+import com.sparta.chairingproject.domain.common.service.S3Uploader;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -31,9 +33,11 @@ public class MenuService {
 
 	private final MenuRepository menuRepository;
 	private final StoreRepository storeRepository;
+	private final S3Uploader s3Uploader;
 
 	@Transactional
-	public MenuResponse createMenu(Long storeId, @Valid MenuRequest request, Member member) {
+	public MenuResponse createMenu(Long storeId, @Valid MenuRequest request, Member member,
+		MultipartFile file) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_MENU));
 		if (!store.getOwner().getId().equals(member.getId())) {
@@ -43,13 +47,17 @@ public class MenuService {
 		if (isDuplicatedMenu) {
 			throw new GlobalException(DUPLICATED_MENU);
 		}
-		Menu menu = Menu.createOf(request.getName(), request.getPrice(), request.getImage(), store);
+
+		String fileName = s3Uploader.upload(file, "menu/");
+
+		Menu menu = Menu.createOf(request.getName(), request.getPrice(), fileName, store);
 		menuRepository.save(menu);
 		return MenuResponse.from(menu);
 	}
 
 	@Transactional
-	public MenuUpdateResponse updateMenu(Long storeId, Long menuId, MenuUpdateRequest request, Member member) {
+	public MenuUpdateResponse updateMenu(Long storeId, Long menuId, MenuUpdateRequest request,
+		Member member, MultipartFile file) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 		if (!store.getOwner().getId().equals(member.getId())) {
@@ -67,11 +75,15 @@ public class MenuService {
 		if (request.getStatus() != null) {
 			menu.updateStatus(request.getStatus());
 		}
+
+		String fileName = s3Uploader.update(menu.getImage(), file, "menu/");
+		menu.updateImage(fileName);
 		return MenuUpdateResponse.from(menu);
 	}
 
 	@Transactional
-	public MenuDeleteResponse deleteMenu(Long storeId, Long menuId, Member member, RequestDto request) {
+	public MenuDeleteResponse deleteMenu(Long storeId, Long menuId, Member member,
+		RequestDto request) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new GlobalException(NOT_FOUND_STORE));
 		if (!store.getOwner().getId().equals(member.getId())) {

@@ -43,6 +43,7 @@ import com.sparta.chairingproject.domain.store.repository.StoreRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class ReviewServiceTest {
+
 	@Mock
 	private ReviewRepository reviewRepository;
 
@@ -76,7 +77,7 @@ public class ReviewServiceTest {
 		orderId = 1L;
 		reviewId = 1L;
 		request = new ReviewRequest("좋은 가게였습니다.", 5);
-		member = new Member("Test user", "test@example.com", "1234", MemberRole.USER);
+		member = new Member("Test user", "test@example.com", "1234", "image", MemberRole.USER);
 		ReflectionTestUtils.setField(member, "id", 1L);
 		store = new Store("Test name", "Test image", "Test description", "Test address", member);
 		store.approveRequest();
@@ -91,9 +92,12 @@ public class ReviewServiceTest {
 	void createReview_success() {
 		// Given
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
-		when(reviewRepository.existsByOrderIdAndMemberId(orderId, member.getId())).thenReturn(false);
-		when(reviewRepository.save(any(Review.class))).thenAnswer(invocation -> invocation.getArgument(0));
+		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(
+			Optional.of(order));
+		when(reviewRepository.existsByOrderIdAndMemberId(orderId, member.getId())).thenReturn(
+			false);
+		when(reviewRepository.save(any(Review.class))).thenAnswer(
+			invocation -> invocation.getArgument(0));
 
 		// When
 		Review savedReview = reviewService.createReview(storeId, orderId, request, member);
@@ -116,7 +120,8 @@ public class ReviewServiceTest {
 	void createReview_fail_reviewAlreadyExists() {
 		// Given
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
+		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(
+			Optional.of(order));
 		when(reviewRepository.existsByOrderIdAndMemberId(orderId, member.getId())).thenReturn(true);
 
 		// When & Then
@@ -138,7 +143,8 @@ public class ReviewServiceTest {
 		ReflectionTestUtils.setField(order, "status", OrderStatus.WAITING);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(Optional.of(order));
+		when(orderRepository.findByIdAndMemberAndStore(orderId, member, store)).thenReturn(
+			Optional.of(order));
 
 		// When & Then
 		GlobalException exception = assertThrows(GlobalException.class,
@@ -198,17 +204,21 @@ public class ReviewServiceTest {
 		Page<Review> reviews = new PageImpl<>(List.of(review), pageable, 1);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(reviews);
-		when(commentRepository.findByReviewAndDeletedAtIsNull(review)).thenReturn(Optional.of(comment));
+		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(
+			reviews);
+		when(commentRepository.findByReviewAndDeletedAtIsNull(review)).thenReturn(
+			Optional.of(comment));
 
 		// When
-		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, requestDto, pageable);
+		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId,
+			requestDto, pageable);
 
 		// Then
 		assertNotNull(result);
 		assertEquals(1, result.getContent().size());
 		assertEquals("Good service", result.getContent().get(0).getReview().getContent());
-		assertEquals("Thank you for your review!", result.getContent().get(0).getComment().getContent());
+		assertEquals("Thank you for your review!",
+			result.getContent().get(0).getComment().getContent());
 
 		verify(storeRepository, times(1)).findById(storeId);
 		verify(reviewRepository, times(1)).findByStoreIdAndDeletedAtIsNull(storeId, pageable);
@@ -224,11 +234,13 @@ public class ReviewServiceTest {
 		Page<Review> reviews = new PageImpl<>(List.of(review), pageable, 1);
 
 		when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
-		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(reviews);
+		when(reviewRepository.findByStoreIdAndDeletedAtIsNull(storeId, pageable)).thenReturn(
+			reviews);
 		when(commentRepository.findByReviewAndDeletedAtIsNull(review)).thenReturn(Optional.empty());
 
 		// When
-		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId, requestDto, pageable);
+		Page<ReviewWithCommentResponse> result = reviewService.getReviewsByStore(storeId,
+			requestDto, pageable);
 
 		// Then
 		assertNotNull(result);
@@ -280,7 +292,8 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 수정 실패 - 작성자가 아닌 경우")
 	void updateReview_fail_notAuthor() {
 		// Given
-		Member anotherMember = new Member("Another user", "another@example.com", "password", MemberRole.USER);
+		Member anotherMember = new Member("Another user", "another@example.com", "password",
+			"image", MemberRole.USER);
 
 		when(reviewRepository.findById(orderId)).thenReturn(Optional.of(review));
 
@@ -330,7 +343,8 @@ public class ReviewServiceTest {
 	@DisplayName("리뷰 삭제 실패 - 작성자가 아닌 경우")
 	void deleteReview_fail_notAuthor() {
 		// Given
-		Member anotherMember = new Member("Another user", "another@example.com", "password", MemberRole.USER);
+		Member anotherMember = new Member("Another user", "another@example.com", "password",
+			"image", MemberRole.USER);
 
 		when(reviewRepository.findById(orderId)).thenReturn(Optional.of(review));
 
