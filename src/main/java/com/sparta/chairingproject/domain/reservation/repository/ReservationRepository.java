@@ -1,5 +1,8 @@
 package com.sparta.chairingproject.domain.reservation.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import com.sparta.chairingproject.domain.reservation.entity.Reservation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,4 +18,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     Page<Reservation> findByMember(@Param("memberId") Long memberId, Pageable pageable);
 
     Page<Reservation> findByStoreId(Long storeId, Pageable pageable);
+
+    @Query("SELECT r FROM Reservation r WHERE r.status = 'PENDING' AND r.date >= :date")
+    List<Reservation> findUnapprovedReservations(@Param("date") LocalDate date);
 }
