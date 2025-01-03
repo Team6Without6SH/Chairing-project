@@ -123,6 +123,7 @@ public enum ExceptionCode {
 
 	/*-- outbox event --*/
 	OUTBOX_EVENT_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "올바르지 않은 상태값입니다."),
+	RESERVATION_EVENT_STATUS_NOT_FOUND(HttpStatus.BAD_REQUEST, "올바르지 않은 상태값입니다."),
 	FAILED_TO_SERIALIZE_EVENT(HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 직렬화에 실패했습니다"),
 
 	HAS_NOT_COOKIE(HttpStatus.BAD_REQUEST, "Request has not cookie"),

@@ -52,7 +52,7 @@ public class ReservationService {
 
 		Reservation savedReservation = reservationRepository.save(req.toEntity(memberId, store));
 
-		ReservationEvent event = savedReservation.toEvent();
+		ReservationEvent event = savedReservation.toEvent("CREATE");
 
 		Outbox outbox = event.toOutbox();
 
@@ -74,7 +74,7 @@ public class ReservationService {
 
 		reservation.updateStatus(ReservationStatus.CANCELED);
 
-		ReservationEvent event = reservation.toEvent();
+		ReservationEvent event = reservation.toEvent("CANCEL");
 
 		Outbox outbox = event.toOutbox();
 
@@ -107,7 +107,7 @@ public class ReservationService {
 
 		reservation.updateStatus(targetStatus);
 
-		ReservationEvent event = reservation.toEvent();
+		ReservationEvent event = reservation.toEvent("UPDATE");
 
 		Outbox outbox = event.toOutbox();
 

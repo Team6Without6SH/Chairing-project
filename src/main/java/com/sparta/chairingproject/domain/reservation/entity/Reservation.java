@@ -2,6 +2,7 @@ package com.sparta.chairingproject.domain.reservation.entity;
 
 import java.time.LocalDate;
 
+import com.sparta.chairingproject.domain.common.entity.OutboxEvent;
 import com.sparta.chairingproject.domain.common.entity.Timestamped;
 import com.sparta.chairingproject.domain.reservation.dto.response.ReservationResponse;
 import com.sparta.chairingproject.domain.store.entity.Store;
@@ -68,9 +69,12 @@ public class Reservation extends Timestamped {
 		);
 	}
 
-	public ReservationEvent toEvent() {
+	public ReservationEvent toEvent(String eventType) {
 		return ReservationEvent.builder()
+			.eventType(OutboxEvent.Type.RESERVATION)
+			.reservationType(ReservationEvent.ReservationType.fromString(eventType))
 			.ownerId(getStore().getOwner().getId())
+			.memberId(getMemberId())
 			.storeName(getStore().getName())
 			.date(getDate())
 			.time(getTime())
