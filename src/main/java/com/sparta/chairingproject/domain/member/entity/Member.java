@@ -50,8 +50,6 @@ public class Member extends Timestamped {
 	private String image;
 	@Enumerated(EnumType.STRING)
 	private MemberRole memberRole;
-	@Column(nullable = false)
-	private boolean deleted;
 
 	public Member(String name, @NotBlank @Email String email, String password, String image,
 		MemberRole memberRole) {
