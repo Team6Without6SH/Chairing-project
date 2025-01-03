@@ -101,6 +101,7 @@ public enum ExceptionCode {
 	COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 쿠폰을 찾을 수 없습니다."),
 	COUPON_ALREADY_ISSUED(HttpStatus.CONFLICT, "이미 해당 쿠폰을 발급받았습니다."),
 	COUPON_NAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 쿠폰 이름입니다."),
+	LOCK_ACQUISITION_FAILED(HttpStatus.CONFLICT,"동시에 너무 많은 요청이 발생했습니다. 잠시 후 다시 시도해주세요."),
 
 	//권한
 	ONLY_OWNER_ALLOWED(HttpStatus.FORBIDDEN, "사장님만 가능합니다"),
