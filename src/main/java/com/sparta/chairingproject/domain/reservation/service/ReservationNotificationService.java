@@ -24,9 +24,7 @@ public class ReservationNotificationService {
 
 	@Transactional
 	public void alertPendingReservations() {
-		LocalDate yesterday = LocalDate.now().minusDays(1);
-		LocalDateTime startOfDay = yesterday.atStartOfDay();
-		LocalDateTime endOfDay = yesterday.atTime(23, 59, 59);
+		LocalDateTime yesterday = LocalDateTime.now().minusDays(1);
 
 		List<Reservation> unapprovedReservations = reservationRepository.findUnapprovedReservations(yesterday);
 
@@ -42,6 +40,7 @@ public class ReservationNotificationService {
 						reservation.getGuestCount()
 					)
 				)
+				.status(Outbox.Status.PENDING)
 				.build();
 			outboxRepository.save(outbox);
 		}
