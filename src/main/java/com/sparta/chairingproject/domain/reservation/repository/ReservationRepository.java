@@ -20,6 +20,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
 	Page<Reservation> findByStoreId(Long storeId, Pageable pageable);
 
-	@Query("SELECT r FROM Reservation r WHERE r.status = 'PENDING' AND r.createdAt  >= :yesterday")
+	@Query("SELECT r FROM Reservation r WHERE r.status = 'PENDING' AND r.createdAt <= :yesterday")
 	List<Reservation> findUnapprovedReservations(@Param("yesterday") LocalDateTime yesterday);
 }
