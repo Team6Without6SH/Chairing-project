@@ -38,15 +38,12 @@ public class CouponConcurrencyTest {
 	private MemberRepository memberRepository;
 
 	private Coupon coupon;
-	private Member member;
 	private int threadCount;
 	private ExecutorService executorService;
 	private CountDownLatch latch;
 
 	@BeforeEach
 	void setUp() {
-		member = new Member("Test User", "test@example.com", "password", MemberRole.USER);
-		memberRepository.save(member);
 		coupon = Coupon.builder()
 			.name("Test Coupon")
 			.quantity(100)
@@ -72,16 +69,14 @@ public class CouponConcurrencyTest {
 			int threadId = i;
 			executorService.submit(() -> {
 				try {
-					// System.out.println("Thread 시작: " + Thread.currentThread().getId());
 					Member threadMember = new Member("Test User" + threadId, "test" + threadId + "@example.com",
-						"password", MemberRole.USER);
+						"password", null, MemberRole.USER);
 					memberRepository.save(threadMember);
 					couponService.issueCoupon(coupon.getId(), new RequestDto(threadMember.getId()), threadMember);
 				} catch (GlobalException e) {
 					System.out.println("Thread 예외: " + Thread.currentThread().getId() + ", " + e.getMessage());
 				} finally {
 					latch.countDown();
-					// System.out.println("Thread 완료: " + Thread.currentThread().getId());
 				}
 			});
 		}
