@@ -8,7 +8,6 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationAdapter;
@@ -32,7 +31,6 @@ public class CouponService {
 	private final CouponRepository couponRepository;
 	private final IssuanceRepository issuanceRepository;
 	private final RedissonClient redissonClient;
-	private final RedisTemplate<String, String> redisTemplate; // FIFO 큐 역할
 
 	public CouponResponse createCoupon(CouponRequest request) {
 		if (couponRepository.existsByName(request.getName())) {
@@ -88,13 +86,11 @@ public class CouponService {
 			System.out.println("Thread " + Thread.currentThread().getId() + " was interrupted.");
 			throw new IllegalArgumentException("스레드 인터럽트로 인해 락 획득이 실패했습니다.", e);
 		} finally {
-			// 트랜잭션이 끝난 후에 락 해제를 보장
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 				@Override
 				public void afterCompletion(int status) {
 					if (lock.isHeldByCurrentThread()) {
 						lock.unlock();
-						System.out.println("Thread " + Thread.currentThread().getId() + " released lock.");
 					}
 				}
 			});
