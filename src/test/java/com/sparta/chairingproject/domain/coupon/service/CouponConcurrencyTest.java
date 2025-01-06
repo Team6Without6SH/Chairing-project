@@ -1,4 +1,3 @@
-
 //package com.sparta.chairingproject.domain.coupon.service;
 //
 //import static org.junit.jupiter.api.Assertions.*;
@@ -101,4 +100,3 @@
 //		assertEquals(100, issuanceRepository.count());
 //	}
 //}
-
