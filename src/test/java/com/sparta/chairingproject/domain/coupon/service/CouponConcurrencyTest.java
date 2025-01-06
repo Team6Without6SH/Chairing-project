@@ -45,7 +45,7 @@ public class CouponConcurrencyTest {
 
 	@BeforeEach
 	void setUp() {
-		member = new Member("Test User", "test@example.com", "password", MemberRole.USER);
+		member = new Member("Test User", "test@example.com", "password", "image", MemberRole.USER);
 		memberRepository.save(member);
 		coupon = Coupon.builder()
 			.name("Test Coupon")
