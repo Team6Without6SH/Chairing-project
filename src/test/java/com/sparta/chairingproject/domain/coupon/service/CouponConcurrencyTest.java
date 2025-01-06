@@ -70,7 +70,7 @@ public class CouponConcurrencyTest {
 			executorService.submit(() -> {
 				try {
 					Member threadMember = new Member("Test User" + threadId, "test" + threadId + "@example.com",
-						"password", null, MemberRole.USER);
+						"password", "image", MemberRole.USER);
 					memberRepository.save(threadMember);
 					couponService.issueCoupon(coupon.getId(), new RequestDto(threadMember.getId()), threadMember);
 				} catch (GlobalException e) {
