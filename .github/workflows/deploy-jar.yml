@@ -21,10 +21,9 @@ jobs:
 
       - name: Set Environment Variables
         run: |
-          
+          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> src/main/resources/application.properties
           echo "SPRING_DATA_REDIS_HOST=${{ secrets.SPRING_DATA_REDIS_HOST }}" >> src/main/resources/application.properties
           echo "SPRING_DATA_REDIS_PORT=${{ secrets.SPRING_DATA_REDIS_PORT }}" >> src/main/resources/application.properties
-          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> src/main/resources/application.properties
           echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> src/main/resources/application.properties
           echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> src/main/resources/application.properties
           echo "AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY }}" >> src/main/resources/application.properties
