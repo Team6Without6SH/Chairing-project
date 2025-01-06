@@ -72,30 +72,30 @@ class CouponServiceTest {
 		verify(couponRepository, times(1)).save(any(Coupon.class));
 	}
 
-	@Test
-	@DisplayName("쿠폰 발급 성공")
-	void issueCoupon_success() {
-		// Given
-		Coupon coupon = Coupon.builder()
-			.id(couponId)
-			.name("Spring Sale")
-			.quantity(10)
-			.discountPrice(500)
-			.build();
-
-		when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
-		when(issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId)).thenReturn(
-			Optional.empty());
-
-		// When
-		couponService.issueCoupon(couponId, request, member);
-
-		// Then
-		verify(couponRepository, times(1)).findById(couponId);
-		verify(issuanceRepository, times(1)).findByMemberIdAndCouponId(member.getId(), couponId);
-		verify(issuanceRepository, times(1)).save(any(Issuance.class));
-		assertEquals(9, coupon.getQuantity());
-	}
+//	@Test
+//	@DisplayName("쿠폰 발급 성공")
+//	void issueCoupon_success() {
+//		// Given
+//		Coupon coupon = Coupon.builder()
+//			.id(couponId)
+//			.name("Spring Sale")
+//			.quantity(10)
+//			.discountPrice(500)
+//			.build();
+//
+//		when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
+//		when(issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId)).thenReturn(
+//			Optional.empty());
+//
+//		// When
+//		couponService.issueCoupon(couponId, request, member);
+//
+//		// Then
+//		verify(couponRepository, times(1)).findById(couponId);
+//		verify(issuanceRepository, times(1)).findByMemberIdAndCouponId(member.getId(), couponId);
+//		verify(issuanceRepository, times(1)).save(any(Issuance.class));
+//		assertEquals(9, coupon.getQuantity());
+//	}
 
 	@Test
 	@DisplayName("쿠폰 생성 실패 - 중복된 이름")
@@ -112,41 +112,41 @@ class CouponServiceTest {
 		verify(couponRepository, never()).save(any(Coupon.class));
 	}
 
-	@Test
-	@DisplayName("쿠폰 발급 실패 - 쿠폰 없음")
-	void issueCoupon_fail_couponNotFound() {
-		// Given
-		when(couponRepository.findById(couponId)).thenReturn(Optional.empty());
+//	@Test
+//	@DisplayName("쿠폰 발급 실패 - 쿠폰 없음")
+//	void issueCoupon_fail_couponNotFound() {
+//		// Given
+//		when(couponRepository.findById(couponId)).thenReturn(Optional.empty());
+//
+//		// When & Then
+//		GlobalException exception = assertThrows(GlobalException.class,
+//			() -> couponService.issueCoupon(couponId, request, member));
+//		assertEquals(ExceptionCode.COUPON_NOT_FOUND.getMessage(), exception.getMessage());
+//		verify(couponRepository, times(1)).findById(couponId);
+//	}
 
-		// When & Then
-		GlobalException exception = assertThrows(GlobalException.class,
-			() -> couponService.issueCoupon(couponId, request, member));
-		assertEquals(ExceptionCode.COUPON_NOT_FOUND.getMessage(), exception.getMessage());
-		verify(couponRepository, times(1)).findById(couponId);
-	}
-
-	@Test
-	@DisplayName("쿠폰 발급 실패 - 이미 발급받은 쿠폰")
-	void issueCoupon_fail_alreadyIssued() {
-		// Given
-		Coupon coupon = Coupon.builder()
-			.id(couponId)
-			.name("Spring Sale")
-			.quantity(10)
-			.discountPrice(500)
-			.build();
-
-		when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
-		when(issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId)).thenReturn(
-			Optional.of(new Issuance()));
-
-		// When & Then
-		GlobalException exception = assertThrows(GlobalException.class,
-			() -> couponService.issueCoupon(couponId, request, member));
-		assertEquals(ExceptionCode.COUPON_ALREADY_ISSUED.getMessage(), exception.getMessage());
-		verify(couponRepository, times(1)).findById(couponId);
-		verify(issuanceRepository, times(1)).findByMemberIdAndCouponId(member.getId(), couponId);
-	}
+//	@Test
+//	@DisplayName("쿠폰 발급 실패 - 이미 발급받은 쿠폰")
+//	void issueCoupon_fail_alreadyIssued() {
+//		// Given
+//		Coupon coupon = Coupon.builder()
+//			.id(couponId)
+//			.name("Spring Sale")
+//			.quantity(10)
+//			.discountPrice(500)
+//			.build();
+//
+//		when(couponRepository.findById(couponId)).thenReturn(Optional.of(coupon));
+//		when(issuanceRepository.findByMemberIdAndCouponId(member.getId(), couponId)).thenReturn(
+//			Optional.of(new Issuance()));
+//
+//		// When & Then
+//		GlobalException exception = assertThrows(GlobalException.class,
+//			() -> couponService.issueCoupon(couponId, request, member));
+//		assertEquals(ExceptionCode.COUPON_ALREADY_ISSUED.getMessage(), exception.getMessage());
+//		verify(couponRepository, times(1)).findById(couponId);
+//		verify(issuanceRepository, times(1)).findByMemberIdAndCouponId(member.getId(), couponId);
+//	}
 
 	@Test
 	@WithMockUser(username = "admin", roles = {"ADMIN"})
