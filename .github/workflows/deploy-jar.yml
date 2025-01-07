@@ -21,13 +21,13 @@ jobs:
 
       - name: Set Environment Variables
         run: |
-          echo "SPRING_DATA_REDIS_PORT=${{ secrets.SPRING_DATA_REDIS_PORT }}" >> src/main/resources/application.properties
-          echo "SPRING_DATA_REDIS_HOST=${{ secrets.SPRING_DATA_REDIS_HOST }}" >> src/main/resources/application.properties
-          echo "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}" >> src/main/resources/application.properties
-          echo "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}" >> src/main/resources/application.properties
-          echo "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}" >> src/main/resources/application.properties
-          echo "CLOUD_AWS_CREDENTIALS_ACCESSKEY=${{ secrets.CLOUD_AWS_CREDENTIALS_ACCESSKEY }}" >> src/main/resources/application.properties
-          echo "CLOUD_AWS_CREDENTIALS_SECRETKEY=${{ secrets.CLOUD_AWS_CREDENTIALS_SECRETKEY }}" >> src/main/resources/application.properties
+          printf "\nSPRING_DATA_REDIS_PORT=${{ secrets.SPRING_DATA_REDIS_PORT }}\n" >> src/main/resources/application.properties
+          printf "SPRING_DATA_REDIS_HOST=${{ secrets.SPRING_DATA_REDIS_HOST }}\n" >> src/main/resources/application.properties
+          printf "SPRING_DATASOURCE_URL=${{ secrets.SPRING_DATASOURCE_URL }}\n" >> src/main/resources/application.properties
+          printf "SPRING_DATASOURCE_USERNAME=${{ secrets.SPRING_DATASOURCE_USERNAME }}\n" >> src/main/resources/application.properties
+          printf "SPRING_DATASOURCE_PASSWORD=${{ secrets.SPRING_DATASOURCE_PASSWORD }}\n" >> src/main/resources/application.properties
+          printf "CLOUD_AWS_CREDENTIALS_ACCESSKEY=${{ secrets.CLOUD_AWS_CREDENTIALS_ACCESSKEY }}\n" >> src/main/resources/application.properties
+          printf "CLOUD_AWS_CREDENTIALS_SECRETKEY=${{ secrets.CLOUD_AWS_CREDENTIALS_SECRETKEY }}\n" >> src/main/resources/application.properties
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
