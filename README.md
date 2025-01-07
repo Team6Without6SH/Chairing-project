@@ -19,6 +19,7 @@
 
 ## **매장 효과**
 <img src="image/img_23.png" alt="매장 효과" width="70%">
+
 ---
 
 # 👥 팀원 소개
@@ -1109,4 +1110,15 @@ Redis 에 메세지를 저장하고, TTL 을 설정하여 관리하는 방법도
 또한 `toBuilder` 메서드를 사용하여 객체를 수정하게 되면, 새로운 참조객체를 만들어 수정하는 방식이라 기존의 객체 데이터를 안전하게 보호해준다는 장점이 있다.
 
 </details>
+
+---
+
+### 요구사항 정의서
+https://docs.google.com/spreadsheets/d/1bdDQHT2M4b_5nFPK09GKkNgQUheKvvGYr_qnuOV2Rlg/edit?pli=1&gid=0#gid=0
+
+### API 명세서
+https://www.notion.so/teamsparta/API-ad7032d3d5e14a5291dcea6e7146066c
+
+### 시연영상
+https://drive.google.com/file/d/1Ph5zrzQShdN_VrzPWkBA4TLqggf-wX0D/view?pli=1
 
